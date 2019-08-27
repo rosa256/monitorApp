@@ -75,4 +75,24 @@
 
     <string name="pref_title_vibrate">Vibrate</string>
     <string name="options">optionsDropDown</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="registerStr">Register</string>
+    <string name="usernameHint">Username</string>
+    <string name="emailHint">E-mail</string>
+    <string name="passwordHint">Password</string>
+    <string name="passwordConfirmHint">Confirm password</string>
+    <string name="loginStr">Login</string>
+
+    <dimen name="inputTopMargin">14dp</dimen>
+    <dimen name="inputTopMarginLogin">26dp</dimen>
+    <dimen name="inputTopMarginLoginButton">56dp</dimen>
+    <dimen name="inputTextSize">27sp</dimen>
+    <dimen name="inputLeftRightMargin">20dp</dimen>
+
+    <string name="exampleText">Hej! Miło mi, że wpadłeś zobaczyć Aplikację.\nInteresuję się programowanie już od szkoły średniej. \nProgramuję w takich językach jak Python, Java, C czy C++.\nW wolnej chwili lubię również posłuchać dobrej muzyki.\nJeżeli masz ochotę, mile widziany będzie feedback. :)\nInne moje projekty zobaczysz na githubie. </string>
+    <string name="exampleLoremIpsumText">Neque porro quisquam est qui dolorem \nipsum quia dolor sit amet, consectetur, adipisci \nvelit.</string>
+    
 </resources>

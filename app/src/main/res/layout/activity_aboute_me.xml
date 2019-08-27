@@ -4,10 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AbouteMe">
+    tools:context=".AbouteMe"
+    android:background="@color/colorBackground"
+    >
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -20,13 +21,27 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
-            android:id="@+id/imageView2"
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="244dp"
-            tools:layout_editor_absoluteX="48dp"
-            tools:layout_editor_absoluteY="195dp"
-            tools:srcCompat="@tools:sample/backgrounds/scenic" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/colorAccent">
+
+            <com.mikhaellopez.circularimageview.CircularImageView
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:src="@drawable/ic_profile"
+                app:civ_border_color="#3f51b5"
+                app:civ_border_width="4dp"
+                app:civ_shadow="true"
+                app:civ_shadow_color="#3f51b5"
+                app:civ_shadow_radius="15"
+                app:civ_background_color="@color/cardview_dark_background"/>
+
+        </LinearLayout>
+
 
         <TextView
             android:id="@+id/nameTextView"
@@ -39,7 +54,7 @@
             android:id="@+id/descriptionTextView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Hej! Miło mi, że wpadłeś zobaczyć Aplikację.\nInteresuję się programowanie już od szkoły średniej. \nProgramuję w takich językach jak Python, Java, C czy C++.\nW wolnej chwili lubię również posłuchać dobrej muzyki.\nJeżeli masz ochotę, mile widziany będzie feedback. :)\nInne moje projekty zobaczysz na githubie. "
+            android:text="@string/exampleLoremIpsumText"
             android:textSize="14sp" />
 
         <TextView

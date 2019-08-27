@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LoginActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:background="@color/colorBackground">
+
+        <EditText
+            android:id="@+id/inputLoginUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/inputTextSize"
+            android:layout_marginLeft="@dimen/inputLeftRightMargin"
+            android:layout_marginRight="@dimen/inputLeftRightMargin"
+            android:layout_marginTop="290dp"
+            android:hint="@string/usernameHint"/>
+
+        <EditText
+            android:id="@+id/inputLoginPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/inputTextSize"
+            android:layout_marginLeft="@dimen/inputLeftRightMargin"
+            android:layout_marginRight="@dimen/inputLeftRightMargin"
+            android:layout_marginTop="@dimen/inputTopMarginLogin"
+            android:hint="@string/passwordHint"/>
+
+        <Button
+            android:id="@+id/buttonLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/inputLeftRightMargin"
+            android:layout_marginRight="@dimen/inputLeftRightMargin"
+            android:textSize="@dimen/inputTextSize"
+            android:layout_marginTop="@dimen/inputTopMarginLoginButton"
+            android:text="@string/loginStr"
+            android:layout_gravity="center"
+            android:padding="16dp"/>
+
+
+    </LinearLayout>
+
+
+</android.support.constraint.ConstraintLayout>
