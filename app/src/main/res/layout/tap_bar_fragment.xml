@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tapbar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragments.TapBarFragment">
+
+    <com.michaldrabik.tapbarmenulib.TapBarMenu
+        android:id="@+id/tapBarMenu"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:background="@color/colorPrimary"
+        app:tbm_backgroundColor="@color/colorPrimaryDark"
+        app:tbm_buttonPosition="right"
+        app:tbm_menuAnchor="bottom">
+
+        <ImageView
+            android:id="@+id/idAboutMe"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:onClick="aboutMe"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@drawable/ic_profile"
+            tools:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/idCalendar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@android:drawable/ic_menu_my_calendar"
+            tools:visibility="visible" />
+
+
+        <ImageView
+            android:id="@+id/idCamera"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:contentDescription="TODO"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:src="@android:drawable/ic_menu_camera"
+            tools:visibility="visible" />
+
+        <Space
+            android:layout_width="56dp"
+            android:layout_height="match_parent" />
+    </com.michaldrabik.tapbarmenulib.TapBarMenu>
+
+</android.support.constraint.ConstraintLayout>
