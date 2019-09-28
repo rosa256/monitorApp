@@ -49,6 +49,7 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST_CODE = 0;
+    private static final String TAG = "MainActivity";
     private TextureView.SurfaceTextureListener surfaceTextureListener;
     private Toolbar toolbar;
     private HandlerThread backgroundThread;
@@ -262,6 +263,7 @@ public class MainActivity extends AppCompatActivity {
                 cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {
+            Log.i(TAG,":MissingPermission - CAMERA");
             e.printStackTrace();
         }
     }
@@ -296,6 +298,8 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.registerItem:
                 Toast.makeText(this,"Register",Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(this, RegisterActivity.class);
+                startActivity(intent);
                 return true;
 
             case R.id.loginItem:

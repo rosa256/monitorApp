@@ -9,76 +9,76 @@
     >
 
     <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@color/colorAccent">
+            android:layout_height="260dp"
+            android:background="@drawable/imagebackground"
+            android:orientation="vertical">
 
             <com.mikhaellopez.circularimageview.CircularImageView
+                android:id="@+id/photoCircularImageView"
                 android:layout_width="250dp"
                 android:layout_height="250dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="@dimen/inputTopMargin"
                 android:src="@drawable/ic_profile"
+                app:civ_background_color="@color/cardview_dark_background"
                 app:civ_border_color="#3f51b5"
                 app:civ_border_width="4dp"
                 app:civ_shadow="true"
                 app:civ_shadow_color="#3f51b5"
-                app:civ_shadow_radius="15"
-                app:civ_background_color="@color/cardview_dark_background"/>
-
+                app:civ_shadow_radius="15" />
         </LinearLayout>
 
-
-        <TextView
-            android:id="@+id/nameTextView"
-            android:layout_width="match_parent"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Damian Rosiński"
-            android:textSize="24sp" />
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal">
 
-        <TextView
-            android:id="@+id/descriptionTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/exampleLoremIpsumText"
-            android:textSize="14sp" />
+            <TextView
+                android:id="@+id/nameTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inputTopMarginLoginButton"
+                android:text="Damian Rosiński"
+                android:textSize="24sp"
+                />
 
-        <TextView
-            android:id="@+id/phoneTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="797 139 697"
-            android:drawableLeft="@android:drawable/stat_sys_phone_call"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/phoneTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:text="797 139 697"
+                android:drawableLeft="@android:drawable/stat_sys_phone_call"
+                android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/emailTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="d.rosinski256@gmail.com"
-            android:drawableLeft="@android:drawable/ic_dialog_email"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/emailTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:text="d.rosinski256@gmail.com"
+                android:drawableLeft="@android:drawable/ic_dialog_email"
+                android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/githubTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="github.com/rosa256"
-            android:drawableLeft="@android:drawable/ic_dialog_dialer"
-            android:textSize="18sp" />
+            <TextView
+                android:id="@+id/githubTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:text="github.com/rosa256"
+                android:drawableLeft="@android:drawable/ic_dialog_dialer"
+                android:textSize="24sp" />
+        </LinearLayout>
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

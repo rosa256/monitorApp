@@ -30,8 +30,17 @@ dependencies {
     implementation 'android.arch.lifecycle:extensions:1.1.1'
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
 
+
+    //implementation platform('software.amazon.awssdk:bom:2.5.29') /*https://docs.aws.amazon.com/sdk-for-java/v2/developer-guide/setup-project-gradle.html*/
+    //implementation group: 'com.amazonaws', name: 'aws-java-sdk-rekognition', version: '2.10.0'
+
+    implementation 'com.amazonaws:aws-android-sdk-rekognition:2.10.0'
+
+    //implementation 'software.amazon.awssdk:kinesis'
+
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.mikhaellopez:circularimageview:3.2.0' /*https://github.com/lopspower/CircularImageView*/
+
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
