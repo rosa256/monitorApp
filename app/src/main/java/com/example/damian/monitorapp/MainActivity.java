@@ -14,7 +14,6 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -38,20 +37,18 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.Protocol;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.amazonaws.services.rekognition.model.AgeRange;
 import com.amazonaws.services.rekognition.model.Attribute;
 import com.amazonaws.services.rekognition.model.DetectFacesRequest;
-import com.amazonaws.services.rekognition.model.DetectFacesResult;
-import com.amazonaws.services.rekognition.model.FaceDetail;
 import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.util.IOUtils;
+import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.CustomPrivilages;
+import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.requester.DetectFacesAsync;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
@@ -64,17 +61,16 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final int CAMERA_REQUEST_CODE = 0;
     private static final String TAG = "MainActivity";
     private CognitoCachingCredentialsProvider credentialsProvider;
     private BasicAWSCredentials basicAWSCredentials;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
-    private static final int REQUEST_WRITE_STORAGE_CAMERA_REQUEST_CODE = 1;
+    private FileManager fileManager;
+
     private Toolbar toolbar;
     private HandlerThread backgroundThread;
     private CameraManager cameraManager;
@@ -90,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private Size previewSize;
     private CameraCaptureSession cameraCaptureSession;
     private TextureView textureView;
-    private File galleryFolder;
+
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -104,14 +100,11 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
+        fileManager = new FileManager(this.getResources());
+
         //cameraSurfaceView = findViewById(R.id.cameraTextureView);
 
-        ActivityCompat.requestPermissions(this, new String[] {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-                },
-                REQUEST_WRITE_STORAGE_CAMERA_REQUEST_CODE);
+        CustomPrivilages.setUpPrivilages(this);
 
 
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
@@ -167,6 +160,8 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
+
+
 
     @OnClick(R.id.fab_take_photo)
     public void onTakePhoneButtonClicked() {
@@ -249,29 +244,6 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("-----------UDALO SIE--------------");
     }
 
-
-
-
-    public AmazonRekognitionClient createClient() {
-        ClientConfiguration clientConfig = new ClientConfiguration();
-        clientConfig.setConnectionTimeout(30000);
-        clientConfig.setProtocol(Protocol.HTTPS);
-        System.out.println("***************WYWOLANO CREATE CLIENT");
-        return new AmazonRekognitionClient(initAndGetCredentialsProvider());
-    }
-
-    public BasicAWSCredentials initAndGetCredentialsProvider() {
-//        credentialsProvider = new CognitoCachingCredentialsProvider(
-//                getApplicationContext(),
-//                "eu-west-2:e6e456d7-f824-4910-8705-e914330e9663", // Identity pool ID
-//                Regions.EU_WEST_2 // Region
-//        );
-
-        basicAWSCredentials = new BasicAWSCredentials("AKIATV7HZTTOYZCKXJMK","QbDIbxFC/cy+PbU+w8HFJnDoscJprRUeHaQBv2dB");
-        System.out.println("****************8SKONCZONO CREATE CLIENT");
-        return basicAWSCredentials;
-    }
-
     private void lock() {
         try {
             cameraCaptureSession.capture(captureRequestBuilder.build(),
@@ -288,25 +260,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    private void createImageGallery() {
-        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        galleryFolder = new File(storageDirectory, getResources().getString(R.string.app_name));
-        if (!galleryFolder.exists()) {
-            boolean wasCreated = galleryFolder.mkdirs();
-            if (!wasCreated) {
-                Log.e("CapturedImages", "Failed to create directory");
-            }
-        }
-    }
-
-    private File createImageFile(File galleryFolder) throws IOException {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "image_" + timeStamp;
-        String sufix = ".jpg";
-        Log.i(TAG, "createdImageFile:" + galleryFolder + "/" + imageFileName + sufix);
-        return File.createTempFile(imageFileName, sufix, galleryFolder);
     }
 
     private void createPreviewSession() {
@@ -421,7 +374,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
         }
     }
-
 
 
     @Override

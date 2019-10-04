@@ -5,11 +5,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.util.IOUtils;
-import com.example.damian.monitorapp.Utils.ClientFactory;
+import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 
 public class CompareFaces {
 
@@ -22,7 +20,7 @@ public class CompareFaces {
         ByteBuffer targetImageBytes=null;
 
 
-        AmazonRekognition rekognitionClient = new ClientFactory().createClient();
+        AmazonRekognition rekognitionClient = new ClientAWSFactory().createClient();
 
         //Load source and target images and create input parameters
         try (InputStream inputStream = new FileInputStream(new File(sourceImage))) {
