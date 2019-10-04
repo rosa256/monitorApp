@@ -14,10 +14,12 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -36,25 +38,49 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.ClientConfiguration;
+import com.amazonaws.Protocol;
+import com.amazonaws.auth.BasicAWSCredentials;
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.rekognition.AmazonRekognitionClient;
+import com.amazonaws.services.rekognition.model.AgeRange;
+import com.amazonaws.services.rekognition.model.Attribute;
+import com.amazonaws.services.rekognition.model.DetectFacesRequest;
+import com.amazonaws.services.rekognition.model.DetectFacesResult;
+import com.amazonaws.services.rekognition.model.FaceDetail;
+import com.amazonaws.services.rekognition.model.Image;
+import com.amazonaws.util.IOUtils;
+import com.example.damian.monitorapp.requester.DetectFacesAsync;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final int CAMERA_REQUEST_CODE = 0;
     private static final String TAG = "MainActivity";
+    private CognitoCachingCredentialsProvider credentialsProvider;
+    private BasicAWSCredentials basicAWSCredentials;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
+    private static final int REQUEST_WRITE_STORAGE_CAMERA_REQUEST_CODE = 1;
     private Toolbar toolbar;
     private HandlerThread backgroundThread;
     private CameraManager cameraManager;
     private Handler backgroundHandler;
+
+    private File globalFile;
     private int cameraFacing;
     private String cameraId;
 
@@ -68,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
+    private FileInputStream sourceFileInputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +106,13 @@ public class MainActivity extends AppCompatActivity {
 
         //cameraSurfaceView = findViewById(R.id.cameraTextureView);
 
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
+        ActivityCompat.requestPermissions(this, new String[] {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA
+                },
+                REQUEST_WRITE_STORAGE_CAMERA_REQUEST_CODE);
+
 
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
@@ -131,11 +164,6 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-        //Folder Permissions
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE}, CAMERA_REQUEST_CODE);
-
-
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
@@ -146,7 +174,9 @@ public class MainActivity extends AppCompatActivity {
         //lock();
         FileOutputStream outputPhoto = null;
         try {
-            outputPhoto = new FileOutputStream(createImageFile(galleryFolder));
+            globalFile = createImageFile(galleryFolder);
+            outputPhoto = new FileOutputStream(globalFile);
+            //sourceFileInputStream = new FileInputStream(createImageFile(galleryFolder));
             textureView.getBitmap()
                     .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
             Toast.makeText(this,"Picture Saved" ,Toast.LENGTH_LONG).show();
@@ -163,6 +193,83 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    @OnClick(R.id.fab_send_photo_aws)
+    public void onSendPhotoToAWS() {
+        final AmazonRekognitionClient rekognitionClient = createClient();
+
+        Thread thread = new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                try  {
+                    doAWSFunction(rekognitionClient);
+                    //Your code goes here
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        thread.start();
+    }
+
+    private void doAWSFunction(AmazonRekognitionClient rekognitionClient) {
+
+
+        ByteBuffer sourceImageBytes = null;
+
+        System.out.println(globalFile.getAbsolutePath()+"]]]]]]]]]]]]]]]]");
+        try (InputStream inputStream = new FileInputStream(globalFile)) {
+            sourceImageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
+        }
+        catch(Exception e)
+        {
+            System.out.println("Failed to load source image " + globalFile);
+            System.exit(1);
+        }
+
+        Image source=new Image()
+                .withBytes(sourceImageBytes);
+//        try (InputStream inputStream = sourceFileInputStream) {
+//            sourceImageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
+//        } catch (Exception e) {
+//            System.out.println("Failed to load source image: sourceFileInputStream");
+//            System.exit(1);
+//        }
+
+
+        DetectFacesRequest request = new DetectFacesRequest()
+                .withImage(source)
+                .withAttributes(Attribute.ALL.toString());
+
+        new DetectFacesAsync(rekognitionClient, request).execute();
+
+        System.out.println("-----------UDALO SIE--------------");
+    }
+
+
+
+
+    public AmazonRekognitionClient createClient() {
+        ClientConfiguration clientConfig = new ClientConfiguration();
+        clientConfig.setConnectionTimeout(30000);
+        clientConfig.setProtocol(Protocol.HTTPS);
+        System.out.println("***************WYWOLANO CREATE CLIENT");
+        return new AmazonRekognitionClient(initAndGetCredentialsProvider());
+    }
+
+    public BasicAWSCredentials initAndGetCredentialsProvider() {
+//        credentialsProvider = new CognitoCachingCredentialsProvider(
+//                getApplicationContext(),
+//                "eu-west-2:e6e456d7-f824-4910-8705-e914330e9663", // Identity pool ID
+//                Regions.EU_WEST_2 // Region
+//        );
+
+        basicAWSCredentials = new BasicAWSCredentials("AKIATV7HZTTOYZCKXJMK","QbDIbxFC/cy+PbU+w8HFJnDoscJprRUeHaQBv2dB");
+        System.out.println("****************8SKONCZONO CREATE CLIENT");
+        return basicAWSCredentials;
     }
 
     private void lock() {
@@ -196,8 +303,10 @@ public class MainActivity extends AppCompatActivity {
 
     private File createImageFile(File galleryFolder) throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
-        String imageFileName = "image_" + timeStamp + "_";
-        return File.createTempFile(imageFileName, ".jpg", galleryFolder);
+        String imageFileName = "image_" + timeStamp;
+        String sufix = ".jpg";
+        Log.i(TAG, "createdImageFile:" + galleryFolder + "/" + imageFileName + sufix);
+        return File.createTempFile(imageFileName, sufix, galleryFolder);
     }
 
     private void createPreviewSession() {
@@ -313,6 +422,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -343,6 +454,7 @@ public class MainActivity extends AppCompatActivity {
             cameraDevice = null;
         }
     }
+
 
     private void closeBackgroundThread() {
         if (backgroundHandler != null) {

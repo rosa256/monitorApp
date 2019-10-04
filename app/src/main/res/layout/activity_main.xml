@@ -11,12 +11,12 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
 
         <android.support.v7.widget.Toolbar
@@ -95,8 +95,18 @@
                 android:layout_height="56dp"
                 android:layout_alignParentBottom="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom="24dp"
+                android:layout_marginBottom="90dp"
                 android:src="@android:drawable/ic_menu_camera"
+                app:backgroundTint="@color/gray_lite" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_send_photo_aws"
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="24dp"
+                android:src="@android:drawable/ic_dialog_email"
                 app:backgroundTint="@color/gray_lite" />
 
         </RelativeLayout>
