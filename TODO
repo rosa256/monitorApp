@@ -19,5 +19,10 @@ It's normally not a good idea to pass around Context objects in Android. It can 
 Its not a good idea to pass Context objects around. This often will lead to memory leaks. My suggestion is that you don't do it. I have made numerous Android apps without having to pass context to non-activity classes in the app. A better idea would be to get the resources you need access to while your in the Activity or Fragment, and hold onto it in another class. You can then use that class in any other classes in your app to access the resources, without having to pass around Context objects.
 -!-
 
+trasnaltor
 
+***
+Pomysł:
+?A może by skorzystać z api do aplikacji aparatu, która jest wbudowana aby obrac source Image?
+***
 

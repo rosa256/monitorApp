@@ -12,6 +12,8 @@ import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 
 public class ClientAWSFactory extends AppCompatActivity{
     private CognitoCachingCredentialsProvider credentialsProvider;
+    private BasicAWSCredentials basicAWSCredentials;
+
 
     public AmazonRekognition createRekognitionClient() {
         ClientConfiguration clientConfig = new ClientConfiguration();
@@ -23,7 +25,6 @@ public class ClientAWSFactory extends AppCompatActivity{
 
     public BasicAWSCredentials initAndGetCredentialsProvider() {
         basicAWSCredentials = new BasicAWSCredentials(Constants.ACCESS_KEY,Constants.SECRET_KEY);
-        System.out.println("****************8SKONCZONO CREATE CLIENT");
         return basicAWSCredentials;
     }
 

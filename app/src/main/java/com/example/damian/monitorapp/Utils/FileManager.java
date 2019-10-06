@@ -14,17 +14,29 @@ import java.util.Date;
 import java.util.Locale;
 
 public class FileManager {
-
     private static final String TAG = "FileManager";
-
+    private static FileManager fileManager = null;
     private File galleryFolder;
+    private File gallerySourceFolder;
+    private File sourceFileImage;
+    private Resources resources = null;
 
-    private Resources resources;
-    public FileManager(Resources resources) {
+    private FileManager() { }
+
+    public void setResources(Resources resources) {
         this.resources = resources;
     }
 
-    private File createImageFile(File galleryFolder) throws IOException {
+    public static FileManager getInstance(){
+        if(fileManager == null) {
+            synchronized (FileManager.class) {
+                fileManager = new FileManager();
+            }
+        }
+        return fileManager;
+    }
+
+    public File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
         String imageFileName = "image_" + timeStamp;
         String sufix = ".jpg";
@@ -32,16 +44,39 @@ public class FileManager {
         return File.createTempFile(imageFileName, sufix, galleryFolder);
     }
 
-    private void createImageGallery() {
+    public File createSourceImageFile() throws IOException{
+        String imageFileName = "sourceImage";
+        String sufix = ".jpg";
+        Log.i(TAG, "createdImageFile:" + gallerySourceFolder + "/" + imageFileName + sufix);
+        sourceFileImage = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+        return sourceFileImage;
+    }
+
+    public void createImageGallery() {
         File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        galleryFolder = new File(storageDirectory, resources.getString(R.string.app_name));
+        if(resources == null){
+            Log.i(TAG,"Resources is null.");
+            return;
+        }
+
+        galleryFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/targetFolder");
         if (!galleryFolder.exists()) {
             boolean wasCreated = galleryFolder.mkdirs();
             if (!wasCreated) {
-                Log.e("CapturedImages", "Failed to create directory");
+                Log.e(TAG, "Failed to create gallery directory");
+            }
+        }
+
+        gallerySourceFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/sourceFolder");
+        if (!gallerySourceFolder.exists()) {
+            boolean wasCreated = gallerySourceFolder.mkdirs();
+            if (!wasCreated) {
+                Log.e(TAG, "Failed to create source directory");
             }
         }
     }
 
-
+    public File getSourceFileImage() {
+        return sourceFileImage;
+    }
 }

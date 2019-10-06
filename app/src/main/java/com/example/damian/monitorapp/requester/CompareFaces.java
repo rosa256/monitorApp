@@ -8,27 +8,34 @@ import java.nio.ByteBuffer;
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.util.IOUtils;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
+import com.example.damian.monitorapp.Utils.FileManager;
+
+// TODO: 6.10.2019
+//Skończyć Wysłanie requesta CompareFaces.
+//
 
 public class CompareFaces {
 
+    FileManager fileManager = FileManager.getInstance();
 
     public void main() throws Exception{
         Float similarityThreshold = 70F;
-        String sourceImage = "/home/damian/Projects/inzynierka/inzynierka-android/app/Resources/Source/User1/sourceImage.jpg";
+        File sourceImageFile = fileManager.getSourceFileImage();
         String targetImage = "/home/damian/Projects/inzynierka/inzynierka-android/app/Resources/Target/User1/targetImage2.jpg";
+
         ByteBuffer sourceImageBytes=null;
         ByteBuffer targetImageBytes=null;
 
 
-        AmazonRekognition rekognitionClient = new ClientAWSFactory().createClient();
+        //AmazonRekognition rekognitionClient = new ClientAWSFactory().createClient();
 
         //Load source and target images and create input parameters
-        try (InputStream inputStream = new FileInputStream(new File(sourceImage))) {
+        try (InputStream inputStream = new FileInputStream(sourceImageFile)) {
             sourceImageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
         }
         catch(Exception e)
         {
-            System.out.println("Failed to load source image " + sourceImage);
+            System.out.println("Failed to load source image " + sourceImageFile.getPath());
             System.exit(1);
         }
         try (InputStream inputStream = new FileInputStream(new File(targetImage))) {
