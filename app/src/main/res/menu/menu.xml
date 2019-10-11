@@ -12,4 +12,15 @@
             android:id="@+id/loginItem"
             app:showAsAction="never">
         </item>
+
+        <item android:title="Detect Faces"
+            android:id="@+id/detectFaces"
+            app:showAsAction="never">
+        </item>
+
+        <item android:title="Compare Faces"
+            android:id="@+id/compareFaces"
+            app:showAsAction="never">
+        </item>
+
 </menu>

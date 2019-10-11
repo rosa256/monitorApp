@@ -25,7 +25,6 @@ public class DetectFacesAsync extends AsyncTask<String, Void, DetectFacesResult>
         super();
         amazonRekognitionClient = rekognitionClient;
         this.request = request;
-        return;
     }
 
     @Override

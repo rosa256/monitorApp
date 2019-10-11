@@ -4,7 +4,6 @@ import android.content.res.Resources;
 import android.os.Environment;
 import android.util.Log;
 
-import com.amazonaws.auth.policy.Resource;
 import com.example.damian.monitorapp.R;
 
 import java.io.File;
@@ -19,12 +18,11 @@ public class FileManager {
     private File galleryFolder;
     private File gallerySourceFolder;
     private File sourceFileImage;
-    private Resources resources = null;
+    private Resources resources;
+    private Boolean init;
 
-    private FileManager() { }
-
-    public void setResources(Resources resources) {
-        this.resources = resources;
+    private FileManager() {
+        init = false;
     }
 
     public static FileManager getInstance(){
@@ -34,6 +32,14 @@ public class FileManager {
             }
         }
         return fileManager;
+    }
+
+    public void initFileManager(Resources resources){
+        if (!init){
+            this.resources = resources;
+            createImageGallery();
+            init = true;
+        }
     }
 
     public File createImageFile() throws IOException {
@@ -53,25 +59,31 @@ public class FileManager {
     }
 
     public void createImageGallery() {
+        System.out.println("111");
         File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if(resources == null){
+            System.out.println("222");
             Log.i(TAG,"Resources is null.");
             return;
         }
 
         galleryFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/targetFolder");
         if (!galleryFolder.exists()) {
+            System.out.println("333");
             boolean wasCreated = galleryFolder.mkdirs();
             if (!wasCreated) {
-                Log.e(TAG, "Failed to create gallery directory");
+                System.out.println("444");
+                Log.i(TAG, "Failed to create target gallery directory");
             }
         }
 
         gallerySourceFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/sourceFolder");
         if (!gallerySourceFolder.exists()) {
+            System.out.println("555");
             boolean wasCreated = gallerySourceFolder.mkdirs();
             if (!wasCreated) {
-                Log.e(TAG, "Failed to create source directory");
+                System.out.println("666");
+                Log.i(TAG, "Failed to create source gallery directory");
             }
         }
     }
