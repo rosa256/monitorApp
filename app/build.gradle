@@ -33,9 +33,10 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
     implementation 'com.github.michaldrabik:tapbarmenu:1.0.5'
     implementation group: 'com.amazonaws', name: 'aws-android-sdk-rekognition', version: '2.16.0'
-    implementation 'com.mikhaellopez:circularimageview:3.2.0' /*https://github.com/lopspower/CircularImageView*/
+    implementation 'com.mikhaellopez:circularimageview:3.2.0'
+    /*https://github.com/lopspower/CircularImageView*/
 
-    implementation (
+    implementation(
             [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.1']

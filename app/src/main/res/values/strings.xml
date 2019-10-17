@@ -91,8 +91,13 @@
     <dimen name="inputTopMarginLoginButton">56dp</dimen>
     <dimen name="inputTextSize">27sp</dimen>
     <dimen name="inputLeftRightMargin">20dp</dimen>
+    <dimen name="infomrationTextSize">20sp</dimen>
 
     <string name="exampleText">Hej! Miło mi, że wpadłeś zobaczyć Aplikację.\nInteresuję się programowanie już od szkoły średniej. \nProgramuję w takich językach jak Python, Java, C czy C++.\nW wolnej chwili lubię również posłuchać dobrej muzyki.\nJeżeli masz ochotę, mile widziany będzie feedback. :)\nInne moje projekty zobaczysz na githubie. </string>
     <string name="exampleLoremIpsumText">Neque porro quisquam est qui dolorem \nipsum quia dolor sit amet, consectetur, adipisci \nvelit.</string>
+    <string name="registerConfirmationStr"><b>Confirm Your Account</b></string>
+    <string name="registerConfirm">Confirm</string>
+    <string name="confirmHint">Type Your Code</string>
+    <string name="confirmInformation">Verification code has been sent to your e-mail. Please insert your code to verify your account.</string>
 
 </resources>

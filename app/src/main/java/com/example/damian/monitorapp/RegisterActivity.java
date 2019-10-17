@@ -1,5 +1,7 @@
 package com.example.damian.monitorapp;
 
+import android.content.Intent;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,13 +14,14 @@ import android.widget.Toast;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSettings;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.CurrentUser;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -26,7 +29,7 @@ import butterknife.OnClick;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    CognitoUserPool userPool;
+    CurrentUser currentUser;
     // Create a CognitoUserAttributes object and add user attributes
     CognitoUserAttributes userAttributes;
     EditText usernameGiven;
@@ -49,12 +52,16 @@ public class RegisterActivity extends AppCompatActivity {
         emailGiven = findViewById(R.id.emailEditText);
         emailGiven.setText("d.rosinski256@gmail.com");
         /* Create a CognitoUserPool instance */
-        userPool = new CognitoUserPool(
-                RegisterActivity.this,
+        currentUser = CurrentUser.getInstance();
+        currentUser.setCognitoUserPool(
+            new CognitoUserPool(
+                    RegisterActivity.this,
                 Constants.USER_POOL_ID,
                 Constants.APP_CLIENT_ID,
                 Constants.APP_CLIENT_SECRET,
-                Regions.fromName(Constants.COGNITO_REGION));
+                Regions.fromName(Constants.COGNITO_REGION)
+            )
+        );
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
@@ -67,6 +74,10 @@ public class RegisterActivity extends AppCompatActivity {
             if(!signUpResult.getUserConfirmed()){
                 Log.i(TAG, "sing up success...not confirmed, verification code sent to:"
                         + signUpResult.getCodeDeliveryDetails().getDestination());
+
+                Intent intent = new Intent(RegisterActivity.this, RegisterConfirmation.class);
+                intent.putExtra("username", usernameGiven.getText().toString());
+                startActivity(intent);
 
                 // This user must be confirmed and a confirmation code was sent to the user
                 // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
@@ -85,30 +96,16 @@ public class RegisterActivity extends AppCompatActivity {
         }
     };
 
-    GenericHandler confirmationCallback = new GenericHandler() {
-        @Override
-        public void onSuccess() {
-            Log.i(TAG, "confirmation user successfuly:");
-
-            // User was successfully confirmed
-        }
-        @Override
-        public void onFailure(Exception exception) {
-            Log.i(TAG, "confirmation user failed:" + exception.getLocalizedMessage());
-            // User confirmation failed. Check exception for the cause.
-        }
-    };
-
-
     @OnClick(R.id.registerButton)
     public void OnRegisterClcik(){
         Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
         userAttributes = new CognitoUserAttributes();
         userAttributes.addAttribute("email",emailGiven.getText().toString());
 
-        userPool.signUpInBackground(
+        currentUser.getCognitoUserPool().signUpInBackground(
                 usernameGiven.getText().toString(),
-                passwordGiven.getText().toString(), userAttributes,
+                passwordGiven.getText().toString(),
+                userAttributes,
                 null,
                 signupCallback
         );
