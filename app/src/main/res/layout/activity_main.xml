@@ -74,11 +74,12 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
-        <RelativeLayout
+        <LinearLayout
+            android:id="@+id/cameraTextureViewRelativeLayout"
             android:layout_width="match_parent"
             android:layout_height="300dp"
             android:layout_below="@id/my_toolbar"
-            android:layout_above="@id/bottomLinearLayout"
+            android:layout_above="@id/actionMenuFragmentLayout"
             android:background="@color/colorBackground"
             android:orientation="vertical">
 
@@ -86,47 +87,21 @@
                 android:id="@+id/texture_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
                 />
+        </LinearLayout>
 
-            <LinearLayout
+        <RelativeLayout
+            android:id="@+id/actionMenuFragmentLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/bottomLinearLayout">
+
+                <fragment
+                android:id="@+id/actionMenuFragment"
+                android:name="com.example.damian.monitorapp.fragments.ActionMenu"
                 android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_alignParentBottom="true"
-                android:layout_centerHorizontal="true"
-                android:layout_marginBottom="24dp"
-                android:gravity="center_horizontal"
-
-                >
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_take_photo"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:src="@android:drawable/ic_menu_camera"
-                app:backgroundTint="@color/gray_lite"
-                />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_send_photo_aws"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:src="@android:drawable/ic_dialog_email"
-                app:backgroundTint="@color/gray_lite"
-                android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_create_source_photo"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:src="@android:drawable/ic_input_add"
-                app:backgroundTint="@color/gray_lite"
-                android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                />
-            </LinearLayout>
+                android:layout_height="wrap_content" />
         </RelativeLayout>
-
 
         <LinearLayout
             android:id="@+id/bottomLinearLayout"
@@ -141,10 +116,7 @@
                 android:name="com.example.damian.monitorapp.fragments.TapBarFragment"
                 android:layout_width="match_parent"
                 android:layout_height="60dp"/>
-
-
         </LinearLayout>
-
 
     </RelativeLayout>
 </android.support.constraint.ConstraintLayout>

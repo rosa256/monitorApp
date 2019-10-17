@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".fragments.ActionMenu">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:background="@color/colorPrimary"
+            >
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab_take_photo"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@android:drawable/ic_menu_camera"
+                    app:backgroundTint="@color/gray_lite"
+                    />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab_send_photo_aws"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@android:drawable/ic_dialog_email"
+                    app:backgroundTint="@color/gray_lite"
+                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                    android:layout_marginBottom="37dp"
+                    />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab_create_source_photo"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@android:drawable/ic_input_add"
+                    app:backgroundTint="@color/gray_lite"
+                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                    />
+
+                <android.support.design.widget.FloatingActionButton
+                    android:id="@+id/fab_select_photo"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:src="@android:drawable/ic_dialog_dialer"
+                    app:backgroundTint="@color/gray_lite"
+                    />
+
+
+        </LinearLayout>
+
+</FrameLayout>

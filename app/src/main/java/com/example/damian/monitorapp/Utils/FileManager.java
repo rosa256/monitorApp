@@ -50,6 +50,14 @@ public class FileManager {
         return File.createTempFile(imageFileName, sufix, galleryFolder);
     }
 
+    public File createSelectedImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
+        String imageFileName = "selected";
+        String sufix = ".jpg";
+        Log.i(TAG, "createdImageFile:" + galleryFolder + "/" + imageFileName + sufix);
+        return File.createTempFile(imageFileName, sufix, galleryFolder);
+    }
+
     public File createSourceImageFile() throws IOException{
         String imageFileName = "sourceImage";
         String sufix = ".jpg";
@@ -59,30 +67,24 @@ public class FileManager {
     }
 
     public void createImageGallery() {
-        System.out.println("111");
         File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if(resources == null){
-            System.out.println("222");
             Log.i(TAG,"Resources is null.");
             return;
         }
 
         galleryFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/targetFolder");
         if (!galleryFolder.exists()) {
-            System.out.println("333");
             boolean wasCreated = galleryFolder.mkdirs();
             if (!wasCreated) {
-                System.out.println("444");
                 Log.i(TAG, "Failed to create target gallery directory");
             }
         }
 
         gallerySourceFolder = new File(storageDirectory, resources.getString(R.string.app_name)+"/sourceFolder");
         if (!gallerySourceFolder.exists()) {
-            System.out.println("555");
             boolean wasCreated = gallerySourceFolder.mkdirs();
             if (!wasCreated) {
-                System.out.println("666");
                 Log.i(TAG, "Failed to create source gallery directory");
             }
         }

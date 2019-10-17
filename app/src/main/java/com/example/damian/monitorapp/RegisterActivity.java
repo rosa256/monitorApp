@@ -4,16 +4,115 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
+import com.example.damian.monitorapp.Utils.Constants;
+
+import butterknife.Bind;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class RegisterActivity extends AppCompatActivity {
+
+    CognitoUserPool userPool;
+    // Create a CognitoUserAttributes object and add user attributes
+    CognitoUserAttributes userAttributes;
+    EditText usernameGiven;
+    EditText passwordGiven;
+    EditText emailGiven;
+    @Bind(R.id.registerButton) Button buttonBtn;
+
+    static final String TAG = "RegisterActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
+        ButterKnife.bind(this);
+
+        usernameGiven = findViewById(R.id.usernameEditText);
+        usernameGiven.setText("maniek256");
+        passwordGiven = findViewById(R.id.passowrdTextView);
+        passwordGiven.setText("ABCabc!@#");
+        emailGiven = findViewById(R.id.emailEditText);
+        emailGiven.setText("d.rosinski256@gmail.com");
+        /* Create a CognitoUserPool instance */
+        userPool = new CognitoUserPool(
+                RegisterActivity.this,
+                Constants.USER_POOL_ID,
+                Constants.APP_CLIENT_ID,
+                Constants.APP_CLIENT_SECRET,
+                Regions.fromName(Constants.COGNITO_REGION));
     }
 
+    SignUpHandler signupCallback = new SignUpHandler() {
+        @Override
+        public void onSuccess(CognitoUser user, SignUpResult signUpResult) {
+            Toast.makeText(RegisterActivity.this,"Pomyślna Rejestracja", Toast.LENGTH_SHORT).show();
+            Log.i(TAG, "sing up success...is confirmed:" + signUpResult.getUserConfirmed());
+
+            // Check if this user (cognitoUser) needs to be confirmed
+            if(!signUpResult.getUserConfirmed()){
+                Log.i(TAG, "sing up success...not confirmed, verification code sent to:"
+                        + signUpResult.getCodeDeliveryDetails().getDestination());
+
+                // This user must be confirmed and a confirmation code was sent to the user
+                // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
+                // Get the confirmation code from user
+            }
+            else {
+                Log.i(TAG, "sing up success...confirmed:" + signUpResult.getUserConfirmed());
+                Toast.makeText(RegisterActivity.this,"Nie pomyślna rejestracja.", Toast.LENGTH_SHORT).show();
+                // The user has already been confirmed
+            }
+        }
+        @Override
+        public void onFailure(Exception exception) {
+            Log.i(TAG, "sing up failure:" + exception.getLocalizedMessage());
+            // Sign-up failed, check exception for the cause
+        }
+    };
+
+    GenericHandler confirmationCallback = new GenericHandler() {
+        @Override
+        public void onSuccess() {
+            Log.i(TAG, "confirmation user successfuly:");
+
+            // User was successfully confirmed
+        }
+        @Override
+        public void onFailure(Exception exception) {
+            Log.i(TAG, "confirmation user failed:" + exception.getLocalizedMessage());
+            // User confirmation failed. Check exception for the cause.
+        }
+    };
+
+
+    @OnClick(R.id.registerButton)
+    public void OnRegisterClcik(){
+        Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
+        userAttributes = new CognitoUserAttributes();
+        userAttributes.addAttribute("email",emailGiven.getText().toString());
+
+        userPool.signUpInBackground(
+                usernameGiven.getText().toString(),
+                passwordGiven.getText().toString(), userAttributes,
+                null,
+                signupCallback
+        );
+    }
 
     private class MyTextWatcher implements TextWatcher {
 
@@ -23,16 +122,13 @@ public class RegisterActivity extends AppCompatActivity {
             this.view = view;
         }
 
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-        }
-
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
         @Override
-        public void afterTextChanged(Editable s) {
+        public void afterTextChanged(Editable s) { }
+    }
 
-        }
+}
 
 /*        public void afterTextChanged(Editable editable) {
             switch (view.getId()) {
@@ -47,6 +143,4 @@ public class RegisterActivity extends AppCompatActivity {
                     break;
             }
         }*/
-    }
 
-}

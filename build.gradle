@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
+       // classpath 'com.amazonaws:aws-android-sdk-appsync-gradle-plugin:2.6.+' // https://aws.amazon.com/blogs/mobile/building-an-android-app-with-aws-amplify-part-1/
 
         
 

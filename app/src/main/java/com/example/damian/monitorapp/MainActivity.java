@@ -1,10 +1,13 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -13,6 +16,7 @@ import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.v4.app.ActivityCompat;
@@ -43,18 +47,27 @@ import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
+    private static final int RESULT_LOAD_IMG = 1;
     private CognitoCachingCredentialsProvider credentialsProvider;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
     private FileManager fileManager;
+    private Bitmap selectedImage;
 
     private Toolbar toolbar;
     private HandlerThread backgroundThread;
@@ -86,14 +99,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
-        ClientAWSFactory awsFactory = new ClientAWSFactory();
+        ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
 
-        rekognitionClient = (AmazonRekognitionClient) awsFactory.createRekognitionClient();
+        rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient();
         Log.i(TAG,"BBBBBBBBBB "+rekognitionClient.getRegions().getName());
         rekognitionRequester = new RekognitionRequester();
 
@@ -110,10 +122,9 @@ public class MainActivity extends AppCompatActivity {
         surfaceTextureListener = new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-                setUpCamera();
+                setUpCamera(width, height);
                 openCamera();
             }
-
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) { }
             @Override
@@ -178,6 +189,49 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+    @OnClick(R.id.fab_select_photo)
+    public void onSelectPhotoButtonClicked() {
+        pickImage();
+    }
+
+    public void pickImage() {
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
+        photoPickerIntent.setType("image/*");
+        startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
+    }
+
+    @Override
+    protected void onActivityResult(int reqCode, int resultCode, Intent data) {
+        super.onActivityResult(reqCode, resultCode, data);
+
+        FileOutputStream outputPhoto = null;
+        if (resultCode == RESULT_OK) {
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                selectedImage = BitmapFactory.decodeStream(imageStream);
+
+                try {
+                    currentTakenPhotoFile= fileManager.createSelectedImageFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                outputPhoto = new FileOutputStream(currentTakenPhotoFile);
+
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 100,outputPhoto);
+
+
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
+            }
+
+        }else {
+            Toast.makeText(MainActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
+        }
+    }
+
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
@@ -257,7 +311,6 @@ public class MainActivity extends AppCompatActivity {
 
             cameraDevice.createCaptureSession(Collections.singletonList(previewSurface),
                     new CameraCaptureSession.StateCallback() {
-
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
                             if (cameraDevice == null) {
@@ -283,18 +336,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void setUpCamera() {
+    private void setUpCamera(int width, int height) {
         try {
             for (String cameraId : cameraManager.getCameraIdList()) {
-                CameraCharacteristics cameraCharacteristics =
-                        cameraManager.getCameraCharacteristics(cameraId);
-                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) ==
-                        cameraFacing) {
+                CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
+                if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == cameraFacing) {
                     StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(
                             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-                    previewSize = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
+
+                    previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), width, height);
                     this.cameraId = cameraId;
+                    //previewSize = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
                 }
+                //TODO - ROTATION: START https://www.youtube.com/watch?v=z3LAbtDh1VE
+                int deviceOrientation = getWindowManager().getDefaultDisplay().getRotation();
+                // TODO: END
+
+
+                //previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), width, height);
+
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -304,8 +364,7 @@ public class MainActivity extends AppCompatActivity {
     @SuppressLint("MissingPermission")
     private void openCamera() {
         try {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA)
-                    == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {
@@ -368,13 +427,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     @Override
     protected void onResume() {
         super.onResume();
         openBackgroundThread();
         if (textureView.isAvailable()) {
-            setUpCamera();
+            setUpCamera(textureView.getWidth(), textureView.getHeight());
             openCamera();
         } else {
             textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -406,6 +464,30 @@ public class MainActivity extends AppCompatActivity {
             backgroundThread.quitSafely();
             backgroundThread = null;
             backgroundHandler = null;
+        }
+    }
+
+    public static class CompareSizeByArea implements Comparator<Size>{
+
+        @Override
+        public int compare(Size lhs, Size rhs) {
+            return Long.signum((long) lhs.getWidth() * lhs.getHeight() /
+                    (long) rhs.getWidth() * rhs .getHeight());
+        }
+    }
+
+    private static Size chooseOptimalSize(Size[] choices, int width, int height){
+        List<Size> bigEnough = new ArrayList<Size>();
+        for(Size option: choices){
+            if(option.getHeight() == option.getWidth() * height/ width &&
+                option.getWidth() >= width && option.getHeight() >= height){
+                bigEnough.add(option);
+            }
+        }
+        if(bigEnough.size() > 0){
+            return Collections.min(bigEnough, new CompareSizeByArea());
+        } else{
+            return choices[0];
         }
     }
 }
