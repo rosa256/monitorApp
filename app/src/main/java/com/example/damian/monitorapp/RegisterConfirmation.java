@@ -9,10 +9,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
-import com.example.damian.monitorapp.Utils.CurrentUser;
-import com.google.gson.Gson;
+import com.example.damian.monitorapp.Utils.CognitoSettings;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -22,7 +20,7 @@ public class RegisterConfirmation extends AppCompatActivity {
 
     private static final String TAG = "RegisterConfirmation";
     @Bind(R.id.confirmationButton) Button confirmationButton;
-    private CurrentUser currentUser;
+    private CognitoSettings cognitoSettings;
     private CognitoUser cognitoUser;
     private TextView confirmTextView;
     private String  username;
@@ -35,17 +33,15 @@ public class RegisterConfirmation extends AppCompatActivity {
 
         confirmTextView = findViewById(R.id.registerConfrimEditText);
         username = getIntent().getStringExtra("username");
-        currentUser = CurrentUser.getInstance();
+        cognitoSettings = CognitoSettings.getInstance();
+        cognitoSettings.initContext(RegisterConfirmation.this);
     }
 
 
     @OnClick(R.id.confirmationButton)
     public void confrimAccount(){
         //TODO Walidacja
-        cognitoUser = currentUser.getCognitoUserPool().getUser(username);
-
-        System.out.println("---------------------");
-        System.out.println(cognitoUser.getUserId());
+        cognitoUser = cognitoSettings.getUserPool().getUser(username);
 
         cognitoUser.confirmSignUpInBackground(confirmTextView.getText().toString(),false, confirmationCallback);
     }

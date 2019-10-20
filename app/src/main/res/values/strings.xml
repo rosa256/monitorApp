@@ -84,7 +84,7 @@
     <string name="emailHint">E-mail</string>
     <string name="passwordHint">Password</string>
     <string name="passwordConfirmHint">Confirm password</string>
-    <string name="loginStr">Login</string>
+    <string name="loginStr"><b>Login</b></string>
 
     <dimen name="inputTopMargin">14dp</dimen>
     <dimen name="inputTopMarginLogin">26dp</dimen>

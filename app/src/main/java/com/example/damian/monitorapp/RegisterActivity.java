@@ -1,7 +1,6 @@
 package com.example.damian.monitorapp;
 
 import android.content.Intent;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,14 +13,9 @@ import android.widget.Toast;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSettings;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
-import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.Utils.CurrentUser;
+import com.example.damian.monitorapp.Utils.CognitoSettings;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,7 +23,7 @@ import butterknife.OnClick;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    CurrentUser currentUser;
+    CognitoSettings cognitoSettings;
     // Create a CognitoUserAttributes object and add user attributes
     CognitoUserAttributes userAttributes;
     EditText usernameGiven;
@@ -52,16 +46,8 @@ public class RegisterActivity extends AppCompatActivity {
         emailGiven = findViewById(R.id.emailEditText);
         emailGiven.setText("d.rosinski256@gmail.com");
         /* Create a CognitoUserPool instance */
-        currentUser = CurrentUser.getInstance();
-        currentUser.setCognitoUserPool(
-            new CognitoUserPool(
-                    RegisterActivity.this,
-                Constants.USER_POOL_ID,
-                Constants.APP_CLIENT_ID,
-                Constants.APP_CLIENT_SECRET,
-                Regions.fromName(Constants.COGNITO_REGION)
-            )
-        );
+        cognitoSettings = CognitoSettings.getInstance();
+        cognitoSettings.initContext(RegisterActivity.this);
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
@@ -102,7 +88,7 @@ public class RegisterActivity extends AppCompatActivity {
         userAttributes = new CognitoUserAttributes();
         userAttributes.addAttribute("email",emailGiven.getText().toString());
 
-        currentUser.getCognitoUserPool().signUpInBackground(
+        cognitoSettings.getUserPool().signUpInBackground(
                 usernameGiven.getText().toString(),
                 passwordGiven.getText().toString(),
                 userAttributes,

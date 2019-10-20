@@ -12,6 +12,15 @@
         android:orientation="vertical"
         android:background="@color/colorBackground">
 
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="37dp"
+            android:gravity="center_horizontal"
+            android:text="@string/loginStr"
+            android:textSize="@dimen/inputTextSize"
+            />
+
         <EditText
             android:id="@+id/inputLoginUsername"
             android:layout_width="match_parent"
@@ -19,7 +28,7 @@
             android:textSize="@dimen/inputTextSize"
             android:layout_marginLeft="@dimen/inputLeftRightMargin"
             android:layout_marginRight="@dimen/inputLeftRightMargin"
-            android:layout_marginTop="290dp"
+            android:layout_marginTop="100dp"
             android:hint="@string/usernameHint"/>
 
         <EditText
@@ -33,14 +42,26 @@
             android:hint="@string/passwordHint"/>
 
         <Button
-            android:id="@+id/buttonLogin"
+            android:id="@+id/loginButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/inputLeftRightMargin"
             android:layout_marginRight="@dimen/inputLeftRightMargin"
             android:textSize="@dimen/inputTextSize"
-            android:layout_marginTop="@dimen/inputTopMarginLoginButton"
+            android:layout_marginTop="@dimen/inputTopMargin"
             android:text="@string/loginStr"
+            android:layout_gravity="center"
+            android:padding="16dp"/>
+
+        <Button
+            android:id="@+id/goToRegistrationButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/inputLeftRightMargin"
+            android:layout_marginRight="@dimen/inputLeftRightMargin"
+            android:textSize="@dimen/inputTextSize"
+            android:layout_marginTop="@dimen/inputTopMargin"
+            android:text="@string/registerStr"
             android:layout_gravity="center"
             android:padding="16dp"/>
 

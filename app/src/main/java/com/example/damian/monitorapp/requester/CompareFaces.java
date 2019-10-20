@@ -26,7 +26,7 @@ public class CompareFaces {
         ByteBuffer sourceImageBytes=null;
         ByteBuffer targetImageBytes=null;
 
-        AmazonRekognition rekognitionClient = new ClientAWSFactory().createRekognitionClient();
+        //AmazonRekognition rekognitionClient = new ClientAWSFactory().createRekognitionClient();
 
         //Load source and target images and create input parameters
         try (InputStream inputStream = new FileInputStream(sourceImageFile)) {

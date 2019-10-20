@@ -1,13 +1,11 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Camera;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
@@ -32,6 +30,7 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import butterknife.Bind;
@@ -39,16 +38,17 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
+import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
+import com.google.gson.Gson;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -85,16 +85,17 @@ public class MainActivity extends AppCompatActivity {
     private Size previewSize;
     private CameraCaptureSession cameraCaptureSession;
     private TextureView textureView;
+    private TextView usernameEditText;
+    private CognitoUserSession userSession;
 
-    AmazonRekognitionClient rekognitionClient;
+    private AmazonRekognitionClient rekognitionClient;
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
     private FileInputStream sourceFileInputStream;
     private String awsServiceOption = Constants.AWS_DETECT_FACES;
 
-    public MainActivity() {
-    }
+    public MainActivity() { }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,11 +104,28 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
+        if(userSession != null) {
+            if (!userSession.isValid()) {
+                Intent intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
+            }
+        }
+        userSession = new Gson().fromJson(getIntent().getStringExtra("userSession"), CognitoUserSession.class);
+        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
+        CognitoSettings cognitoSettings = CognitoSettings.getInstance();
+        cognitoSettings.initContext(MainActivity.this);
+
+        System.out.println(cognitoSettings.getUserPool().getUser(userSession.getUsername()));
+        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
+        System.out.println(userSession.getIdToken());
+        System.out.println(userSession.getUsername());
+        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
+
+
         ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
 
-        rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient();
-        Log.i(TAG,"BBBBBBBBBB "+rekognitionClient.getRegions().getName());
-        rekognitionRequester = new RekognitionRequester();
+        rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
+//        rekognitionRequester = new RekognitionRequester();
 
         //cameraSurfaceView = findViewById(R.id.cameraTextureView);
 
@@ -118,6 +136,10 @@ public class MainActivity extends AppCompatActivity {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
         textureView = findViewById(R.id.texture_view);
+
+        usernameEditText = (TextView) findViewById(R.id.usernameEditText);
+        usernameEditText.setText(userSession.getUsername());
+
 
         surfaceTextureListener = new TextureView.SurfaceTextureListener() {
             @Override
@@ -140,14 +162,11 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.this.cameraDevice = cameraDevice;
                 createPreviewSession();
             }
-
-
             @Override
             public void onDisconnected(CameraDevice cameraDevice) {
                 cameraDevice.close();
                 MainActivity.this.cameraDevice = null;
             }
-
             @Override
             public void onError(CameraDevice cameraDevice, int error) {
                 cameraDevice.close();
@@ -242,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try  {
-                    rekognitionRequester.doAwsService(rekognitionClient,currentTakenPhotoFile, awsServiceOption);
+                    new RekognitionRequester().doAwsService(rekognitionClient,currentTakenPhotoFile, awsServiceOption);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -400,15 +419,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        Intent intent;
         switch (item.getItemId()) {
             case R.id.registerItem:
                 Toast.makeText(this,"Register",Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(this, RegisterActivity.class);
+                intent = new Intent(this, RegisterActivity.class);
                 startActivity(intent);
                 return true;
 
             case R.id.loginItem:
                 Toast.makeText(this,"Login",Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, LoginActivity.class);
+                startActivity(intent);
                 return true;
 
             case R.id.detectFaces:
@@ -430,6 +452,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        if(!userSession.isValid()) {
+            Intent intent = new Intent(this,LoginActivity.class);
+            startActivity(intent);
+        }
         openBackgroundThread();
         if (textureView.isAvailable()) {
             setUpCamera(textureView.getWidth(), textureView.getHeight());
