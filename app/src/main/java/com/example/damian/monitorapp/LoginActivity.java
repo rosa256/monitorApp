@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp;
 
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,11 +17,11 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Auth
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.ChallengeContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoAccessToken;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoIdToken;
-import com.amazonaws.mobileconnectors.cognitoidentityprovider.tokens.CognitoRefreshToken;
+import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
+import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.requester.RefreshAsyncTask;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -46,16 +47,24 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
 
+
         password = findViewById(R.id.inputLoginPassword);
         password.setText("ABCabc!@#");
         username = findViewById(R.id.inputLoginUsername);
         username.setText("maniek256");
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(LoginActivity.this);
+
+        if(checkCacheCredentials()){
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "invoke onResume()");
         if(userSession != null){
         if(!userSession.isValid()) {
             Intent intent = new Intent(this,LoginActivity.class);
@@ -75,10 +84,8 @@ public class LoginActivity extends AppCompatActivity {
     public void SignInUser(){
         cognitoUser = cognitoSettings.getUserPool().getUser(username.getText().toString());
         System.out.println(cognitoSettings.getUserPool().getCurrentUser());
-
         //Invoke Sign In process.
         cognitoUser.getSessionInBackground(authenticationHandler);
-
     }
 
     // Callback handler for the sign-in process
@@ -94,12 +101,8 @@ public class LoginActivity extends AppCompatActivity {
             Map<String, String> logins = new HashMap<String, String>();
             logins.put("cognito-idp."+ Constants.COGNITO_REGION +".amazonaws.com/" + Constants.USER_POOL_ID, cognitoUserSession.getIdToken().getJWTToken());
             cognitoSettings.getCredentialsProvider().setLogins(logins);
-//            CognitoIdToken idToken = cognitoUserSession.getIdToken();
-//            CognitoAccessToken accessToken = cognitoUserSession.getAccessToken();
-//            CognitoRefreshToken refreshToken = cognitoUserSession.getRefreshToken();
-//            System.out.println(idToken);
-//            System.out.println(accessToken);
-//            new CognitoUserSession(idToken,accessToken,refreshToken);
+            AmazonCognitoIdentityClient amazonCognitoIdentityClient = new AmazonCognitoIdentityClient(cognitoSettings.getCredentialsProvider());
+
 
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("userSession", new Gson().toJson(cognitoUserSession));
@@ -126,4 +129,61 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(LoginActivity.this,"User does not exist",Toast.LENGTH_SHORT).show();
         }
     };
+
+
+    private boolean checkCacheCredentials() {
+        CognitoUser currentUser = cognitoSettings.getUserPool().getCurrentUser();
+
+        currentUser.getSessionInBackground(new AuthenticationHandler() {
+            @Override
+            public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {
+
+                if (userSession.isValid()) {
+                    Log.i(TAG, "user session valid, getting token...");
+                    // Get id token from CognitoUserSession.
+                    String idToken = userSession.getIdToken().getJWTToken();
+
+                    if (idToken.length() > 0) {
+                        // Set up as a credentials provider.
+                        Log.i(TAG, "got id token - setting credentials using token");
+                        //new RefreshAsyncTask().execute(1);
+
+                    } else {
+                        Log.i(TAG, "no token...");
+                    }
+                } else {
+                    Log.i(TAG, "user session not valid - using identity pool credentials - guest user");
+                }
+                //performAction(action);
+            }
+
+            @Override
+            public void getAuthenticationDetails(AuthenticationContinuation authenticationContinuation, String userId) {
+                Log.i(TAG, " Not logged in! using identity pool credentials for guest user");
+                //performAction(action);
+            }
+            @Override
+            public void getMFACode(MultiFactorAuthenticationContinuation continuation) { }
+            @Override
+            public void authenticationChallenge(ChallengeContinuation continuation) { }
+            @Override
+            public void onFailure(Exception exception) {
+                Log.i(TAG, "error getting session: " + exception.getLocalizedMessage());
+                Log.i(TAG, "Session expired, forwarded to Login Activity.");
+                //proceed using guest user credentials
+                //performAction(action);
+            }
+        });
+
+
+        String identityId = cognitoSettings.getUserPool().getCurrentUser().getUserId();
+        System.out.println(TAG +": ---------------- IdentityId: " + identityId);
+        System.out.println(TAG +": ---------------- SessionDuration: " + cognitoSettings.getCredentialsProvider().getSessionDuration());
+
+        if(identityId != null && !identityId.isEmpty())
+            return true;
+        return false;
+    }
+
 }
+

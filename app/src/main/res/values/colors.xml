@@ -3,11 +3,11 @@
     <color name="colorPrimary">#333333</color>
     <color name="colorPrimaryDark">#000000</color>
     <color name="colorBackground">#cccccc</color>
+    <color name="colorWhite">#eeeeed</color>
     <color name="colorAccent">#ff9933</color>
     <color name="colorBlack">#555555</color>
     <color name="colorGreyLight">#c4c3c3</color>
     <color name="gray_lite">#649f9f9f</color>
-    <color name="colorAccentOrange">#f39225</color>
     <color name="colorWarning">#f20</color>
     <color name="colorLemon">#99ff99</color>
     <color name="cardview_dark_background">#302010</color>

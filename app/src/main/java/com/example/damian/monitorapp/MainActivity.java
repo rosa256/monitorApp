@@ -86,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private CameraCaptureSession cameraCaptureSession;
     private TextureView textureView;
     private TextView usernameEditText;
-    private CognitoUserSession userSession;
+    private CognitoSettings cognitoSettings;
 
     private AmazonRekognitionClient rekognitionClient;
 
@@ -104,23 +104,8 @@ public class MainActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
-        if(userSession != null) {
-            if (!userSession.isValid()) {
-                Intent intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
-            }
-        }
-        userSession = new Gson().fromJson(getIntent().getStringExtra("userSession"), CognitoUserSession.class);
-        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
-        CognitoSettings cognitoSettings = CognitoSettings.getInstance();
+        cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(MainActivity.this);
-
-        System.out.println(cognitoSettings.getUserPool().getUser(userSession.getUsername()));
-        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
-        System.out.println(userSession.getIdToken());
-        System.out.println(userSession.getUsername());
-        System.out.println("aAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAaaa");
-
 
         ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
 
@@ -137,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
         textureView = findViewById(R.id.texture_view);
 
-        usernameEditText = (TextView) findViewById(R.id.usernameEditText);
-        usernameEditText.setText(userSession.getUsername());
+        usernameEditText = findViewById(R.id.usernameEditText);
+        usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
 
 
         surfaceTextureListener = new TextureView.SurfaceTextureListener() {
@@ -261,7 +246,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try  {
-                    new RekognitionRequester().doAwsService(rekognitionClient,currentTakenPhotoFile, awsServiceOption);
+                    new RekognitionRequester().doAwsService(rekognitionClient,currentTakenPhotoFile, awsServiceOption, getApplicationContext());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -442,6 +427,12 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this,"Compare Faces Set",Toast.LENGTH_SHORT).show();
                 awsServiceOption = Constants.AWS_COMPARE_FACES;
                 return true;
+            case R.id.logoutItem:
+                Toast.makeText(this,"Logout",Toast.LENGTH_SHORT).show();
+
+                intent = new Intent(MainActivity.this, LoginActivity.class);
+                startActivity(intent);
+                return true;
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
@@ -453,10 +444,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
-        if(!userSession.isValid()) {
-            Intent intent = new Intent(this,LoginActivity.class);
-            startActivity(intent);
-        }
         openBackgroundThread();
         if (textureView.isAvailable()) {
             setUpCamera(textureView.getWidth(), textureView.getHeight());

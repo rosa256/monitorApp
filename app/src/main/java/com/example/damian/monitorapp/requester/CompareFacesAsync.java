@@ -1,7 +1,10 @@
 package com.example.damian.monitorapp.requester;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.amazonaws.services.rekognition.model.BoundingBox;
@@ -9,6 +12,7 @@ import com.amazonaws.services.rekognition.model.CompareFacesMatch;
 import com.amazonaws.services.rekognition.model.CompareFacesRequest;
 import com.amazonaws.services.rekognition.model.CompareFacesResult;
 import com.amazonaws.services.rekognition.model.ComparedFace;
+import com.amazonaws.services.rekognition.model.DetectFacesResult;
 import com.amazonaws.services.rekognition.model.Image;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -21,16 +25,20 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
 
     private AmazonRekognitionClient amazonRekognitionClient;
     private ObjectMapper objectMapper;
+    private Context context;
     private Image source;
     private Image target;
+    private String confidence ="-1";
 
     private Exception exception;
 
-    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target) {
+    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context) {
         super();
         this.amazonRekognitionClient = rekognitionClient;
         this.source = source;
         this.target = target;
+        this.context = context;
+
         objectMapper = new ObjectMapper();
     }
 
@@ -56,6 +64,7 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
                     + " " + position.getTop()
                     + " matches with " + match.getSimilarity().toString()
                     + "% confidence.");
+            confidence = match.getSimilarity().toString();
             try {
                 Log.i(TAG,"Complete set of attributes:");
                 Log.i(TAG, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(face));
@@ -71,5 +80,11 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
                 + " face(s) that did not match");
 
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
     }
 }

@@ -1,7 +1,10 @@
 package com.example.damian.monitorapp.requester;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.os.CountDownTimer;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
@@ -14,16 +17,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
-public class DetectFacesAsync extends AsyncTask<String, Void, DetectFacesResult> {
+public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResult> {
     private static final String TAG = "DetectFacesAsync";
 
+    private Context context;
     private Exception exception;
     private DetectFacesRequest request;
     private AmazonRekognitionClient amazonRekognitionClient;
+    private String gender ="-1";
 
-    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request) {
+    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context) {
         super();
         amazonRekognitionClient = rekognitionClient;
+        this.context = context;
         this.request = request;
     }
 
@@ -39,7 +45,7 @@ public class DetectFacesAsync extends AsyncTask<String, Void, DetectFacesResult>
             for (FaceDetail face: faceDetails) {
                 if (request.getAttributes().contains("ALL")) {
                     AgeRange ageRange = face.getAgeRange();
-
+                    gender = face.getGender().toString();
                     Log.i(TAG,"The detected face is estimated to be between "
                             + ageRange.getLow().toString() + " and " + ageRange.getHigh().toString()
                             + " years old.");
@@ -62,5 +68,11 @@ public class DetectFacesAsync extends AsyncTask<String, Void, DetectFacesResult>
             Log.e("monitorApp","exception",e);
         }
         return result;
+    }
+
+    @Override
+    protected void onPostExecute(DetectFacesResult detectFacesResult) {
+        super.onPostExecute(detectFacesResult);
+        Toast.makeText(context.getApplicationContext(), "Gender: " + gender, Toast.LENGTH_LONG).show();
     }
 }

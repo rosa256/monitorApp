@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp.requester;
 
 
+import android.content.Context;
 import android.util.Log;
 
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
@@ -19,17 +20,18 @@ import java.nio.ByteBuffer;
 public class RekognitionRequester {
 
     private static final String TAG = "RekognitionRequester";
+    private Context context;
 
-    public static void doAwsService(AmazonRekognitionClient rekognitionClient,File currentTakenPhotoFile, String awsServiceOption){
+    public static void doAwsService(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, String awsServiceOption, Context context){
         Log.i(TAG, "doAwsService() - Invoke with awsServiceOption: "+awsServiceOption);
         if(Constants.AWS_DETECT_FACES.equals(awsServiceOption)){
-            doAwsFaceDetection(rekognitionClient, currentTakenPhotoFile);
+            doAwsFaceDetection(rekognitionClient, currentTakenPhotoFile, context);
         }else if(Constants.AWS_COMPARE_FACES.equals(awsServiceOption)){
-            doAwsCompareFaces(rekognitionClient, currentTakenPhotoFile);
+            doAwsCompareFaces(rekognitionClient, currentTakenPhotoFile, context);
         }
     }
 
-    private static void doAwsFaceDetection(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile) {
+    private static void doAwsFaceDetection(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context) {
         Log.i(TAG,"doAwsDetectFaces() - Started");
         ByteBuffer sourceImageBytes = null;
 
@@ -48,11 +50,14 @@ public class RekognitionRequester {
                 .withAttributes(Attribute.ALL.toString());
 
         Log.i(TAG,"doAwsFaceDetection() - invoke DetectFacesAsync");
-        new DetectFacesAsync(rekognitionClient, request).execute();
+        new DetectFacesAsync(rekognitionClient, request, context).execute();
+
+
+
         Log.i(TAG,"doAwsDetectFaces() - Finished");
     }
 
-    private static void doAwsCompareFaces(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile) {
+    private static void doAwsCompareFaces(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context) {
         Log.i(TAG,"doAwsCompareFaces() - Started");
 
         ByteBuffer sourceImageBytes = null;
@@ -81,9 +86,8 @@ public class RekognitionRequester {
 
 
         Log.i(TAG,"doAwsCompareFaces() - invoke CompareFacesAsync");
-        new CompareFacesAsync(rekognitionClient, source, target).execute();
+        new CompareFacesAsync(rekognitionClient, source, target, context).execute();
 
         Log.i(TAG,"doAwsCompareFaces() - Finished");
     }
-
 }

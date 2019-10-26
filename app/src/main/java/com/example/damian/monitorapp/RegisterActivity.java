@@ -110,7 +110,6 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) { }
     }
-
 }
 
 /*        public void afterTextChanged(Editable editable) {

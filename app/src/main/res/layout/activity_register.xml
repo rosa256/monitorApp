@@ -31,7 +31,6 @@
                 android:id="@+id/usernameEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:hint="@string/usernameHint"
                 android:textSize="@dimen/inputTextSize"
                 android:inputType="text"/>
@@ -48,38 +47,51 @@
                 android:id="@+id/emailEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
                 android:hint="@string/emailHint"
                 android:textSize="@dimen/inputTextSize"
                 android:inputType="textEmailAddress"/>
         </android.support.design.widget.TextInputLayout>
 
-        <EditText
-            android:id="@+id/passowrdTextView"
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/input_layout_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:hint="@string/passwordHint"
-            android:textSize="@dimen/inputTextSize"
             android:layout_marginTop="@dimen/inputTopMargin"
             android:layout_marginLeft="@dimen/inputLeftRightMargin"
-            android:layout_marginRight="@dimen/inputLeftRightMargin"
-            android:inputType="textPassword"
-            />
+            android:layout_marginRight="@dimen/inputLeftRightMargin">
 
-        <EditText
-            android:id="@+id/passowrdConfirmTextView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:hint="@string/passwordConfirmHint"
-            android:textSize="@dimen/inputTextSize"
-            android:layout_marginTop="@dimen/inputTopMargin"
-            android:layout_marginLeft="@dimen/inputLeftRightMargin"
-            android:layout_marginRight="@dimen/inputLeftRightMargin"
-            android:inputType="textPassword"
-            />
+            <EditText
+                android:id="@+id/passowrdTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/passwordHint"
+                android:textSize="@dimen/inputTextSize"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                android:layout_marginRight="@dimen/inputLeftRightMargin"
+                android:inputType="textPassword"
+                />
+        </android.support.design.widget.TextInputLayout>
 
+        <android.support.design.widget.TextInputLayout
+        android:id="@+id/input_layout_password_confirm"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/inputTopMargin"
+        android:layout_marginLeft="@dimen/inputLeftRightMargin"
+        android:layout_marginRight="@dimen/inputLeftRightMargin">
+            <EditText
+                android:id="@+id/passowrdConfirmTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/passwordConfirmHint"
+                android:textSize="@dimen/inputTextSize"
+                android:layout_marginTop="@dimen/inputTopMargin"
+                android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                android:layout_marginRight="@dimen/inputLeftRightMargin"
+                android:inputType="textPassword"
+                />
+        </android.support.design.widget.TextInputLayout>
         <Button
             android:id="@+id/registerButton"
             android:layout_width="match_parent"

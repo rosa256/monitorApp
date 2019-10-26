@@ -48,7 +48,6 @@ public class CognitoSettings {
 
     public CognitoCachingCredentialsProvider getCredentialsProvider() {
         if(cognitoCachingCredentialsProvider == null) {
-            System.out.println("CREDENTAIALEEE");
             cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
                     context.getApplicationContext(),
                     "eu-west-2:e6e456d7-f824-4910-8705-e914330e9663",
@@ -56,7 +55,6 @@ public class CognitoSettings {
             );
             return cognitoCachingCredentialsProvider;
         }else {
-            System.out.println("ZWROCONEEE - CREDENTAIALEEE");
             return cognitoCachingCredentialsProvider;
         }
     }
