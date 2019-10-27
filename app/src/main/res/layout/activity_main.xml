@@ -74,34 +74,19 @@
             </LinearLayout>
         </android.support.v7.widget.Toolbar>
 
-        <LinearLayout
-            android:id="@+id/cameraTextureViewRelativeLayout"
-            android:layout_width="match_parent"
-            android:layout_height="300dp"
-            android:layout_below="@id/my_toolbar"
-            android:layout_above="@id/actionMenuFragmentLayout"
-            android:background="@color/colorBackground"
-            android:orientation="vertical">
-
-            <TextureView
-                android:id="@+id/texture_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                />
-        </LinearLayout>
-
         <RelativeLayout
-            android:id="@+id/actionMenuFragmentLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_above="@+id/bottomLinearLayout">
+            android:layout_above="@+id/bottomLinearLayout"
+            android:layout_below="@id/my_toolbar">
 
-                <fragment
-                android:id="@+id/actionMenuFragment"
-                android:name="com.example.damian.monitorapp.fragments.ActionMenu"
+            <fragment
+                android:id="@+id/cameraPreviewFragment"
+                android:name="com.example.damian.monitorapp.fragments.CameraPreviewFragment"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"/>
         </RelativeLayout>
+
 
         <LinearLayout
             android:id="@+id/bottomLinearLayout"
@@ -109,7 +94,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
-            android:background="@color/colorBackground">
+            android:background="@color/colorBackground"
+            android:orientation="vertical">
+
+            <fragment
+                android:id="@+id/actionMenuFragment"
+                android:name="com.example.damian.monitorapp.fragments.ActionMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <fragment
                 android:id="@+id/tapBarMenuFragment"

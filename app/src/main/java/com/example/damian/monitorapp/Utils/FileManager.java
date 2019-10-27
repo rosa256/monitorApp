@@ -21,6 +21,8 @@ public class FileManager {
     private Resources resources;
     private Boolean init;
 
+    private File currentTakenPhotoFile;
+
     private FileManager() {
         init = false;
     }
@@ -92,5 +94,11 @@ public class FileManager {
 
     public File getSourceFileImage() {
         return sourceFileImage;
+    }
+    public File getCurrentTakenPhotoFile() {
+        return currentTakenPhotoFile;
+    }
+    public void setCurrentTakenPhotoFile(File currentTakenPhotoFile) {
+        this.currentTakenPhotoFile = currentTakenPhotoFile;
     }
 }

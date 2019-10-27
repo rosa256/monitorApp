@@ -18,6 +18,7 @@
                     android:layout_height="56dp"
                     android:src="@android:drawable/ic_menu_camera"
                     app:backgroundTint="@color/gray_lite"
+                    android:layout_gravity="center"
                     />
 
                 <android.support.design.widget.FloatingActionButton
@@ -27,7 +28,7 @@
                     android:src="@android:drawable/ic_dialog_email"
                     app:backgroundTint="@color/gray_lite"
                     android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_marginBottom="37dp"
+                    android:layout_gravity="center"
                     />
 
                 <android.support.design.widget.FloatingActionButton
@@ -37,6 +38,7 @@
                     android:src="@android:drawable/ic_input_add"
                     app:backgroundTint="@color/gray_lite"
                     android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                    android:layout_gravity="center"
                     />
 
                 <android.support.design.widget.FloatingActionButton
@@ -45,6 +47,8 @@
                     android:layout_height="56dp"
                     android:src="@android:drawable/ic_dialog_dialer"
                     app:backgroundTint="@color/gray_lite"
+                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
+                    android:layout_gravity="center"
                     />
 
 
