@@ -76,37 +76,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
-//    @Override
-//    protected void onActivityResult(int reqCode, int resultCode, Intent data) {
-//        super.onActivityResult(reqCode, resultCode, data);
-//
-//        FileOutputStream outputPhoto = null;
-//        if (resultCode == RESULT_OK) {
-//            try {
-//                final Uri imageUri = data.getData();
-//                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-//                selectedImage = BitmapFactory.decodeStream(imageStream);
-//
-//                try {
-//                    currentTakenPhotoFile= fileManager.createSelectedImageFile();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//                outputPhoto = new FileOutputStream(currentTakenPhotoFile);
-//
-//                selectedImage.compress(Bitmap.CompressFormat.PNG, 100,outputPhoto);
-//
-//
-//            } catch (FileNotFoundException e) {
-//                e.printStackTrace();
-//                Toast.makeText(MainActivity.this, "Something went wrong", Toast.LENGTH_LONG).show();
-//            }
-//
-//        }else {
-//            Toast.makeText(MainActivity.this, "You haven't picked Image",Toast.LENGTH_LONG).show();
-//        }
-//    }
-
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {

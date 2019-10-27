@@ -3,6 +3,7 @@ package com.example.damian.monitorapp.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -16,8 +17,10 @@ import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.FileManager;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -113,6 +116,7 @@ public class ActionMenu extends Fragment{
         }
     }
 
+    //TODO: Very slow working.. Have to check this.
     @OnClick(R.id.fab_select_photo)
     public void onSelectPhotoButtonClicked() {
         pickImage();
@@ -131,22 +135,22 @@ public class ActionMenu extends Fragment{
         if (resultCode == RESULT_OK) {
             try {
                 final Uri imageUri = data.getData();
-                //final InputStream imageStream = getContentResolver().openInputStream(imageUri);
-               // selectedImage = BitmapFactory.decodeStream(imageStream);
+                final InputStream imageStream = getActivity().getContentResolver().openInputStream(imageUri);
+                Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
                 try {
-                    /*currentTakenPhotoFile= */fileManager.createSelectedImageFile();
+                    fileManager.setCurrentTakenPhotoFile(fileManager.createSelectedImageFile());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                //outputPhoto = new FileOutputStream(currentTakenPhotoFile);
+                outputPhoto = new FileOutputStream(fileManager.getCurrentTakenPhotoFile());
 
-                //selectedImage.compress(Bitmap.CompressFormat.PNG, 100,outputPhoto);
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 100,outputPhoto);
 
 
-            } catch (Exception e/*FileNotFoundException e*/) {
-             //   e.printStackTrace();
-             //   Toast.makeText(getActivity().getApplicationContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(getActivity().getApplicationContext(), "Something went wrong", Toast.LENGTH_LONG).show();
             }
 
         }else {
