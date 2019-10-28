@@ -32,16 +32,6 @@
                     />
 
                 <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_create_source_photo"
-                    android:layout_width="56dp"
-                    android:layout_height="56dp"
-                    android:src="@android:drawable/ic_input_add"
-                    app:backgroundTint="@color/gray_lite"
-                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_gravity="center"
-                    />
-
-                <android.support.design.widget.FloatingActionButton
                     android:id="@+id/fab_select_photo"
                     android:layout_width="56dp"
                     android:layout_height="56dp"

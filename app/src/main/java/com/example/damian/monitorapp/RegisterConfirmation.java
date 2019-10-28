@@ -52,7 +52,9 @@ public class RegisterConfirmation extends AppCompatActivity {
             Log.i(TAG, "confirmation user successfuly:");
             Toast.makeText(RegisterConfirmation.this, "Udalo sie potiwerdzic", Toast.LENGTH_SHORT).show();
 
-            Intent intent = new Intent(RegisterConfirmation.this, LoginActivity.class);
+
+            Intent intent = new Intent(RegisterConfirmation.this, SourcePhotoActivity.class);
+            //Intent intent = new Intent(RegisterConfirmation.this, LoginActivity.class);
             startActivity(intent);
 
             // User was successfully confirmed

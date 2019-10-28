@@ -99,5 +99,7 @@
     <string name="registerConfirm">Confirm</string>
     <string name="confirmHint">Type Your Code</string>
     <string name="confirmInformation">Verification code has been sent to your e-mail. Please insert your code to verify your account.</string>
+    <string name="oneMoreStep"><b>One more step</b></string>
+    <string name="oneMoreStepInfo">Please make your profile photo</string>
 
 </resources>

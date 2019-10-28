@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                try  {
+                try {
                     new RekognitionRequester().doAwsService(rekognitionClient,fileManager.getCurrentTakenPhotoFile(), awsServiceOption, getApplicationContext());
                 } catch (Exception e) {
                     e.printStackTrace();

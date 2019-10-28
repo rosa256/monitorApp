@@ -16,7 +16,6 @@ import android.widget.Toast;
 import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.FileManager;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -64,10 +63,8 @@ public class ActionMenu extends Fragment{
         //lock();
         FileOutputStream outputPhoto = null;
         try {
-            File currentPhoto;
-            currentPhoto = fileManager.createImageFile();
-            System.out.println(currentPhoto.getAbsolutePath());
-            outputPhoto = new FileOutputStream(currentPhoto);
+            fileManager.setCurrentTakenPhotoFile(fileManager.createImageFile());
+            outputPhoto = new FileOutputStream(fileManager.getCurrentTakenPhotoFile());
 
             textureView.getBitmap()
                     .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
@@ -87,36 +84,8 @@ public class ActionMenu extends Fragment{
         }
     }
 
-    @OnClick(R.id.fab_create_source_photo)
-    public void onCreateSourcePhoto() {
-        fileManager.initFileManager(this.getResources());
-        //lock();
-
-        FileOutputStream outputPhoto = null;
-        try {
-            //*currentTakenPhotoFile = fileManager.createSourceImageFile();
-            //*outputPhoto = new FileOutputStream(currentTakenPhotoFile);
-            //sourceFileInputStream = new FileInputStream(createImageFile(galleryFolder));
-
-            //textureView.getBitmap()
-            //        .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
-            //Toast.makeText(this,"Picture Source Saved" ,Toast.LENGTH_LONG).show();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            //unlock();
-            try {
-                if (outputPhoto != null) {
-                    outputPhoto.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
     //TODO: Very slow working.. Have to check this.
+    //TODO: Fix loading photo from gallery (gallery path not initalize(null)).
     @OnClick(R.id.fab_select_photo)
     public void onSelectPhotoButtonClicked() {
         pickImage();
@@ -158,3 +127,6 @@ public class ActionMenu extends Fragment{
         }
     }
 }
+
+//    E/CameraCaptureSession: Session 0: Exception while stopping repeating:
+//    android.hardware.camera2.CameraAccessException: CAMERA_DISCONNECTED (2): cancelRequest:458: Camera device no longer alive

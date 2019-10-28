@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SourcePhotoActivity">
+
+    <RelativeLayout
+        android:id="@+id/upperRelativeLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintVertical_bias="1.0"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+        <RelativeLayout
+            android:id="@+id/source_photo_layout"
+            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_above="@id/bottomLinearLayout">
+
+            <TextView
+                android:id="@+id/oneMoreStepTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="13dp"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/inputTextSize"
+                android:text="@string/oneMoreStep" />
+
+            <TextView
+                android:id="@+id/oneMoreStepInfoTextView"
+                android:layout_below="@+id/oneMoreStepTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="7dp"
+                android:gravity="center_horizontal"
+                android:textSize="@dimen/inputTextSize"
+                android:text="@string/oneMoreStepInfo" />
+
+            <fragment
+                android:id="@+id/cameraPreviewFragment"
+                android:layout_below="@+id/oneMoreStepInfoTextView"
+                android:layout_marginTop="12dp"
+                android:name="com.example.damian.monitorapp.fragments.CameraPreviewFragment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/bottomLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical"
+            android:layout_marginBottom="18dp">
+
+            <Button
+                android:id="@+id/fab_create_source_photo"
+                android:layout_gravity="center"
+                android:text="Create"
+                android:textColor="#FFFFFF"
+                android:textSize="30sp"
+                android:layout_width="270dp"
+                android:layout_height="60dp"
+                android:background="@drawable/button_shape"
+                android:shadowColor="#A8A8A8"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="5"/>
+        </LinearLayout>
+    </RelativeLayout>
+
+</android.support.constraint.ConstraintLayout>
