@@ -1,22 +1,17 @@
 package com.example.damian.monitorapp.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.damian.monitorapp.LoginActivity;
-import com.example.damian.monitorapp.MainActivity;
 import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.SourcePhotoActivity;
 import com.example.damian.monitorapp.Utils.FileManager;
@@ -59,9 +54,9 @@ public class AcceptSourcePhotoFragment extends Fragment {
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
         if (isVisibleToUser) {
-            File imgFile = fileManager.getSourceFileImage();
-            if(imgFile.exists()){
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            File imgFileToShow = fileManager.getSourcePhotoFile();
+            if(imgFileToShow.exists()){
+                Bitmap myBitmap = BitmapFactory.decodeFile(imgFileToShow.getAbsolutePath());
                 myImage.setImageBitmap(myBitmap);
             }
         }

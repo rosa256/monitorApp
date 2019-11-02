@@ -2,8 +2,10 @@ package com.example.damian.monitorapp;
 
 import android.content.Intent;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -68,10 +70,18 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         CustomPrivileges.setUpPrivileges(this);
 
         fileManager = FileManager.getInstance();
+        fileManager.initFileManager(this.getResources());
 
         usernameEditText = findViewById(R.id.usernameEditText);
         usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
 
+        //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
+        CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        if(fr != null) {
+            Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
+            fr.getImageViewSource().setImageBitmap(myBitmap);
+        }
+        //TODO--end
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
@@ -79,7 +89,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
-        fileManager.initFileManager(this.getResources());
 
         Thread thread = new Thread(new Runnable() {
             @Override

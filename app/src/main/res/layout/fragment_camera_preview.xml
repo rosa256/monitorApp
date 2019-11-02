@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     tools:context=".fragments.CameraPreviewFragment">
 
-    <LinearLayout
+    <RelativeLayout
         android:id="@+id/actionMenuFragmentLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,7 +14,38 @@
         <TextureView
             android:id="@+id/texture_view"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"/>
-    </LinearLayout>
+            android:layout_height="match_parent"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Target"
+            android:textSize="16dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="67dp"
+            />
+        <ImageView
+            android:id="@+id/image_view_source"
+            android:layout_width="65dp"
+            android:layout_height="95dp"
+            android:layout_alignParentEnd="true"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Source"
+            android:textSize="16dp"
+            android:layout_alignParentEnd="true"
+            android:layout_marginRight="2dp"
+            />
+        <ImageView
+            android:id="@+id/image_view_target"
+            android:layout_width="65dp"
+            android:layout_height="92dp"
+            android:layout_toStartOf="@+id/image_view_source"
+            android:layout_marginRight="8dp"
+            />
+    </RelativeLayout>
 </FrameLayout>

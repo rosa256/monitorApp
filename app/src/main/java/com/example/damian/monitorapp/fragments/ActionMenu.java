@@ -16,10 +16,12 @@ import android.widget.Toast;
 import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.FileManager;
 
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -70,6 +72,11 @@ public class ActionMenu extends Fragment{
                     .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
             Toast.makeText(getActivity().getApplicationContext(),"Picture Saved" ,Toast.LENGTH_LONG).show();
 
+            //--To Set Up Hint Views
+            Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getCurrentTakenPhotoFile().getAbsolutePath());
+            cameraPreviewFragment.getImageViewTarget().setImageBitmap(myBitmap);
+            //--To Set Up Hint Views
+
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -92,8 +99,8 @@ public class ActionMenu extends Fragment{
     }
 
     public void pickImage() {
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK);
-        photoPickerIntent.setType("image/*");
+        cameraPreviewFragment = (CameraPreviewFragment) getFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
     }
 
@@ -105,17 +112,20 @@ public class ActionMenu extends Fragment{
             try {
                 final Uri imageUri = data.getData();
                 final InputStream imageStream = getActivity().getContentResolver().openInputStream(imageUri);
-                Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
 
                 try {
                     fileManager.setCurrentTakenPhotoFile(fileManager.createSelectedImageFile());
+                    //--To Set Up Hint Views
+                    cameraPreviewFragment.getImageViewTarget().setImageBitmap(selectedImage);
+                    //--To Set Up Hint Views
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                outputPhoto = new FileOutputStream(fileManager.getCurrentTakenPhotoFile());
 
-                selectedImage.compress(Bitmap.CompressFormat.PNG, 100,outputPhoto);
-
+                OutputStream os = new BufferedOutputStream(new FileOutputStream(fileManager.getCurrentTakenPhotoFile()));
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 60,os);
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();

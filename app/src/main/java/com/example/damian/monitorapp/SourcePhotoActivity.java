@@ -1,14 +1,13 @@
 package com.example.damian.monitorapp;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
-import android.view.View;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
@@ -68,11 +67,17 @@ public class SourcePhotoActivity extends AppCompatActivity implements CameraPrev
         FileOutputStream outputPhoto = null;
         try {
             //TODO: Do Poprawienia setCurrentTakenPhotoFile...
-            fileManager.setCurrentTakenPhotoFile(fileManager.createSourceImageFile());
-            outputPhoto = new FileOutputStream(fileManager.getCurrentTakenPhotoFile());
+            fileManager.setSourcePhotoFile(fileManager.createSourceImageFile());
+            outputPhoto = new FileOutputStream(fileManager.getSourcePhotoFile());
             textureView.getBitmap()
                     .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);
-            Toast.makeText(SourcePhotoActivity.this,"Picture Source Saved" ,Toast.LENGTH_LONG).show();
+
+            //--To Set Up Hint Views
+            Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
+            cameraPreviewFragment.getImageViewSource().setImageBitmap(myBitmap);
+            //--To Set Up Hint Views
+
+                    Toast.makeText(SourcePhotoActivity.this,"Picture Source Saved" ,Toast.LENGTH_LONG).show();
             setViewPager(1);
 
         } catch (Exception e) {

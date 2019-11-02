@@ -26,6 +26,7 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.damian.monitorapp.R;
 
@@ -61,6 +62,8 @@ public class CameraPreviewFragment extends Fragment {
     private Size previewSize;
 
     private TextureView textureView;
+    private ImageView imageViewSource;
+    private ImageView imageViewTarget;
 
     private String cameraId;
 
@@ -79,6 +82,8 @@ public class CameraPreviewFragment extends Fragment {
         cameraManager = (CameraManager) getActivity().getSystemService(Context.CAMERA_SERVICE);
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
         textureView = view.findViewById(R.id.texture_view);
+        imageViewSource = view.findViewById(R.id.image_view_source);
+        imageViewTarget = view.findViewById(R.id.image_view_target);
 
         surfaceTextureListener = new TextureView.SurfaceTextureListener() {
             @Override
@@ -300,6 +305,14 @@ public class CameraPreviewFragment extends Fragment {
     public TextureView getTextureView() {
         return textureView;
     }
+    public ImageView getImageViewSource() {
+        return imageViewSource;
+    }
+
+    public ImageView getImageViewTarget() {
+        return imageViewTarget;
+    }
+
 }
 
 

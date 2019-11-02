@@ -5,6 +5,7 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.example.damian.monitorapp.R;
+import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,11 +18,11 @@ public class FileManager {
     private static FileManager fileManager = null;
     private File galleryFolder;
     private File gallerySourceFolder;
-    private File sourceFileImage;
     private Resources resources;
     private Boolean init;
 
     private File currentTakenPhotoFile;
+    private File sourcePhotoFile;
 
     private FileManager() {
         init = false;
@@ -39,8 +40,9 @@ public class FileManager {
     public void initFileManager(Resources resources){
         if (!init){
             this.resources = resources;
-            createImageGallery();
             init = true;
+            createImageGallery();
+            loadSourceImage();
         }
     }
 
@@ -64,8 +66,8 @@ public class FileManager {
         String imageFileName = "sourceImage";
         String sufix = ".jpg";
         Log.i(TAG, "createdImageFile:" + gallerySourceFolder + "/" + imageFileName + sufix);
-        sourceFileImage = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
-        return sourceFileImage;
+        sourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+        return sourcePhotoFile;
     }
 
     public void createImageGallery() {
@@ -92,13 +94,37 @@ public class FileManager {
         }
     }
 
-    public File getSourceFileImage() {
-        return sourceFileImage;
+    public boolean checkIfExistsSourcePhotoFile(){
+        String imageFileName = "sourceImage";
+        String sufix = ".jpg";
+        File testSourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+            if(testSourcePhotoFile.exists())
+                return true;
+            else
+                return false;
+    }
+
+    private void loadSourceImage(){
+        if(checkIfExistsSourcePhotoFile()){
+            String imageFileName = "sourceImage";
+            String sufix = ".jpg";
+            File fileSource = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+            setSourcePhotoFile(fileSource);
+        }
+    }
+
+    public File getSourcePhotoFile() {
+        return sourcePhotoFile;
     }
     public File getCurrentTakenPhotoFile() {
         return currentTakenPhotoFile;
     }
+
     public void setCurrentTakenPhotoFile(File currentTakenPhotoFile) {
         this.currentTakenPhotoFile = currentTakenPhotoFile;
     }
+    public void setSourcePhotoFile(File sourcePhotoFile) {
+        this.sourcePhotoFile = sourcePhotoFile;
+    }
+
 }

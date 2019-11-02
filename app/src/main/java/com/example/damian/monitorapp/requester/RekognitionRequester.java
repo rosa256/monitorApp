@@ -71,7 +71,7 @@ public class RekognitionRequester {
             System.exit(1);
         }
 
-        try(InputStream inputStream = new FileInputStream(FileManager.getInstance().getSourceFileImage())){
+        try(InputStream inputStream = new FileInputStream(FileManager.getInstance().getSourcePhotoFile())){
             sourceImageBytes = ByteBuffer.wrap(IOUtils.toByteArray(inputStream));
         }catch (Exception e){
             Log.i(TAG,"Failed to load source image file " + currentTakenPhotoFile.getPath());
