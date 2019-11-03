@@ -102,4 +102,10 @@
     <string name="oneMoreStep"><b>One more step</b></string>
     <string name="oneMoreStepInfo">Please make your profile photo</string>
 
+    <string name="delayButtonLabelSecondsFormat">Delay: %d Sec</string>
+    <string name="delayButtonLabelNone">Delay: None</string>
+    <string name="timerCountdownMessageFormat">Taking picture in %d seconds</string>
+
+
+
 </resources>

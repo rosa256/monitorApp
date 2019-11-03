@@ -2,10 +2,12 @@ package com.example.damian.monitorapp;
 
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -16,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,9 +33,14 @@ import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
+import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
@@ -45,6 +53,18 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private RekognitionRequester rekognitionRequester;
     private AmazonRekognitionClient rekognitionClient;
     private CognitoSettings cognitoSettings;
+    private Button pictureDelayButton;
+
+    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30);
+    static final int DEFAULT_DELAY = 5;
+    int pictureDelay = DEFAULT_DELAY;
+    static final String DELAY_PREFERENCES_KEY = "delay";
+    Handler handler = new Handler();
+    // assign ID when we start a timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
+    int currentPictureID = 0;
+    int pictureTimer = 0;
+    private TextView statusTextField;
+
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -75,6 +95,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         usernameEditText = findViewById(R.id.usernameEditText);
         usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
 
+        pictureDelayButton = (Button)findViewById(R.id.button_delay_photo);
+        statusTextField = (TextView)findViewById(R.id.statusTextField);
+
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
         if(fr != null) {
@@ -82,6 +105,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             fr.getImageViewSource().setImageBitmap(myBitmap);
         }
         //TODO--end
+
+        this.readDelayPreference();
+
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
@@ -106,6 +132,102 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.tapBarMenu)
     public void onMenuButtonClick() {
         tapBarMenu.toggle();
+    }
+
+    void updateDelayButton() {
+        if (pictureDelay==0) {
+            pictureDelayButton.setText(getString(R.string.delayButtonLabelNone));
+        }
+        else {
+            String labelFormat = getString(R.string.delayButtonLabelSecondsFormat);
+            pictureDelayButton.setText(String.format(labelFormat, this.pictureDelay));
+        }
+    }
+
+    public void decrementTimer(final int pictureID) {
+        if (pictureID!=this.currentPictureID) {
+            return;
+        }
+        boolean takePicture = (pictureTimer==1);
+        --pictureTimer;
+        if (takePicture) {
+            savePictureNow();
+            //playTimerBeep();
+        }
+        else if (pictureTimer>0) {
+            updateTimerMessage();
+            handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
+            //if (pictureTimer<3) playTimerBeep();
+        }
+    }
+    void updateTimerMessage() {
+        String messageFormat = getString(R.string.timerCountdownMessageFormat);
+        statusTextField.setText(String.format(messageFormat, pictureTimer));
+    }
+
+    @OnClick(R.id.fab_delay_photo)
+    public void savePicture() {
+        if (this.pictureDelay==0) {
+            savePictureNow();
+        }
+        else {
+            savePictureAfterDelay(this.pictureDelay);
+        }
+    }
+
+    void savePictureAfterDelay(int delay) {
+        pictureTimer = delay;
+        updateTimerMessage();
+        currentPictureID++;
+        handler.postDelayed(makeDecrementTimerFunction(currentPictureID), 1000);
+
+        //updateButtons(false);
+    }
+
+    Runnable makeDecrementTimerFunction(final int pictureID) {
+        return new Runnable() {
+            public void run() {decrementTimer(pictureID);}
+        };
+    }
+
+    public void savePictureNow() {
+        ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        //pictureURIs = new ArrayList<Uri>();
+        statusTextField.setText("Taking picture...");
+        cameraPreviewFragment.onTakePhoneButtonClicked();
+        //arManager.getCamera().autoFocus(this);
+    }
+
+
+    @OnClick(R.id.button_delay_photo)
+    public void cycleDelay() {
+        int index = DELAY_DURATIONS.indexOf(this.pictureDelay);
+        if (index<0) {
+            this.pictureDelay = DEFAULT_DELAY;
+        }
+        else {
+            this.pictureDelay = DELAY_DURATIONS.get((index+1) % DELAY_DURATIONS.size());
+        }
+        writeDelayPreference();
+        updateDelayButton();
+    }
+
+    void writeDelayPreference() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(DELAY_PREFERENCES_KEY, this.pictureDelay);
+        editor.commit();
+    }
+
+    void readDelayPreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int delay = prefs.getInt(DELAY_PREFERENCES_KEY, -1);
+        if (!DELAY_DURATIONS.contains(delay)) {
+            delay = DEFAULT_DELAY;
+        }
+        this.pictureDelay = delay;
+        updateDelayButton();
     }
 
     public void aboutMe(View view){
