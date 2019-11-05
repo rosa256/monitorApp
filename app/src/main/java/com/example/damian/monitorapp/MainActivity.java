@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -38,6 +39,9 @@ import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
+import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
+import net.steamcrafted.materialiconlib.MaterialIconView;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -65,6 +69,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     int pictureTimer = 0;
     private TextView statusTextField;
 
+    private MaterialIconView playButton;
+    private MaterialIconView appStatusIcon;
+    private Toolbar mToolbar;
+    private boolean onOff=false;
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -77,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
 
@@ -94,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         usernameEditText = findViewById(R.id.usernameEditText);
         usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
+
+        playButton = (MaterialIconView) findViewById(R.id.runAppButton);
+        appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         pictureDelayButton = (Button)findViewById(R.id.button_delay_photo);
         statusTextField = (TextView)findViewById(R.id.statusTextField);
@@ -127,6 +139,19 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             }
         });
         thread.start();
+    }
+
+    @OnClick(R.id.runAppButton)
+    public void runApp(){
+        if(!onOff){ //ON
+            onOff=true;
+            appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
+            appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+        }else{ //OFF
+            onOff=false;
+            appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
+            appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
+        }
     }
 
     @OnClick(R.id.tapBarMenu)
@@ -191,7 +216,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
     public void savePictureNow() {
-        ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.actionMenuFragment);
         //pictureURIs = new ArrayList<Uri>();
         statusTextField.setText("Taking picture...");
         cameraPreviewFragment.onTakePhoneButtonClicked();

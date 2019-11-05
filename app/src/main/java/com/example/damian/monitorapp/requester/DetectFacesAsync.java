@@ -15,6 +15,7 @@ import com.amazonaws.services.rekognition.model.FaceDetail;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResult> {

@@ -2,7 +2,6 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,7 +11,6 @@ import com.amazonaws.services.rekognition.model.CompareFacesMatch;
 import com.amazonaws.services.rekognition.model.CompareFacesRequest;
 import com.amazonaws.services.rekognition.model.CompareFacesResult;
 import com.amazonaws.services.rekognition.model.ComparedFace;
-import com.amazonaws.services.rekognition.model.DetectFacesResult;
 import com.amazonaws.services.rekognition.model.Image;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.fasterxml.jackson.core.JsonProcessingException;

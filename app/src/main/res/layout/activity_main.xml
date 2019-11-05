@@ -36,15 +36,15 @@
                 android:layout_height="match_parent"
                 android:weightSum="4">
 
-                <ImageView
+                <net.steamcrafted.materialiconlib.MaterialIconView
                     android:id="@+id/appStatus"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-
+                    android:layout_height="32dp"
                     android:layout_weight="1"
-                    android:gravity="center"
-                    android:src="@android:drawable/presence_busy" />
-
+                    android:layout_gravity="center_vertical"
+                    app:materialIcon="eye_off"
+                    app:materialIconColor="#AA2222"
+                    />
                 <TextView
                     android:id="@+id/TextView"
                     android:layout_width="wrap_content"

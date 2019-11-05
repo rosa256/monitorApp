@@ -36,27 +36,33 @@
                 android:src="@drawable/ic_profile"
                 tools:visibility="visible" />
 
-            <ImageView
+            <net.steamcrafted.materialiconlib.MaterialIconView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <net.steamcrafted.materialiconlib.MaterialIconView
                 android:id="@+id/idCalendar"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:src="@android:drawable/ic_menu_my_calendar"
-                tools:visibility="visible" />
+                app:materialIcon="chart_areaspline"
+                app:materialIconSize="32dp"
+                app:materialIconColor="#DDDDDD"
+                />
 
-
-            <ImageView
-                android:id="@+id/idCamera"
-                android:layout_width="0dp"
+            <net.steamcrafted.materialiconlib.MaterialIconView
+                android:id="@+id/runAppButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:contentDescription="TODO"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:src="@android:drawable/ic_menu_camera"
-                tools:visibility="visible" />
+                app:materialIcon="play_circle_outline"
+                app:materialIconSize="32dp"
+                app:materialIconColor="#DDDDDD"
+                />
 
             <Space
                 android:layout_width="56dp"

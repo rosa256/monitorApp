@@ -33,14 +33,18 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
     implementation 'com.github.michaldrabik:tapbarmenu:1.0.5'
     implementation group: 'com.amazonaws', name: 'aws-android-sdk-rekognition', version: '2.16.0'
-    implementation 'com.mikhaellopez:circularimageview:3.2.0'
-    /*https://github.com/lopspower/CircularImageView*/
 
     implementation(
             [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.1'],
             [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.1']
     )
+
+    //https://android-arsenal.com/details/1/2193
+    implementation 'net.steamcrafted:materialiconlib:1.1.5'
+    /*https://github.com/lopspower/CircularImageView*/
+    implementation 'com.mikhaellopez:circularimageview:3.2.0'
+
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
