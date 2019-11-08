@@ -14,6 +14,7 @@ import android.os.Bundle;
 
 import android.support.v7.widget.Toolbar;
 
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -45,6 +46,9 @@ import net.steamcrafted.materialiconlib.MaterialIconView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
@@ -73,6 +77,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
     private boolean onOff=false;
+
+    ScheduledExecutorService executor =
+            Executors.newSingleThreadScheduledExecutor();
+
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -147,10 +155,14 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             onOff=true;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
             appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+            executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay+ 3, TimeUnit.SECONDS);
+
         }else{ //OFF
             onOff=false;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
+            executor.shutdown();
         }
     }
 
@@ -180,14 +192,21 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             //playTimerBeep();
         }
         else if (pictureTimer>0) {
+
             updateTimerMessage();
+
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
             //if (pictureTimer<3) playTimerBeep();
         }
     }
     void updateTimerMessage() {
-        String messageFormat = getString(R.string.timerCountdownMessageFormat);
-        statusTextField.setText(String.format(messageFormat, pictureTimer));
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                String messageFormat = getString(R.string.timerCountdownMessageFormat);
+                statusTextField.setText(String.format(messageFormat, pictureTimer));
+            }
+        });
     }
 
     @OnClick(R.id.fab_delay_photo)
@@ -196,17 +215,17 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             savePictureNow();
         }
         else {
+
             savePictureAfterDelay(this.pictureDelay);
         }
     }
 
     void savePictureAfterDelay(int delay) {
+
         pictureTimer = delay;
         updateTimerMessage();
         currentPictureID++;
         handler.postDelayed(makeDecrementTimerFunction(currentPictureID), 1000);
-
-        //updateButtons(false);
     }
 
     Runnable makeDecrementTimerFunction(final int pictureID) {
@@ -235,6 +254,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         }
         writeDelayPreference();
         updateDelayButton();
+
+        executor.shutdown();
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay+ 3, TimeUnit.SECONDS);
+
     }
 
     void writeDelayPreference() {
@@ -322,4 +346,33 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
     }
+
+
+    public class DoComparisonThread extends Thread{
+        private static final String TAG = "DoComparisonThread";
+        volatile boolean flag = true;
+        @Override
+        public void run(){
+            Log.i(TAG, "begin comparison thread");
+            while(flag){
+                savePicture();
+                try{
+                    this.sleep(pictureDelay);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    Runnable periodicTask = new Runnable() {
+        public void run() {
+            // Invoke method(s) to do the work
+            savePicture();
+        }
+    };
+
+
+
 }
+
