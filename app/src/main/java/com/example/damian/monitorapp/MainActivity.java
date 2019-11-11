@@ -29,6 +29,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
@@ -37,20 +38,23 @@ import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
+import com.example.damian.monitorapp.models.UserDO;
+import com.example.damian.monitorapp.requester.DatabaseAccess;
+import com.example.damian.monitorapp.requester.InitDBConnectionAsync;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialIconView;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
+public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener {
 
     private static final String TAG = "MainActivity";
     private TextView usernameEditText;
@@ -60,6 +64,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private CognitoCachingCredentialsProvider credentialsProvider;
     private RekognitionRequester rekognitionRequester;
     private AmazonRekognitionClient rekognitionClient;
+    private AmazonDynamoDBClient dynamoDBClient;
     private CognitoSettings cognitoSettings;
     private Button pictureDelayButton;
 
@@ -76,11 +81,12 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private MaterialIconView playButton;
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
-    private boolean onOff=false;
+    private boolean onOff = false;
 
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
+    private DatabaseAccess databaseAccess;
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -103,6 +109,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
 
         rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
+        dynamoDBClient = (AmazonDynamoDBClient) clientAWSFactory.createDynamoDBClient(getApplicationContext());
 
         CustomPrivileges.setUpPrivileges(this);
 
@@ -115,12 +122,20 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         playButton = (MaterialIconView) findViewById(R.id.runAppButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
-        pictureDelayButton = (Button)findViewById(R.id.button_delay_photo);
-        statusTextField = (TextView)findViewById(R.id.statusTextField);
+        pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
+        statusTextField = (TextView) findViewById(R.id.statusTextField);
 
+        //Init DB in thread - Network Connection.
+        //TODO: Sprawdzanie czy jest zainicjalizowana Baza.
+        InitDBConnectionAsync initDBConnectionAsync = new InitDBConnectionAsync(getApplicationContext(), dynamoDBClient, databaseAccess);
+        initDBConnectionAsync.execute();
+
+
+        //TODO:TO trzeba poprawić. To jest to samo co linijke wyzej.
+        //DatabaseAccess.getInstance(getApplicationContext(), dynamoDBClient);
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
-        if(fr != null) {
+        if (fr != null) {
             Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
             fr.getImageViewSource().setImageBitmap(myBitmap);
         }
@@ -140,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             @Override
             public void run() {
                 try {
-                    new RekognitionRequester().doAwsService(rekognitionClient,fileManager.getCurrentTakenPhotoFile(), awsServiceOption, getApplicationContext());
+                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, getApplicationContext());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -150,16 +165,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
     @OnClick(R.id.runAppButton)
-    public void runApp(){
-        if(!onOff){ //ON
-            onOff=true;
+    public void runApp() {
+        if (!onOff) { //ON
+            onOff = true;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
             appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
             executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay+ 3, TimeUnit.SECONDS);
+            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
 
-        }else{ //OFF
-            onOff=false;
+        } else { //OFF
+            onOff = false;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
             executor.shutdown();
@@ -172,26 +187,24 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
     void updateDelayButton() {
-        if (pictureDelay==0) {
+        if (pictureDelay == 0) {
             pictureDelayButton.setText(getString(R.string.delayButtonLabelNone));
-        }
-        else {
+        } else {
             String labelFormat = getString(R.string.delayButtonLabelSecondsFormat);
             pictureDelayButton.setText(String.format(labelFormat, this.pictureDelay));
         }
     }
 
     public void decrementTimer(final int pictureID) {
-        if (pictureID!=this.currentPictureID) {
+        if (pictureID != this.currentPictureID) {
             return;
         }
-        boolean takePicture = (pictureTimer==1);
+        boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
         if (takePicture) {
             savePictureNow();
             //playTimerBeep();
-        }
-        else if (pictureTimer>0) {
+        } else if (pictureTimer > 0) {
 
             updateTimerMessage();
 
@@ -199,6 +212,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             //if (pictureTimer<3) playTimerBeep();
         }
     }
+
     void updateTimerMessage() {
         runOnUiThread(new Runnable() {
             @Override
@@ -211,10 +225,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.fab_delay_photo)
     public void savePicture() {
-        if (this.pictureDelay==0) {
+        if (this.pictureDelay == 0) {
             savePictureNow();
-        }
-        else {
+        } else {
 
             savePictureAfterDelay(this.pictureDelay);
         }
@@ -230,7 +243,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     Runnable makeDecrementTimerFunction(final int pictureID) {
         return new Runnable() {
-            public void run() {decrementTimer(pictureID);}
+            public void run() {
+                decrementTimer(pictureID);
+            }
         };
     }
 
@@ -238,7 +253,15 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.actionMenuFragment);
         //pictureURIs = new ArrayList<Uri>();
         statusTextField.setText("Taking picture...");
+
+        UserDO userDO = new UserDO();
+        userDO.setUserId("maniek2567");
+        userDO.setConfidence("80");
+        userDO.setDate("11-11-2011");
+        userDO.setHour("17:28");
+        databaseAccess.createUserCheck(userDO);
         cameraPreviewFragment.onTakePhoneButtonClicked();
+
         //arManager.getCamera().autoFocus(this);
     }
 
@@ -246,18 +269,17 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.button_delay_photo)
     public void cycleDelay() {
         int index = DELAY_DURATIONS.indexOf(this.pictureDelay);
-        if (index<0) {
+        if (index < 0) {
             this.pictureDelay = DEFAULT_DELAY;
-        }
-        else {
-            this.pictureDelay = DELAY_DURATIONS.get((index+1) % DELAY_DURATIONS.size());
+        } else {
+            this.pictureDelay = DELAY_DURATIONS.get((index + 1) % DELAY_DURATIONS.size());
         }
         writeDelayPreference();
         updateDelayButton();
 
         executor.shutdown();
         executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay+ 3, TimeUnit.SECONDS);
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
 
     }
 
@@ -279,7 +301,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         updateDelayButton();
     }
 
-    public void aboutMe(View view){
+    public void aboutMe(View view) {
         Intent intent = new Intent(this, AbouteMe.class);
         startActivity(intent);
     }
@@ -296,28 +318,28 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         Intent intent;
         switch (item.getItemId()) {
             case R.id.registerItem:
-                Toast.makeText(this,"Register",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Register", Toast.LENGTH_SHORT).show();
                 intent = new Intent(this, RegisterActivity.class);
                 startActivity(intent);
                 return true;
 
             case R.id.loginItem:
-                Toast.makeText(this,"Login",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Login", Toast.LENGTH_SHORT).show();
                 intent = new Intent(this, LoginActivity.class);
                 startActivity(intent);
                 return true;
 
             case R.id.detectFaces:
-                Toast.makeText(this,"Detect Faces Set",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Detect Faces Set", Toast.LENGTH_SHORT).show();
                 awsServiceOption = Constants.AWS_DETECT_FACES;
                 return true;
 
             case R.id.compareFaces:
-                Toast.makeText(this,"Compare Faces Set",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Compare Faces Set", Toast.LENGTH_SHORT).show();
                 awsServiceOption = Constants.AWS_COMPARE_FACES;
                 return true;
             case R.id.logoutItem:
-                Toast.makeText(this,"Logout",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Logout", Toast.LENGTH_SHORT).show();
 
                 intent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(intent);
@@ -325,7 +347,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
-        return true;
+                return true;
         }
     }
 
@@ -348,15 +370,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
 
-    public class DoComparisonThread extends Thread{
+    public class DoComparisonThread extends Thread {
         private static final String TAG = "DoComparisonThread";
         volatile boolean flag = true;
+
         @Override
-        public void run(){
+        public void run() {
             Log.i(TAG, "begin comparison thread");
-            while(flag){
+            while (flag) {
                 savePicture();
-                try{
+                try {
                     this.sleep(pictureDelay);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -371,8 +394,5 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             savePicture();
         }
     };
-
-
-
 }
 

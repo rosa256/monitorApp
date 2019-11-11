@@ -75,5 +75,6 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     protected void onPostExecute(DetectFacesResult detectFacesResult) {
         super.onPostExecute(detectFacesResult);
         Toast.makeText(context.getApplicationContext(), "Gender: " + gender, Toast.LENGTH_LONG).show();
+        context = null;
     }
 }
