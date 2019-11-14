@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.icu.util.LocaleData;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -29,6 +30,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
@@ -47,7 +50,10 @@ import com.michaldrabik.tapbarmenulib.TapBarMenu;
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialIconView;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -125,14 +131,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
-        //Init DB in thread - Network Connection.
-        //TODO: Sprawdzanie czy jest zainicjalizowana Baza.
-        //InitDBConnectionAsync initDBConnectionAsync = new InitDBConnectionAsync(getApplicationContext(), dynamoDBClient);
-        //initDBConnectionAsync.execute();
-
-
-        //TODO:TO trzeba poprawić. To jest to samo co linijke wyzej.
-        //DatabaseAccess.getInstance(getApplicationContext(), dynamoDBClient);
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
         if (fr != null) {
@@ -260,17 +258,48 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 //        userDO.setDate("11-11-2011");
 //        userDO.setHour("17:28");
 
+        final Document userCheckDocument = new Document();
+        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getUserPool().getCurrentUser().getUserId());
+        userCheckDocument.put(Constants.DYNAMODB_CONFIDENCE,"??");
+
+        final long timestamp = new Date().getTime();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+
+        final int hours = calendar.get(Calendar.HOUR);
+        final int minutes = calendar.get(Calendar.MINUTE);
+
+        final String dayString = new SimpleDateFormat("d-MM-YYYY").format(calendar.getTime());
+        final String timeString = new SimpleDateFormat("HH:mm:ss").format(calendar.getTime());
+
+        userCheckDocument.put(Constants.DYNAMODB_DATE,dayString);
+        userCheckDocument.put(Constants.DYNAMODB_HOUR,timeString);
+        userCheckDocument.put(Constants.DYNAMODB_FULLDATE,dayString +" "+timeString);
+
         cameraPreviewFragment.onTakePhoneButtonClicked();
 
-
-        Thread thread = new Thread(new Runnable() {
+        Thread threadWrite = new Thread(new Runnable() {
             @Override
             public void run() {
                 databaseAccess = DatabaseAccess.getInstance(MainActivity.this);
-                databaseAccess.createUserCheck();
+                //cognitoSettings.getCredentialsProvider().refresh();
+                //databaseAccess.readUserCheck();
+                databaseAccess.createUserCheck(userCheckDocument);
+
             }
         });
-        thread.start();
+        threadWrite.start();
+
+//        Thread threadRead = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                databaseAccess = DatabaseAccess.getInstance(MainActivity.this);
+//            }
+//        });
+//        threadRead.start();
+
+
+
 
         //arManager.getCamera().autoFocus(this);
     }

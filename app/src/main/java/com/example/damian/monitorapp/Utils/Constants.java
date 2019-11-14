@@ -15,6 +15,11 @@ public class Constants {
     public static final String APP_CLIENT_ID = "5j2j3quh2hcautq5vjtrc84d3i";
     public static final String APP_CLIENT_SECRET = "17cc0t9fh9th531cnmjgt592cmhpsl2liq4gmigcfqfv1vnr05b9";
 
+    public static final String DYNAMODB_USERID = "userId";
+    public static final String DYNAMODB_CONFIDENCE = "confidence";
+    public static final String DYNAMODB_DATE = "date";
+    public static final String DYNAMODB_HOUR = "hour";
+    public static final String DYNAMODB_FULLDATE = "fullDate";
 
 
 }

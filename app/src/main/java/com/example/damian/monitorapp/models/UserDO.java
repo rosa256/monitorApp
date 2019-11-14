@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp.models;
 
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBHashKey;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
 
@@ -12,6 +13,7 @@ public class UserDO {
     private String date;
     private String hour;
 
+    @DynamoDBHashKey
     @DynamoDBAttribute(attributeName = "userId")
     public String getUserId() {
         return userId;

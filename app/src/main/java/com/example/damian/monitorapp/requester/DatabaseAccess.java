@@ -17,6 +17,7 @@ import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.models.UserDO;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class DatabaseAccess {
@@ -28,20 +29,16 @@ public class DatabaseAccess {
     private Table dbTable;
     private static final String TABLE_NAME = "User_Check";
 
-
     private static DatabaseAccess instance;
-    private DynamoDBMapper dynamoDBMapper;
 
     private DatabaseAccess(Context context) {
         this.context = context;
 
         cognitoSettings = CognitoSettings.getInstance();
         credentialsProvider = cognitoSettings.getCredentialsProvider();
+
         amazonDynamoDBClient = new AmazonDynamoDBClient(credentialsProvider);
         amazonDynamoDBClient.setRegion(Region.getRegion(Constants.COGNITO_REGION));
-//        this.dynamoDBMapper = DynamoDBMapper.builder()
-//                .dynamoDBClient(dynamoDBClient)
-//                .build();
 
         dbTable = Table.loadTable(amazonDynamoDBClient, TABLE_NAME);
     }
@@ -53,40 +50,28 @@ public class DatabaseAccess {
         return instance;
     }
 
-    public void createUserCheck(/*Document userDocument*/){
+    public void createUserCheck(Document userCheckDocument){
+        if(!userCheckDocument.containsKey("userId")){
+            userCheckDocument.put("userId", credentialsProvider.getCachedIdentityId());
+        }
+        if(!userCheckDocument.containsKey(""))
 
-        Document userDocument = new Document();
-        userDocument.put("userId","test2");
-        userDocument.put("confidence","100");
-        userDocument.put("date","15-05-2005");
-        userDocument.put("hour","17:23");
 
-//        Set<String> mySet = new HashSet<>();
-//
-//        mySet.add()
-
-        DynamoDBEntry item1 = new Primitive("primiteve1");
-
+/*
         PutItemOperationConfig putItemOperationConfig = new PutItemOperationConfig();
         putItemOperationConfig.withReturnValues(ReturnValue.ALL_OLD);
-
-        Document result = dbTable.putItem(userDocument, putItemOperationConfig);
-
-       // Document retrievedDoc = dbTable.getItem(new Primitive("userId"));
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                dynamoDBMapper.save(userDO);
-//            }
-//        }).start();
+*/
+        dbTable.putItem(userCheckDocument/*, putItemOperationConfig*/);
     }
-    public UserDO readUserCheck(final UserDO userDO){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                //Logic
-            }
-        }).start();
-        return null;
+
+
+    public void readUserCheck() {
+
+        List<Document> returnedItem = dbTable.query(new Primitive(cognitoSettings.getUserPool().getCurrentUser().getUserId())).getAllResults();
+        System.out.println("-----------------");
+        System.out.println(returnedItem.get(1).toString());
+        System.out.println(returnedItem.size());
+        System.out.println("-----------------");
+        System.out.println("-----------------");
     }
 }
