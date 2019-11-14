@@ -3,7 +3,6 @@ package com.example.damian.monitorapp.models;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBAttribute;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBTable;
 
-import java.util.Date;
 
 @DynamoDBTable(tableName = "User_Check")
 

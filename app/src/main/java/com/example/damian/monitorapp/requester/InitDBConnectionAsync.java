@@ -12,18 +12,16 @@ public class InitDBConnectionAsync extends AsyncTask<String, Integer, InitDBConn
 
     private Context context;
     private DatabaseAccess databaseAccess;
-    private DatabaseAccess databaseAccessReferenceFromMain;
     private AmazonDynamoDBClient dynamoDBClient;
 
-    public InitDBConnectionAsync(Context context, AmazonDynamoDBClient dynamoDBClient, DatabaseAccess databaseAccessReference) {
+    public InitDBConnectionAsync(Context context, AmazonDynamoDBClient dynamoDBClient) {
         this.context = context;
         this.dynamoDBClient = dynamoDBClient;
-        databaseAccessReferenceFromMain = databaseAccessReference;
     }
 
     @Override
     protected InitDBConnectionAsync doInBackground(String... strings) {
-        databaseAccess = DatabaseAccess.getInstance(context, dynamoDBClient);
+        databaseAccess = DatabaseAccess.getInstance(context);
 
         return null;
     }
@@ -31,8 +29,7 @@ public class InitDBConnectionAsync extends AsyncTask<String, Integer, InitDBConn
     protected void onPostExecute(InitDBConnectionAsync initDBConnectionAsync) {
         super.onPostExecute(initDBConnectionAsync);
         Toast.makeText(context.getApplicationContext(), "Connection Database: " + (!databaseAccess.toString().isEmpty()), Toast.LENGTH_LONG).show();
-        databaseAccessReferenceFromMain = databaseAccess;
-        context = null;
+        //context = null;
     }
 
 }

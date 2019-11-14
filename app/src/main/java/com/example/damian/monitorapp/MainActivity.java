@@ -127,8 +127,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         //Init DB in thread - Network Connection.
         //TODO: Sprawdzanie czy jest zainicjalizowana Baza.
-        InitDBConnectionAsync initDBConnectionAsync = new InitDBConnectionAsync(getApplicationContext(), dynamoDBClient, databaseAccess);
-        initDBConnectionAsync.execute();
+        //InitDBConnectionAsync initDBConnectionAsync = new InitDBConnectionAsync(getApplicationContext(), dynamoDBClient);
+        //initDBConnectionAsync.execute();
 
 
         //TODO:TO trzeba poprawić. To jest to samo co linijke wyzej.
@@ -254,13 +254,23 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         //pictureURIs = new ArrayList<Uri>();
         statusTextField.setText("Taking picture...");
 
-        UserDO userDO = new UserDO();
-        userDO.setUserId("maniek2567");
-        userDO.setConfidence("80");
-        userDO.setDate("11-11-2011");
-        userDO.setHour("17:28");
-        databaseAccess.createUserCheck(userDO);
+//        UserDO userDO = new UserDO();
+//        userDO.setUserId("maniek2567");
+//        userDO.setConfidence("80");
+//        userDO.setDate("11-11-2011");
+//        userDO.setHour("17:28");
+
         cameraPreviewFragment.onTakePhoneButtonClicked();
+
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                databaseAccess = DatabaseAccess.getInstance(MainActivity.this);
+                databaseAccess.createUserCheck();
+            }
+        });
+        thread.start();
 
         //arManager.getCamera().autoFocus(this);
     }
