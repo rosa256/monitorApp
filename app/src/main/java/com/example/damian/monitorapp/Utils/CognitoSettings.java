@@ -6,11 +6,6 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.regions.Regions;
 
-import java.util.HashMap;
-import java.util.Map;
-
-//CognitoCachingCredentialsProvider
-
 public class CognitoSettings {
 
     private String userPoolId = Constants.USER_POOL_ID;

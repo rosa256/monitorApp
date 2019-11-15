@@ -259,8 +259,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 //        userDO.setHour("17:28");
 
         final Document userCheckDocument = new Document();
-        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getUserPool().getCurrentUser().getUserId());
-        userCheckDocument.put(Constants.DYNAMODB_CONFIDENCE,"??");
+        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getCredentialsProvider().getIdentityId());
+        System.out.println("----------------");
+        System.out.println(cognitoSettings.getCredentialsProvider().getIdentityId());
+        System.out.println("----------------");
+        userCheckDocument.put(Constants.DYNAMODB_CONFIDENCE,"95");
 
         final long timestamp = new Date().getTime();
         Calendar calendar = Calendar.getInstance();
@@ -285,21 +288,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 //cognitoSettings.getCredentialsProvider().refresh();
                 //databaseAccess.readUserCheck();
                 databaseAccess.createUserCheck(userCheckDocument);
-
             }
         });
         threadWrite.start();
-
-//        Thread threadRead = new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                databaseAccess = DatabaseAccess.getInstance(MainActivity.this);
-//            }
-//        });
-//        threadRead.start();
-
-
-
 
         //arManager.getCamera().autoFocus(this);
     }

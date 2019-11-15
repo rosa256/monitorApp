@@ -18,10 +18,8 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.Chal
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.continuations.MultiFactorAuthenticationContinuation;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.AuthenticationHandler;
 import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
-import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.requester.RefreshAsyncTask;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
