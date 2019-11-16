@@ -166,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     public void runApp() {
         if (!onOff) { //ON
             onOff = true;
+            currentPictureID = 0;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
             appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
             executor = Executors.newSingleThreadScheduledExecutor();
@@ -175,7 +176,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             onOff = false;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
-            executor.shutdown();
+            executor.shutdownNow();
+
+            //Operations to end counting proccess.
+            currentPictureID++;
+            decrementTimer(-1);
+                //Stoping handler postDelayed.
+                handler.removeCallbacksAndMessages(null);
         }
     }
 
@@ -195,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     public void decrementTimer(final int pictureID) {
         if (pictureID != this.currentPictureID) {
+            updateTimerMessage(true);
             return;
         }
         boolean takePicture = (pictureTimer == 1);
@@ -204,19 +212,23 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             //playTimerBeep();
         } else if (pictureTimer > 0) {
 
-            updateTimerMessage();
+            updateTimerMessage(false);
 
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
             //if (pictureTimer<3) playTimerBeep();
         }
     }
 
-    void updateTimerMessage() {
+    void updateTimerMessage(final Boolean operationStoped) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 String messageFormat = getString(R.string.timerCountdownMessageFormat);
                 statusTextField.setText(String.format(messageFormat, pictureTimer));
+                if(operationStoped){
+                    messageFormat = "Start Taking Pictures";
+                    statusTextField.setText(String.format(messageFormat, pictureTimer));
+                }
             }
         });
     }
@@ -234,7 +246,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     void savePictureAfterDelay(int delay) {
 
         pictureTimer = delay;
-        updateTimerMessage();
+        updateTimerMessage(false);
         currentPictureID++;
         handler.postDelayed(makeDecrementTimerFunction(currentPictureID), 1000);
     }
@@ -249,20 +261,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     public void savePictureNow() {
         ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.actionMenuFragment);
-        //pictureURIs = new ArrayList<Uri>();
         statusTextField.setText("Taking picture...");
 
-//        UserDO userDO = new UserDO();
-//        userDO.setUserId("maniek2567");
-//        userDO.setConfidence("80");
-//        userDO.setDate("11-11-2011");
-//        userDO.setHour("17:28");
-
         final Document userCheckDocument = new Document();
-        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getCredentialsProvider().getIdentityId());
-        System.out.println("----------------");
-        System.out.println(cognitoSettings.getCredentialsProvider().getIdentityId());
-        System.out.println("----------------");
+        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getUserPool().getCurrentUser().getUserId());
         userCheckDocument.put(Constants.DYNAMODB_CONFIDENCE,"95");
 
         final long timestamp = new Date().getTime();
@@ -308,9 +310,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         updateDelayButton();
 
         executor.shutdown();
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
-
     }
 
     void writeDelayPreference() {
