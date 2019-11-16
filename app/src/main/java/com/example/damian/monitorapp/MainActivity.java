@@ -1,5 +1,6 @@
 package com.example.damian.monitorapp;
 
+import android.content.Context;
 import android.content.Intent;
 
 import android.content.SharedPreferences;
@@ -7,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.icu.util.LocaleData;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -92,6 +94,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
+
     private DatabaseAccess databaseAccess;
 
     @Bind(R.id.tapBarMenu)
@@ -165,6 +168,19 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.runAppButton)
     public void runApp() {
         if (!onOff) { //ON
+
+            //Class for checking network conectivity.
+            ConnectivityManager connectivityManager =
+                    (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+            boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
+                    connectivityManager.getActiveNetworkInfo().isConnected();
+            if(!isInternetConnection){
+                Log.i(TAG, "runApp: No Internet Connection");
+                System.out.println("NO INTERNET CONNECTION!");
+                Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_LONG).show();
+                return;
+            }
+
             onOff = true;
             currentPictureID = 0;
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
