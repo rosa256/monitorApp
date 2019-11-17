@@ -34,19 +34,15 @@ import butterknife.OnClick;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
-import com.example.damian.monitorapp.models.UserDO;
 import com.example.damian.monitorapp.requester.DatabaseAccess;
-import com.example.damian.monitorapp.requester.InitDBConnectionAsync;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
@@ -54,7 +50,6 @@ import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialIconView;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -88,6 +83,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private TextView statusTextField;
 
     private MaterialIconView playButton;
+    private MaterialIconView playService;
+    private MaterialIconView stopService;
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
     private boolean onOff = false;
@@ -101,6 +98,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
     private String awsServiceOption = Constants.AWS_DETECT_FACES;
+
+    Intent serviceIntent;
 
 
     public MainActivity() { }
@@ -128,6 +127,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
 
         playButton = (MaterialIconView) findViewById(R.id.runAppButton);
+        playService = (MaterialIconView) findViewById(R.id.runServiceButton);
+        stopService = (MaterialIconView) findViewById(R.id.stopServiceButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
@@ -163,6 +164,36 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         });
         thread.start();
     }
+
+    @OnClick(R.id.runServiceButton)
+    public void runService(){
+        //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
+        boolean showPreview = true;
+        if(showPreview) {
+            serviceIntent = new Intent(this, CameraService.class);
+            serviceIntent.setPackage("com.example.damian.monitorapp");
+            serviceIntent.setAction(CameraService.ACTION_START_WITH_PREVIEW);
+            System.out.println("Service START PREVIEW");
+            Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
+        }else {
+            serviceIntent = new Intent(this, CameraService.class);
+            serviceIntent.setPackage("com.example.damian.monitorapp");
+            serviceIntent.setAction(CameraService.ACTION_START);
+            System.out.println("Service START NO PREVIEW");
+            Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+        }
+        startService(serviceIntent);
+    }
+
+    @OnClick(R.id.stopServiceButton)
+    public void stopMyService(){
+        if(serviceIntent != null)
+        //serviceIntent = new Intent(CameraService.ACTION_STOP);
+        stopService(new Intent(this,CameraService.class));
+        System.out.println("Service STOPED");
+        Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
+    }
+
 
     @OnClick(R.id.runAppButton)
     public void runApp() {

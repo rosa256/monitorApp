@@ -205,7 +205,7 @@ public class CameraPreviewFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void openCamera() {
         try {
-            if (ActivityCompat.checkSelfPermission(getContext().getApplicationContext(), android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(requireContext().getApplicationContext(), android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {

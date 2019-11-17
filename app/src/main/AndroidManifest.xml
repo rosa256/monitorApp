@@ -12,6 +12,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!--<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />-->
+    <!-- Permission require to retrieve View, over other apps. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <!-- Since android Pie (API level 28), need to add the FOREGROUND_SERVICE permission. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
 
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
@@ -37,6 +42,14 @@
             </intent-filter>
         </activity>
         <activity android:name=".AbouteMe" />
+
+        <service android:name=".CameraService" >
+            <intent-filter>
+                <action android:name="com.example.damian.monitorApp.START"/>
+                <action android:name="com.example.damian.monitorApp.START_WITH_PREVIEW"/>
+                <action android:name="com.example.damian.monitorApp.STOP_SERVICE"/>
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>

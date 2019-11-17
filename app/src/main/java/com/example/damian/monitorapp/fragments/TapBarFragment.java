@@ -14,7 +14,6 @@ import butterknife.ButterKnife;
 
 public class TapBarFragment extends Fragment {
 
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
@@ -25,8 +24,4 @@ public class TapBarFragment extends Fragment {
     ButterKnife.bind(this,view);
     return view;
     }
-
-
-
-
 }
