@@ -20,6 +20,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.Authentic
 import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -52,6 +53,8 @@ public class LoginActivity extends AppCompatActivity {
         username.setText("maniek256");
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(LoginActivity.this);
+
+        CustomPrivileges.setUpPrivileges(this);
 
         if(checkCacheCredentials()){
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
@@ -131,7 +134,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private boolean checkCacheCredentials() {
         CognitoUser currentUser = cognitoSettings.getUserPool().getCurrentUser();
-
         currentUser.getSessionInBackground(new AuthenticationHandler() {
             @Override
             public void onSuccess(CognitoUserSession userSession, CognitoDevice newDevice) {

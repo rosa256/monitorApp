@@ -32,6 +32,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
@@ -119,8 +120,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
         dynamoDBClient = (AmazonDynamoDBClient) clientAWSFactory.createDynamoDBClient(getApplicationContext());
-
-        CustomPrivileges.setUpPrivileges(this);
 
         fileManager = FileManager.getInstance();
         fileManager.initFileManager(this.getResources());
@@ -360,18 +359,18 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Intent intent;
+        final Intent[] intent = new Intent[1];
         switch (item.getItemId()) {
             case R.id.registerItem:
                 Toast.makeText(this, "Register", Toast.LENGTH_SHORT).show();
-                intent = new Intent(this, RegisterActivity.class);
-                startActivity(intent);
+                intent[0] = new Intent(this, RegisterActivity.class);
+                startActivity(intent[0]);
                 return true;
 
             case R.id.loginItem:
                 Toast.makeText(this, "Login", Toast.LENGTH_SHORT).show();
-                intent = new Intent(this, LoginActivity.class);
-                startActivity(intent);
+                intent[0] = new Intent(this, LoginActivity.class);
+                startActivity(intent[0]);
                 return true;
 
             case R.id.detectFaces:
@@ -384,10 +383,23 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 awsServiceOption = Constants.AWS_COMPARE_FACES;
                 return true;
             case R.id.logoutItem:
-                Toast.makeText(this, "Logout", Toast.LENGTH_SHORT).show();
+                cognitoSettings.getUserPool().getCurrentUser().globalSignOutInBackground(new GenericHandler() {
+                    @Override
+                    public void onSuccess() {
+                        cognitoSettings.getUserPool().getCurrentUser().signOut();
+                        cognitoSettings.getCredentialsProvider().clear();
+                        cognitoSettings.getCredentialsProvider().clearCredentials();
+                        Toast.makeText(MainActivity.this, "Success Logout", Toast.LENGTH_SHORT).show();
+                        intent[0] = new Intent(MainActivity.this, LoginActivity.class);
+                        startActivity(intent[0]);
+                    }
 
-                intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
+                    @Override
+                    public void onFailure(Exception exception) {
+                        Toast.makeText(MainActivity.this,"Cannot log out.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
                 return true;
             default:
                 // If we got here, the user's action was not recognized.
