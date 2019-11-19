@@ -189,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     public void stopMyService(){
         if(serviceIntent != null)
         //serviceIntent = new Intent(CameraService.ACTION_STOP);
-        stopService(new Intent(this,CameraService.class));
+        stopService(new Intent(this, CameraService.class));
         System.out.println("Service STOPED");
         Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
     }

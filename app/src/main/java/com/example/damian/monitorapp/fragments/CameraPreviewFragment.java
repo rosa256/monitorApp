@@ -305,6 +305,10 @@ public class CameraPreviewFragment extends Fragment {
     public TextureView getTextureView() {
         return textureView;
     }
+    public void setTextureView(TextureView textureView) {
+        this.textureView =  textureView;
+        this.textureView.setSurfaceTextureListener(surfaceTextureListener);
+    }
     public ImageView getImageViewSource() {
         return imageViewSource;
     }
