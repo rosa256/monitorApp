@@ -1,0 +1,1035 @@
+Date: Mon, 25 Nov 2019 18:06:00 +0100 (CET)
+Message-ID: <255172438.1944.1574701560606@devtools.wi.pb.edu.pl>
+Subject: Exported From Confluence
+MIME-Version: 1.0
+Content-Type: multipart/related; 
+	boundary="----=_Part_1943_2137943615.1574701560605"
+
+------=_Part_1943_2137943615.1574701560605
+Content-Type: text/html; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
+Content-Location: file:///C:/exported.html
+
+<html xmlns:o=3D'urn:schemas-microsoft-com:office:office'
+      xmlns:w=3D'urn:schemas-microsoft-com:office:word'
+      xmlns:v=3D'urn:schemas-microsoft-com:vml'
+      xmlns=3D'urn:w3-org-ns:HTML'>
+<head>
+    <meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3Dutf-8=
+">
+    <title>Opisy przypadk=C3=B3w u=C5=BCycia</title>
+    <!--[if gte mso 9]>
+    <xml>
+        <o:OfficeDocumentSettings>
+            <o:TargetScreenSize>1024x640</o:TargetScreenSize>
+            <o:PixelsPerInch>72</o:PixelsPerInch>
+            <o:AllowPNG/>
+        </o:OfficeDocumentSettings>
+        <w:WordDocument>
+            <w:View>Print</w:View>
+            <w:Zoom>90</w:Zoom>
+            <w:DoNotOptimizeForBrowser/>
+        </w:WordDocument>
+    </xml>
+    <![endif]-->
+    <style>
+                <!--
+        @page Section1 {
+            size: 8.5in 11.0in;
+            margin: 1.0in;
+            mso-header-margin: .5in;
+            mso-footer-margin: .5in;
+            mso-paper-source: 0;
+        }
+
+        table {
+            border: solid 1px;
+            border-collapse: collapse;
+        }
+
+        table td, table th {
+            border: solid 1px;
+            padding: 5px;
+        }
+
+        td {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-after: avoid;
+        }
+
+        div.Section1 {
+            page: Section1;
+        }
+
+        /* Confluence print stylesheet. Common to all themes for print medi=
+a */
+/* Full of !important until we improve batching for print CSS */
+
+@media print {
+    #main {
+        padding-bottom: 1em !important; /* The default padding of 6em is to=
+o much for printouts */
+    }
+
+    body {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        font-size: 10pt;
+        line-height: 1.2;
+    }
+
+    body, #full-height-container, #main, #page, #content, .has-personal-sid=
+ebar #content {
+        background: #fff !important;
+        color: #000 !important;
+        border: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    a, a:link, a:visited, a:focus, a:hover, a:active {
+        color: #000;
+    }
+
+    #content h1,
+    #content h2,
+    #content h3,
+    #content h4,
+    #content h5,
+    #content h6 {
+        font-family: Arial, Helvetica, FreeSans, sans-serif;
+        page-break-after: avoid;
+    }
+
+    pre {
+        font-family: Monaco, "Courier New", monospace;
+    }
+
+    #header,
+    .aui-header-inner,
+    #navigation,
+    #sidebar,
+    .sidebar,
+    #personal-info-sidebar,
+    .ia-fixed-sidebar,
+    .page-actions,
+    .navmenu,
+    .ajs-menu-bar,
+    .noprint,
+    .inline-control-link,
+    .inline-control-link a,
+    a.show-labels-editor,
+    .global-comment-actions,
+    .comment-actions,
+    .quick-comment-container,
+    #addcomment {
+        display: none !important;
+    }
+
+    /* CONF-28544 cannot print multiple pages in IE */
+    #splitter-content {
+        position: relative !important;
+    }
+
+    .comment .date::before {
+        content: none !important; /* remove middot for print view */
+    }
+
+    h1.pagetitle img {
+        height: auto;
+        width: auto;
+    }
+
+    .print-only {
+        display: block;
+    }
+
+    #footer {
+        position: relative !important; /* CONF-17506 Place the footer at en=
+d of the content */
+        margin: 0;
+        padding: 0;
+        background: none;
+        clear: both;
+    }
+
+    #poweredby {
+        border-top: none;
+        background: none;
+    }
+
+    #poweredby li.print-only {
+        display: list-item;
+        font-style: italic;
+    }
+
+    #poweredby li.noprint {
+        display: none;
+    }
+
+    /* no width controls in print */
+    .wiki-content .table-wrap,
+    .wiki-content p,
+    .panel .codeContent,
+    .panel .codeContent pre,
+    .image-wrap {
+        overflow: visible !important;
+    }
+
+    /* TODO - should this work? */
+    #children-section,
+    #comments-section .comment,
+    #comments-section .comment .comment-body,
+    #comments-section .comment .comment-content,
+    #comments-section .comment p {
+        page-break-inside: avoid;
+    }
+
+    #page-children a {
+        text-decoration: none;
+    }
+
+    /**
+     hide twixies
+
+     the specificity here is a hack because print styles
+     are getting loaded before the base styles. */
+    #comments-section.pageSection .section-header,
+    #comments-section.pageSection .section-title,
+    #children-section.pageSection .section-header,
+    #children-section.pageSection .section-title,
+    .children-show-hide {
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    .children-show-hide.icon {
+        display: none;
+    }
+
+    /* personal sidebar */
+    .has-personal-sidebar #content {
+        margin-right: 0px;
+    }
+
+    .has-personal-sidebar #content .pageSection {
+        margin-right: 0px;
+    }
+
+    .no-print, .no-print * {
+        display: none !important;
+    }
+}
+-->
+    </style>
+</head>
+<body>
+    <h1>Opisy przypadk=C3=B3w u=C5=BCycia</h1>
+    <div class=3D"Section1">
+        <div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Rejestracja (PZ/PU/1)</strong></p></t=
+d>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie jest zarejestrowany w systemie</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Po uruchomieniu aplikacji u=C5=BCytkownik naciska przycisk =E2=80=9ERej=
+estracja=E2=80=9D</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wy=C5=9Bwietla formularz rejestracji sk=C5=82adaj=C4=85cy si=
+=C4=99 z p=C3=B3l:</li>
+</ol>
+<ul>
+<li>Nazwa u=C5=BCytkownika</li>
+<li>E-mail</li>
+<li>Has=C5=82o</li>
+</ul>
+<ol>
+<li>U=C5=BCytkownik wprowadza dane i zatwierdza.</li>
+<li>System powiadamia u=C5=BCytkownika, =C5=BCe konto zosta=C5=82o utworzon=
+e oraz przekierowuje do widoku logowania.</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik poda=C5=82 nazw=C4=99, pod kt=C3=B3r=C4=85 jest zarejes=
+trowany ju=C5=BC inny u=C5=BCytkownik, system wy=C5=9Bwietla informacj=C4=
+=99 o zaj=C4=99tej nazwie, u=C5=BCytkownik mo=C5=BCe poprawi=C4=87 wyb=C3=
+=B3r.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie uzupe=C5=82ni=C5=82 wszystkich p=C3=B3l formularza,=
+ system wy=C5=9Bwietla powiadomienie o nieudanej rejestracji.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System wy=C5=9Bwietla powiadomienie o udanej rejestracji</li>
+<li>Na podany e-mail zostaje wys=C5=82ana wiadomo=C5=9B=C4=87 o za=C5=82o=
+=C5=BCeniu konta</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 1000 x dziennie</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Zalogowanie (PZ/PU/2)</strong></p></t=
+d>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie jest zalogowany</li>
+<li>U=C5=BCytkownik posiada konto w systemie</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Uruchomienie aplikacji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wy=C5=9Bwietla formularz logowania, kt=C3=B3ry sk=C5=82ada si=
+=C4=99 z dw=C3=B3ch p=C3=B3l</li>
+</ol>
+<ul>
+<li>Nazwa u=C5=BCytkownika</li>
+<li>Has=C5=82o</li>
+</ul>
+<ol>
+<li>U=C5=BCytkownik wprowadza dane i zatwierdza.</li>
+<li>Je=C5=BCeli dane s=C4=85 poprawne, system przekierowuje u=C5=BCytkownik=
+a do g=C5=82=C3=B3wnego menu aplikacji</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik poda=C5=82 niepoprawne dane, system wy=C5=9Bwietla powi=
+adomienie o b=C5=82=C4=99dnych danych, u=C5=BCytkownik mo=C5=BCe poprawi=C4=
+=87 wprowadzone dane.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie uzupe=C5=82ni=C5=82 wszystkich p=C3=B3l formularza,=
+ system wy=C5=9Bwietla powiadomienie o nieudanym logowaniu</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 100 000x dziennie</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Zmiana ustawie=C5=84 (PZ/PU/3)</stron=
+g></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik jest zalogowany</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Naci=C5=9Bni=C4=99cie przycisku =E2=80=9EUstawienia=E2=80=9D</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wy=C5=9Bwietla formularz umo=C5=BCliwiaj=C4=85cy:</li>
+</ol>
+<ul>
+<li>Zmian=C4=99 nazwy u=C5=BCytkownika</li>
+<li>Zmian=C4=99 has=C5=82a</li>
+<li>Zmian=C4=99 adresu e-mail przypisanego do konta</li>
+</ul>
+<ol>
+<li>U=C5=BCytkownik wprowadza dane, kt=C3=B3re chce zmieni=C4=87</li>
+<li>U=C5=BCytkownik zatwierdza zmian=C4=99 naciskaj=C4=85c w odpowiedni prz=
+ycisk</li>
+<li>System wy=C5=9Bwietla powiadomienie o udanej zmianie</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik poda=C5=82 niepoprawne dane, system wy=C5=9Bwietla powi=
+adomienie o b=C5=82=C4=99dnych danych, u=C5=BCytkownik mo=C5=BCe poprawi=C4=
+=87 wprowadzone dane.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie uzupe=C5=82ni=C5=82 wymaganego pola w formularzu, s=
+ystem wy=C5=9Bwietla powiadomienie.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 100x dziennie</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Przegl=C4=85danie historii (PZ/PU/4)<=
+/strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik jest zalogowany</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Naci=C5=9Bni=C4=99cie przycisku =E2=80=9EHistoria=E2=80=9D</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wy=C5=9Bwietla posegregowan=C4=85 list=C4=99 z datami.</li>
+<li>Gdy u=C5=BCytkownik naci=C5=9Bnie na dany element listy, rozwija si=C4=
+=99 lista da=C5=84, dla kt=C3=B3rych zosta=C5=82y obliczone kalorie w danym=
+ dniu, na element sk=C5=82adaj=C4=85 si=C4=99:</li>
+</ol>
+<ul>
+<li>Data</li>
+<li>Zdj=C4=99cie dania</li>
+<li>Liczba obliczonych kalorii</li>
+<li>Nazwa dania</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>W przypadku braku jakichkolwiek zapisanych potraw, zamiast listy wy=C5=
+=9Bwietlany jest komunikat ich braku.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 8x dziennie na ka=C5=BCdego u=C5=BCytkownika</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Zrobienie zdj=C4=99cia (PZ/PU/5)</str=
+ong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik jest zalogowany</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Naci=C5=9Bni=C4=99cie przycisku przenosz=C4=85cego do aparatu</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja uruchamia aparat, dost=C4=99pny jest podgl=C4=85d jak przy tr=
+adycyjnym jego uruchomieniu.</li>
+<li>U=C5=BCytkownik robi zdj=C4=99cie.</li>
+<li>U=C5=BCytkownik akceptuje zdj=C4=99cie.</li>
+<li>Wykonuje si=C4=99 przypadek u=C5=BCycia (<strong>PZ/PU/6</strong>)</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie akceptuje zdj=C4=99cia jako =E2=80=9Edobrego=E2=80=
+=9D, zdj=C4=99cie nie zostaje wys=C5=82ane na serwer, u=C5=BCytkownik mo=C5=
+=BCe zrobi=C4=87 zdj=C4=99cie jeszcze raz lub wyj=C5=9B=C4=87 do g=C5=82=C3=
+=B3wnego menu</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 8x dziennie na ka=C5=BCdego u=C5=BCytkownika</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Wys=C5=82anie zdj=C4=99cia na serwer =
+(PZ/PU/6)</strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik zrobi=C5=82 zdj=C4=99cie lub wybra=C5=82 je z galerii d=
+o wys=C5=82ania na serwer</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Wyb=C3=B3r zdj=C4=99cia z galerii/zaakceptowanie wykonanego zdj=C4=99ci=
+a</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wysy=C5=82a zdj=C4=99cia na serwer, gdzie dokonywane jest roz=
+poznanie, jaka potrawa znajduje si=C4=99 na zdj=C4=99ciu.</li>
+<li>System zwraca wynik rozpoznania, umieszcza nazw=C4=99 potrawy w polu te=
+kstowym daj=C4=85c u=C5=BCytkownikowi mo=C5=BCliwo=C5=9B=C4=87 poprawienia =
+predykcji systemu.</li>
+<li>U=C5=BCytkownik poprawia nazw=C4=99 potrawy ze zdj=C4=99cia po czym je =
+zatwierdza.</li>
+<li>Wykonuje si=C4=99 przypadek&nbsp; u=C5=BCycia (<strong>PZ/PU/7</strong>=
+).</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie wprowadza zmian w nazwie rozpoznanej potrawy =E2=80=
+=93 uznaje, =C5=BCe system dobrze j=C4=85 okre=C5=9Bli=C5=82, potrawa zosta=
+je zapisana w historii.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Je=C5=BCeli u=C5=BCytkownik nie jest po=C5=82=C4=85czony z internetem, =
+zostaje wy=C5=9Bwietlony komunikat prosz=C4=85cy o po=C5=82=C4=85czenie si=
+=C4=99 z sieci=C4=85.</li>
+<li>Aplikacja wys=C5=82a=C5=82a zdj=C4=99cie na serwer, lecz ten nie odpowi=
+ada =E2=80=93 po up=C5=82ywie czasu =C5=BC=C4=85dania aplikacja wy=C5=9Bwie=
+tla powiadomienie o niepowodzeniu wys=C5=82ania zdj=C4=99cia.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 8x dziennie na ka=C5=BCdego u=C5=BCytkownika</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Poprawienie predykcji serwera (PZ/PU/=
+7)</strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik poprawi=C5=82 nazw=C4=99 rozpoznanej potrawy</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Poprawienie przez u=C5=BCytkownika nazwy rozpoznanej potrawy</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja wysy=C5=82a poprawion=C4=85 nazw=C4=99 potrawy ze zdj=C4=99ci=
+a.</li>
+<li>System zapisuje odpowied=C5=BA oraz dodaje danie do historii.</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Je=C5=BCeli u=C5=BCytkownik nie jest po=C5=82=C4=85czony z internetem, =
+zostaje wy=C5=9Bwietlony komunikat prosz=C4=85cy o po=C5=82=C4=85czenie si=
+=C4=99 z sieci=C4=85.</li>
+<li>Aplikacja wys=C5=82a=C5=82a zdj=C4=99cie na serwer, lecz ten nie odpowi=
+ada =E2=80=93 po up=C5=82ywie czasu =C5=BC=C4=85dania aplikacja wy=C5=9Bwie=
+tla powiadomienie o niepowodzeniu wys=C5=82ania zdj=C4=99cia.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 1x dziennie na ka=C5=BCdego u=C5=BCytkownika</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Wyb=C3=B3r zdj=C4=99cia z galerii (PZ=
+/PU/8)</strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>U=C5=BCytkownik</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik jest zalogowany</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nacisn=C4=85=C5=82 przycisk przenosz=C4=85cy do galerii=
+</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Aplikacja otwiera galeri=C4=99 zdj=C4=99=C4=87, z kt=C3=B3rej u=C5=BCyt=
+kownik mo=C5=BCe wybra=C4=87 jedno zdj=C4=99cie, kt=C3=B3re ma zosta=C4=87 =
+wys=C5=82ane na serwer w celu dokonania rozpoznania dania.</li>
+<li>U=C5=BCytkownik wybra=C5=82 zdj=C4=99cie oraz zaakceptowa=C5=82 sw=C3=
+=B3j wyb=C3=B3r.</li>
+<li>Wykonuje si=C4=99 przypadek u=C5=BCycia (<strong>PZ/PU/6</strong>)</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nie wybra=C5=82 zdj=C4=99cia i wychodzi z galerii, apli=
+kacja przenosi u=C5=BCytkownika do g=C5=82=C3=B3wnego menu.</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd">
+<ul>
+<li>System przekierowuje u=C5=BCytkownika do menu g=C5=82=C3=B3wnego aplika=
+cji</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Ok. 1x dziennie na ka=C5=BCdego u=C5=BCytkownika</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Douczanie modelu rozpoznaj=C4=85cego =
+potrawy (PZ/PU/9)</strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>Administrator</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Administrator loguje si=C4=99 do systemu ucz=C4=85cego</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>U=C5=BCytkownik nacisn=C4=85=C5=82 przycisk przenosz=C4=85cy do galerii=
+</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Administrator wchodzi na platform=C4=99 Google ML Vision</li>
+<li>Administrator wybiera opcj=C4=99 dodania zdj=C4=99=C4=87 do bazy, z kt=
+=C3=B3rej uczony jest model rozpoznaj=C4=85cy potrawy</li>
+<li>&nbsp;Administrator zatwierdza, model rozpoczyna proces douczania</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>1x w tygodniu</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class=3D"table-wrap">
+<table class=3D"confluenceTable">
+<tbody>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przypadek U=C5=BCycia</strong></p></t=
+d>
+<td class=3D"confluenceTd"><p><strong>Do=C5=82=C4=85czanie zdj=C4=99=C4=87 =
+do modelu (PZ/PU/10)</strong></p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Aktor</strong></p></td>
+<td class=3D"confluenceTd"><p>System</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki pocz=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Na serwerze znajduj=C4=85 si=C4=99 zdj=C4=99cia, kt=C3=B3re u=C5=BCytko=
+wnicy wys=C5=82ali do rozpoznania potrawy</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Zdarzenie inicjuj=C4=85ce</strong></p=
+></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>Godzina 23:50 ka=C5=BCdego dnia</li>
+</ul></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebieg w krokach</strong></p></td>
+<td class=3D"confluenceTd">
+<ol>
+<li>Serwer =C5=82=C4=85czy wszystkie wygenerowane pliki csv dla ka=C5=BCdej=
+ z potraw w jeden du=C5=BCy plik csv</li>
+<li>Serwer uploaduje zdj=C4=99cia wraz z utworzonym plikiem csv na platform=
+=C4=99 Google ML Vision.</li>
+</ol></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Przebiegi alternatywne</strong></p></=
+td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Sytuacje wyj=C4=85tkowe</strong></p><=
+/td>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Warunki ko=C5=84cowe</strong></p></td=
+>
+<td class=3D"confluenceTd"><p>&nbsp;</p></td>
+</tr>
+<tr>
+<td class=3D"confluenceTd"><p><strong>Cz=C4=99stotliwo=C5=9B=C4=87 wykonywa=
+nia</strong></p></td>
+<td class=3D"confluenceTd">
+<ul>
+<li>1x dziennie</li>
+</ul></td>
+</tr>
+</tbody>
+</table>
+</div>
+    </div>
+</body>
+</html>
+------=_Part_1943_2137943615.1574701560605--
