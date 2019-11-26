@@ -17,6 +17,7 @@ import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.FileManager;
 
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -104,6 +105,7 @@ public class ActionMenu extends Fragment{
         startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
     }
 
+
     public void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);
 
@@ -123,13 +125,18 @@ public class ActionMenu extends Fragment{
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+                File tempFile = fileManager.createImageFile();
+                outputPhoto = new FileOutputStream(tempFile);
 
-                OutputStream os = new BufferedOutputStream(new FileOutputStream(fileManager.getCurrentTakenPhotoFile()));
-                selectedImage.compress(Bitmap.CompressFormat.PNG, 60,os);
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 60 , outputPhoto);
+
+                fileManager.setCurrentTakenPhotoFile(tempFile);
 
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
                 Toast.makeText(getActivity().getApplicationContext(), "Something went wrong", Toast.LENGTH_LONG).show();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
         }else {

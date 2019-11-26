@@ -168,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.runServiceButton)
     public void runService(){
         //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
-        boolean showPreview = true;
+        boolean showPreview = false;
         if(showPreview) {
             serviceIntent = new Intent(this, CameraService.class);
             serviceIntent.setPackage("com.example.damian.monitorapp");
