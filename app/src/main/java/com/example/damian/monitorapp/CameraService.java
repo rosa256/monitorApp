@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -8,9 +9,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
@@ -20,9 +20,8 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureFailure;
+import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
@@ -32,6 +31,9 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.PowerManager;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
@@ -45,17 +47,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.example.damian.monitorapp.Utils.FileManager;
-import com.example.damian.monitorapp.fragments.ActionMenu;
+import com.example.damian.monitorapp.Utils.ImageSaver;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -80,18 +77,22 @@ public class CameraService extends Service {
     private View rootView;
     private TextureView textureView;
 
+    private Activity activity;
+
     private CameraPreviewFragment cameraPreviewFragment;
     private TextureView.SurfaceTextureListener surfaceTextureListener;
     private CameraManager cameraManager;
     private String cameraId;
     private Size previewSize;
-    private CameraDevice.StateCallback stateCallback;
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
     private int cameraFacing;
     private CameraDevice cameraDevice;
     private CaptureRequest.Builder captureRequestBuilder;
     private CameraCaptureSession cameraCaptureSession;
+
+    private PowerManager powerManager;
+    private PowerManager.WakeLock pmWakeLock;
 
     public static final int ACTIVITY_START_CAMERA_APP = 0;
     public static final int STATE_PREVIEW = 0;
@@ -105,8 +106,12 @@ public class CameraService extends Service {
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
     Handler handler;
-    static final int DEFAULT_DELAY = 15;
+    static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
+
+    static final String SERVICE_STATE_KEY = "serviceState";
+    private boolean cameraClosed;
+
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
@@ -115,9 +120,6 @@ public class CameraService extends Service {
         ORIENTATIONS.append(Surface.ROTATION_180, 270);
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
-    //TODO: ZROBIENIE PODGLADU CAMERY SERWISU NAD INNYMI APLIKACJAMI,
-    //TODO: ZROBIENIE PODGLADU CAMERY SERWISU NAD INNYMI APLIKACJAMI,
-    //TODO: ZROBIENIE PODGLADU CAMERY SERWISU NAD INNYMI APLIKACJAMI,
 
     @Nullable
     @Override
@@ -129,25 +131,20 @@ public class CameraService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         Log.i(TAG, "onStartCommand(): action = " + action);
-        System.out.println("onStartCommand(): action = " + action);
-        switch (action){
-            case ACTION_START:
-                start();
-                break;
-            case ACTION_START_WITH_PREVIEW:
-                startWithPreview();
-                break;
-            case ACTION_STOP:
-                stopService();
-                break;
+
+
+        if (intent!= null) {
+            Log.d(TAG, "onStartCommand: *** action = " + action);
+            switch (action) {
+                case ACTION_START:
+                    start();
+                    break;
+                case ACTION_START_WITH_PREVIEW:
+                    startWithPreview();
+                    break;
+            }
         }
         return START_STICKY; /** NIE WIEM O CO Z TYM CHODZI */
-    }
-
-    public void stopService(){
-        stopSelf();
-        closeBackgroundThread();
-
     }
 
     @Override
@@ -162,7 +159,7 @@ public class CameraService extends Service {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
                 setUpCamera(width, height);
-                openCamera();
+                //openCamera();
             }
             @Override
             public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) { }
@@ -171,24 +168,6 @@ public class CameraService extends Service {
             @Override
             public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) { }
         };
-        stateCallback = new CameraDevice.StateCallback() {
-            @Override
-            public void onOpened(CameraDevice cameraDevice) {
-                CameraService.this.cameraDevice = cameraDevice;
-                createPreviewSession();
-            }
-            @Override
-            public void onDisconnected(CameraDevice cameraDevice) {
-                cameraDevice.close();
-                CameraService.this.cameraDevice = null;
-            }
-            @Override
-            public void onError(CameraDevice cameraDevice, int error) {
-                cameraDevice.close();
-                CameraService.this.cameraDevice = null;
-            }
-        };
-
         startWithForeground();
     }
 
@@ -196,8 +175,21 @@ public class CameraService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        closeBackgroundThread();
+        stopService();
     }
+
+    public void stopService(){
+        stopSelf();
+        closeBackgroundThread();
+//        pmWakeLock.release();
+
+        if(executor != null && handler != null) {
+            handler.removeCallbacksAndMessages(null);
+            executor.shutdownNow();
+        }
+        Log.d(TAG, "stopService: Stopping service");
+    }
+
 
     private void initOverlay(){
         LayoutInflater li = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -223,33 +215,29 @@ public class CameraService extends Service {
         WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         wm.addView(rootView, params);
     }
-    private void start(){
+    public void start(){
         shouldShowPreview = false;
 
         // Initialize view drawn over other apps
-        System.out.println(TAG + ": start() ---------------");
-
+        Log.d(TAG, "start: Run Service with NO PREVIEW.");
         //TODO:SETUP PREVIEW SIZE FOR START();
         setUpCamera(620,860);
-        openCamera();
-
         runApp();
-
+        writeServiceStatePreference(1);
     }
 
     private void startWithPreview(){
         shouldShowPreview = true;
-
+        Log.d(TAG, "startWithPreview: Run Service with PREVIEW");
         // Initialize view drawn over other apps
         initOverlay();
-        System.out.println(TAG + ": startWithPreview() ---------------");
 
         //TODO: Ustawienie Kamery
         // Initialize camera here if texture view already initialized
         if (textureView.isAvailable()){
             setUpCamera(textureView.getWidth(), textureView.getHeight());
             openCamera();
-            runApp();
+            //runApp();
         }
         else
         textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -274,7 +262,7 @@ public class CameraService extends Service {
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(getText(R.string.app_name))
                 .setContentText(getText(R.string.app_name))
-                .setSmallIcon(R.drawable.notification_template_icon_bg)
+                .setSmallIcon(R.drawable.ic_bell)
                 .setContentIntent(pendingIntent)
                 .setTicker(getText(R.string.app_name))
                 .build();
@@ -287,36 +275,14 @@ public class CameraService extends Service {
             for (String cameraId : cameraManager.getCameraIdList()) {
                 CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
                 if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == cameraFacing) {
+                    this.cameraId = cameraId;
+
                     StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(
                             CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
                     previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), width, height);
-                    this.cameraId = cameraId;
-                    //previewSize = streamConfigurationMap.getOutputSizes(SurfaceTexture.class)[0];
-
-                    //---(START)SETUP UP ORIENTATION;
-
-                    //---(END)SETUP UP ORIENTATION;
-
                 }
-                //TODO - ROTATION: START https://www.youtube.com/watch?v=z3LAbtDh1VE
-                //int deviceOrientation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
-                // TODO: END
             }
-
-            imageReader = ImageReader.newInstance(
-                    previewSize.getWidth(),
-                    previewSize.getHeight(),
-                    ImageFormat.JPEG,
-                    2);
-
-            imageReader.setOnImageAvailableListener(new ImageReader.OnImageAvailableListener() {
-                @Override
-                public void onImageAvailable(ImageReader reader) {
-                    backgroundHandler.post(new ImageSaver(reader.acquireLatestImage()));
-                }
-            }, backgroundHandler);
-
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
@@ -326,7 +292,7 @@ public class CameraService extends Service {
     private void openCamera() {
         try {
             if (ActivityCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
+                cameraManager.openCamera(cameraId, stateCallback, null);
             }
         } catch (CameraAccessException e) {
             Log.i(TAG,":MissingPermission - CAMERA");
@@ -334,156 +300,131 @@ public class CameraService extends Service {
         }
     }
 
-    private static Size chooseOptimalSize(Size[] choices, int width, int height){
-        List<Size> bigEnough = new ArrayList<Size>();
-        for(Size option: choices){
-            if(option.getHeight() == option.getWidth() * height/ width &&
-                    option.getWidth() >= width && option.getHeight() >= height){
-                bigEnough.add(option);
-            }
-        }
-        if(bigEnough.size() > 0){
-            return Collections.min(bigEnough, new CameraPreviewFragment.CompareSizeByArea());
-        } else{
-            return choices[0];
-        }
-    }
-
-    private static class ImageSaver implements Runnable{
-        private Image image;
-
-        public ImageSaver(Image image) {
-            this.image = image;
-        }
-
+    private final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
         @Override
-        public void run() {
-
-            FileOutputStream outputPhoto = null;
-            if (image == null)
-                return;
-            try {
-                ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                byte[] ImageBytes = new byte[buffer.capacity()];
-                buffer.get(ImageBytes);
-
-                final Bitmap bmp= BitmapFactory.decodeByteArray(ImageBytes,0,ImageBytes.length);
-
-                FileManager fileManager = FileManager.getInstance();
-                fileManager.setCurrentTakenPhotoFile(fileManager.createImageFile());
-
-                outputPhoto = new FileOutputStream(fileManager.getCurrentTakenPhotoFile());
-
-                bmp.compress(Bitmap.CompressFormat.PNG,100,outputPhoto);
-                image.close();
-
-
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } finally {
-                if (image != null) {
-
-                }
-                if (outputPhoto != null) {
-                    try {
-                        outputPhoto.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-
-        }
-    }
-
-    private CameraCaptureSession.CaptureCallback mSessionCaptureCallback = new CameraCaptureSession.CaptureCallback() {
-
-
-        private void process(CaptureResult result) throws CameraAccessException {
-            switch (mState) {
-                case STATE_PREVIEW:
-                    //NOTHINK
-                    break;
-                case STATE__WAIT_LOCK:
-                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                    if (afState == CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED) {
-                        //unLockFocus();
-                        captureStillImage();
-                        System.out.println("FOCUSE LOCK SUCCESFULY");
-                    }
-                    break;
-            }
-        }
-
-        @Override
-        public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long frameNumber) {
-            super.onCaptureStarted(session, request, timestamp, frameNumber);
-        }
-
-        @Override
-        public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+        public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
+                                       @NonNull TotalCaptureResult result) {
             super.onCaptureCompleted(session, request, result);
-
-            try {
-                process(result);
-            } catch (CameraAccessException e) {
-                e.printStackTrace();
-            }
-        }
-
-        @Override
-        public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
-            super.onCaptureFailed(session, request, failure);
-            System.out.println("FOCUSE LOCK FAILED!");
+                Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
+            closeCamera();
         }
     };
 
+    int readServiceStatePreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return prefs.getInt(SERVICE_STATE_KEY,0);
+    }
+
+    void writeServiceStatePreference(int serviceState) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SERVICE_STATE_KEY, serviceState);
+        editor.commit();
+    }
+
+
     public void takePhoto() throws CameraAccessException {
-        lockFocus();
+        if (null == cameraDevice) {
+            Log.e(TAG, "cameraDevice is null");
+            return;
+        }
+        final CameraCharacteristics characteristics = cameraManager.getCameraCharacteristics(cameraDevice.getId());
+        Size[] jpegSizes = null;
+        StreamConfigurationMap streamConfigurationMap = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        if (streamConfigurationMap != null) {
+            jpegSizes = streamConfigurationMap.getOutputSizes(ImageFormat.JPEG);
+        }
+        final boolean jpegSizesNotEmpty = jpegSizes != null && 0 < jpegSizes.length;
+        int width = jpegSizesNotEmpty ? jpegSizes[0].getWidth() : 640;
+        int height = jpegSizesNotEmpty ? jpegSizes[0].getHeight() : 480;
+        final ImageReader reader = ImageReader.newInstance(640, 480, ImageFormat.JPEG, 2);
+        final CaptureRequest.Builder captureBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+        captureBuilder.addTarget(reader.getSurface());
+        captureBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+        captureBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+        captureBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
+        captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(2)/*getOrientation()*/);
+        reader.setOnImageAvailableListener(onImageAvailableListener, null);
+        cameraDevice.createCaptureSession(Arrays.asList(reader.getSurface()), new CameraCaptureSession.StateCallback() {
+                    @Override
+                    public void onConfigured(@NonNull CameraCaptureSession session) {
+                        try {
+                            session.capture(captureBuilder.build(), captureListener, null);
+                        } catch (final CameraAccessException e) {
+                            Log.e(TAG, " exception occurred while accessing " + cameraDevice.getId(), e);
+                        }
+                    }
+
+                    @Override
+                    public void onConfigureFailed(@NonNull CameraCaptureSession session) {
+                        Log.d(TAG, "onConfigureFailed: Faild to create cameraCaptureSession");
+                    }
+                },null);
     }
 
-    private void lockFocus() throws CameraAccessException {
-        mState = STATE__WAIT_LOCK;
-        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_TRIGGER_START);
+    ImageReader.OnImageAvailableListener onImageAvailableListener = new ImageReader.OnImageAvailableListener() {
+        @Override
+        public void onImageAvailable(ImageReader reader) {
+            Log.d(TAG, "onImageAvailableListener: Image Available to save.");
 
-        cameraCaptureSession.capture(captureRequestBuilder.build(), mSessionCaptureCallback,backgroundHandler);
-    }
+            final Image image = reader.acquireNextImage();
+            new ImageSaver(image);
+        }
+    };
 
-    //TODO:25.11.2019--PROBLEM JEST W TYM ZE IMAGERADER CIAGLE POBIERA ZDJECIA!! NIE CZEKA NA AKCJE
-    private void unLockFocus() throws CameraAccessException {
-        mState = STATE_PREVIEW;
-        captureRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CaptureRequest.CONTROL_AF_TRIGGER_CANCEL);
+    private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
+        @Override
+        public void onOpened(@NonNull CameraDevice camera) {
+            cameraClosed = false;
+            cameraDevice = camera;
+            Log.d(TAG, "onOpened: Camera " + camera.getId() + " is opened.");
 
-        cameraCaptureSession.capture(captureRequestBuilder.build(), mSessionCaptureCallback,null);
-    }
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        takePhoto();
+                    } catch (CameraAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        }
+        @Override
+        public void onDisconnected(@NonNull CameraDevice camera) {
+            Log.d(TAG, "onDisconnected: Camera " + camera.getId() + " is Disconnected");
+            if (cameraDevice != null && !cameraClosed) {
+                cameraClosed = true;
+                cameraDevice.close();
+            }
+        }
+        @Override
+        public void onError(CameraDevice camera, int error) {
+            Log.e(TAG, "onError: Camera "+ camera.getId() +" has error, code: " + error);
+            if (cameraDevice != null && !cameraClosed)
+            cameraDevice.close();
+            CameraService.this.cameraDevice = null;
+        }
 
+        @Override
+        public void onClosed(@NonNull CameraDevice camera) {
+            cameraClosed = true;
+        }
+    };
 
     private void createPreviewSession() {
         try {
-            List<Surface> targetSurfaces = new ArrayList<Surface>();
-
-            captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-
-            if(shouldShowPreview) {
-                SurfaceTexture surfaceTexture = textureView.getSurfaceTexture();
-                surfaceTexture.setDefaultBufferSize(previewSize.getWidth(), previewSize.getHeight());
-                Surface previewSurface = new Surface(surfaceTexture);
-                targetSurfaces.add(previewSurface);
-                captureRequestBuilder.addTarget(previewSurface);
-                //captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            }else {
-                captureRequestBuilder.addTarget(imageReader.getSurface());
-                targetSurfaces.add(imageReader.getSurface());
-            }
-
+            //captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.);
             captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
 
+            captureRequestBuilder.addTarget(imageReader.getSurface());
+
             captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(2));
 
-            cameraDevice.createCaptureSession(targetSurfaces,
+            cameraDevice.createCaptureSession(Arrays.asList(imageReader.getSurface()),
                     new CameraCaptureSession.StateCallback() {
                         @Override
                         public void onConfigured(CameraCaptureSession cameraCaptureSession) {
@@ -493,8 +434,9 @@ public class CameraService extends Service {
                             try {
                                 CaptureRequest captureRequest = captureRequestBuilder.build();
                                 CameraService.this.cameraCaptureSession = cameraCaptureSession;
+                                //CameraService.this.cameraCaptureSession.capture();
                                 CameraService.this.cameraCaptureSession.setRepeatingRequest(captureRequest /*mPreviewCaptureRequest*/,
-                                        mSessionCaptureCallback, backgroundHandler);
+                                        null , backgroundHandler);
                             } catch (CameraAccessException e) {
                                 e.printStackTrace();
                             }
@@ -510,29 +452,6 @@ public class CameraService extends Service {
         }
     }
 
-    private void captureStillImage() throws CameraAccessException {
-        CaptureRequest.Builder captureStillBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
-        captureStillBuilder.addTarget(imageReader.getSurface());
-        captureStillBuilder.set(CaptureRequest.JPEG_ORIENTATION,ORIENTATIONS.get(2));
-
-        CameraCaptureSession.CaptureCallback captureCallback =
-                new CameraCaptureSession.CaptureCallback() {
-                    @Override
-                    public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-                        super.onCaptureCompleted(session, request, result);
-                        System.out.println("IMAGE CAPTURED!");
-                        try {
-                            unLockFocus();
-                        } catch (CameraAccessException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                };
-        cameraCaptureSession.capture(captureStillBuilder.build(), captureCallback,null);
-    }
-
-
-
     private void openBackgroundThread() {
         backgroundThread = new HandlerThread("camera_background_thread");
         backgroundThread.start();
@@ -547,11 +466,10 @@ public class CameraService extends Service {
         }
     }
 
-    public void runApp() {
+    public void runApp(){
         if (!onOff) { //ON
 
-            //---(START) CHECK INTERNET CONNECTION
-            //Class for checking network conectivity.
+            //(START) CHECK INTERNET CONNECTION
             ConnectivityManager connectivityManager =
                     (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
             boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
@@ -562,7 +480,7 @@ public class CameraService extends Service {
                 Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
                 return;
             }
-            //---(END) CHECK INTERNET CONNECTION
+            //(END) CHECK INTERNET CONNECTION
 
             onOff = true;
             currentPictureID = 0;
@@ -581,7 +499,7 @@ public class CameraService extends Service {
         }
     }
 
-    public void decrementTimer(final int pictureID) {
+    public void decrementTimer(final int pictureID){
         if (pictureID != this.currentPictureID) {
             return;
         }
@@ -594,18 +512,17 @@ public class CameraService extends Service {
 
             System.out.println("ODLICZAM: "+pictureTimer);
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
-            //if (pictureTimer<3) playTimerBeep();
         }
     }
 
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
-            savePicture();
+                savePicture();
         }
     };
 
-    public void savePicture() {
+    public void savePicture(){
         if (this.pictureDelay == 0) {
             savePictureNow();
         } else {
@@ -625,22 +542,51 @@ public class CameraService extends Service {
     Runnable makeDecrementTimerFunction(final int pictureID) {
         return new Runnable() {
             public void run() {
-                decrementTimer(pictureID);
+                    decrementTimer(pictureID);
             }
         };
     }
 
-    public void savePictureNow() {
-        try {
-            takePhoto();
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
+    public void savePictureNow(){
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+//        int value = prefs.getInt("icrementValue",0);
+//        value++;
+//        SharedPreferences.Editor editor = prefs.edit();
+//        editor.putInt("icrementValue", value);
+//        editor.commit();
+//        Log.d(TAG, "VAAAAAAAAAAAAAAAALLLLLLLUUUUUEEEEEE: " + value);
+        openCamera();
+    }
+
+
+    private void closeCamera() {
+        Log.d(TAG, "closing camera " + cameraDevice.getId());
+        if (null != cameraDevice && !cameraClosed) {
+        Log.d(TAG, "closing camera inside " + cameraDevice.getId());
+            cameraDevice.close();
+            cameraDevice = null;
         }
-        // ActionMenu cameraPreviewFragment = new ActionMenu();
-        // cameraPreviewFragment.onTakePhoneButtonClicked();
+        if (null != imageReader) {
+            imageReader.close();
+            imageReader = null;
+        }
+    }
+
+    private static Size chooseOptimalSize(Size[] choices, int width, int height){
+        List<Size> bigEnough = new ArrayList<Size>();
+        for(Size option: choices){
+            if(option.getHeight() == option.getWidth() * height/ width &&
+                    option.getWidth() >= width && option.getHeight() >= height){
+                bigEnough.add(option);
+            }
+        }
+        if(bigEnough.size() > 0){
+            return Collections.min(bigEnough, new CameraPreviewFragment.CompareSizeByArea());
+        } else{
+            return choices[0];
+        }
     }
 }
-
 
 
 

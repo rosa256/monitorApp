@@ -7,10 +7,11 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.icu.util.LocaleData;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -58,7 +59,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
     private TextView usernameEditText;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
+    static final String SERVICE_STATE_KEY = "serviceState";
     Handler handler = new Handler();
     // assign ID when we start a timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
     int currentPictureID = 0;
@@ -89,9 +91,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private Toolbar mToolbar;
     private boolean onOff = false;
 
+    private PowerManager powerManager;
+    private PowerManager.WakeLock pmWakeLock;
+
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
+    private CameraService cameraService;
 
     private DatabaseAccess databaseAccess;
 
@@ -100,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private String awsServiceOption = Constants.AWS_DETECT_FACES;
 
     Intent serviceIntent;
+    CameraPreviewFragment fr;
 
 
     public MainActivity() { }
@@ -135,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
-        CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
         if (fr != null) {
             Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
             fr.getImageViewSource().setImageBitmap(myBitmap);
@@ -176,13 +183,24 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             System.out.println("Service START PREVIEW");
             Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
         }else {
+            powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            pmWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "monitorApp:WakeLockTag");
+            pmWakeLock.acquire();
+
+
             serviceIntent = new Intent(this, CameraService.class);
             serviceIntent.setPackage("com.example.damian.monitorapp");
             serviceIntent.setAction(CameraService.ACTION_START);
+            fr.onStop();
+            writeServiceStatePreference(1); //Service ON;
             System.out.println("Service START NO PREVIEW");
             Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
         }
-        startService(serviceIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
     }
 
     @OnClick(R.id.stopServiceButton)
@@ -190,6 +208,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         if(serviceIntent != null)
         //serviceIntent = new Intent(CameraService.ACTION_STOP);
         stopService(new Intent(this, CameraService.class));
+        writeServiceStatePreference(0); //Service OFF;
+        pmWakeLock.release();
         System.out.println("Service STOPED");
         Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
     }
@@ -365,6 +385,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         editor.commit();
     }
 
+
     void readDelayPreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -375,6 +396,20 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         this.pictureDelay = delay;
         updateDelayButton();
     }
+
+    void writeServiceStatePreference(int serviceState) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SERVICE_STATE_KEY, serviceState);
+        editor.commit();
+    }
+
+    int readServiceStatePreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return prefs.getInt(SERVICE_STATE_KEY,0);
+    }
+
 
     public void aboutMe(View view) {
         Intent intent = new Intent(this, AbouteMe.class);
@@ -456,6 +491,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
     }
+
 
 
     public class DoComparisonThread extends Thread {
