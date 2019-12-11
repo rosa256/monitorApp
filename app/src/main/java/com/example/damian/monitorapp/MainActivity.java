@@ -1,5 +1,6 @@
 package com.example.damian.monitorapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -155,7 +156,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
-
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
 
@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             serviceIntent.setPackage("com.example.damian.monitorapp");
             serviceIntent.setAction(CameraService.ACTION_START);
             fr.onStop();
-            writeServiceStatePreference(1); //Service ON;
+            //writeServiceStatePreference(1); //Service ON;
             System.out.println("Service START NO PREVIEW");
             Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
         }
@@ -208,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         if(serviceIntent != null)
         //serviceIntent = new Intent(CameraService.ACTION_STOP);
         stopService(new Intent(this, CameraService.class));
-        writeServiceStatePreference(0); //Service OFF;
+        //writeServiceStatePreference(0); //Service OFF;
         pmWakeLock.release();
         System.out.println("Service STOPED");
         Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();

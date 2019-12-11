@@ -224,14 +224,14 @@ public class CameraPreviewFragment extends Fragment {
 
         openBackgroundThread();
         int state = readServiceStatePreference();
-        if(state == 0) {
+        //if(state == 0) {
             if (textureView.isAvailable()) {
                 setUpCamera(textureView.getWidth(), textureView.getHeight());
                 openCamera();
             } else {
                 textureView.setSurfaceTextureListener(surfaceTextureListener);
             }
-        }
+        //}
     }
 
     void writeServiceStatePreference(int serviceState) {

@@ -27,6 +27,7 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -112,6 +113,13 @@ public class CameraService extends Service {
     static final String SERVICE_STATE_KEY = "serviceState";
     private boolean cameraClosed;
 
+    private WifiManager.WifiLock mWiFiLock;
+    private PowerManager.WakeLock mWakeLock;
+    private final Object mLock = new Object();
+
+    /*
+    * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
+    * */
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
@@ -181,6 +189,7 @@ public class CameraService extends Service {
     public void stopService(){
         stopSelf();
         closeBackgroundThread();
+        unlockCPU();
 //        pmWakeLock.release();
 
         if(executor != null && handler != null) {
@@ -190,6 +199,23 @@ public class CameraService extends Service {
         Log.d(TAG, "stopService: Stopping service");
     }
 
+    private void lockCPU() {
+        PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
+        if (mgr == null) {
+            return;
+        }
+        mWakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getSimpleName());
+        mWakeLock.acquire();
+        Log.d(TAG, "Player lockCPU()");
+    }
+
+    private void unlockCPU() {
+        if (mWakeLock != null && mWakeLock.isHeld()) {
+            mWakeLock.release();
+            mWakeLock = null;
+            Log.d(TAG, "Player unlockCPU()");
+        }
+    }
 
     private void initOverlay(){
         LayoutInflater li = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -221,9 +247,12 @@ public class CameraService extends Service {
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
         //TODO:SETUP PREVIEW SIZE FOR START();
+        lockCPU();
         setUpCamera(620,860);
+
         runApp();
-        writeServiceStatePreference(1);
+
+        //writeServiceStatePreference(1);
     }
 
     private void startWithPreview(){
@@ -237,7 +266,7 @@ public class CameraService extends Service {
         if (textureView.isAvailable()){
             setUpCamera(textureView.getWidth(), textureView.getHeight());
             openCamera();
-            //runApp();
+            runApp();
         }
         else
         textureView.setSurfaceTextureListener(surfaceTextureListener);
@@ -484,9 +513,10 @@ public class CameraService extends Service {
 
             onOff = true;
             currentPictureID = 0;
-            executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
-
+            synchronized (mLock) {
+                executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
+            }
         } else { //OFF
             onOff = false;
             executor.shutdownNow();
@@ -562,7 +592,6 @@ public class CameraService extends Service {
     private void closeCamera() {
         Log.d(TAG, "closing camera " + cameraDevice.getId());
         if (null != cameraDevice && !cameraClosed) {
-        Log.d(TAG, "closing camera inside " + cameraDevice.getId());
             cameraDevice.close();
             cameraDevice = null;
         }
