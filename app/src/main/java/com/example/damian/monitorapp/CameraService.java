@@ -7,8 +7,10 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -49,6 +51,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.ImageSaver;
+import com.example.damian.monitorapp.broadcastRecivers.LaunchBroadcastReceiver;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 
@@ -66,9 +69,9 @@ public class CameraService extends Service {
 
     private static final String TAG = "CameraService";
 
-    static final String ACTION_START = "com.example.damian.monitorApp.START";
-    static final String ACTION_START_WITH_PREVIEW = "com.example.damian.monitorApp.START_WITH_PREVIEW";
-    static final String ACTION_STOP = "com.example.damian.monitorApp.STOP";
+    public static final String ACTION_START = "com.example.damian.monitorApp.START";
+    public static final String ACTION_START_WITH_PREVIEW = "com.example.damian.monitorApp.START_WITH_PREVIEW";
+    public static final String ACTION_STOP = "com.example.damian.monitorApp.STOP";
 
     private static final Integer ONGOING_NOTIFICATION_ID = 6660;
     private static final String CHANNEL_ID = "cam_service_channel_id";
@@ -101,7 +104,7 @@ public class CameraService extends Service {
     private int mState;
     private ImageReader imageReader;
 
-    private boolean onOff = false;
+    private boolean isON = true;
     int currentPictureID = 0;
     int pictureTimer = 0;
     ScheduledExecutorService executor =
@@ -163,6 +166,12 @@ public class CameraService extends Service {
         handler = new Handler();
         cameraPreviewFragment = new CameraPreviewFragment();
         openBackgroundThread();
+
+        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
+        registerReceiver(launchReceiver, filter);
+
         surfaceTextureListener = new TextureView.SurfaceTextureListener() {
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
@@ -496,7 +505,7 @@ public class CameraService extends Service {
     }
 
     public void runApp(){
-        if (!onOff) { //ON
+        if (isON) { //ON
 
             //(START) CHECK INTERNET CONNECTION
             ConnectivityManager connectivityManager =
@@ -511,14 +520,14 @@ public class CameraService extends Service {
             }
             //(END) CHECK INTERNET CONNECTION
 
-            onOff = true;
+            isON = false;
             currentPictureID = 0;
             synchronized (mLock) {
                 executor = Executors.newSingleThreadScheduledExecutor();
                 executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
             }
         } else { //OFF
-            onOff = false;
+            isON = true;
             executor.shutdownNow();
 
             //Operations to end counting proccess.
@@ -615,7 +624,34 @@ public class CameraService extends Service {
             return choices[0];
         }
     }
+
+    private class LaunchBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(Intent.ACTION_SCREEN_ON.equals(action)){
+                isON = true;
+                runApp();
+                Log.d(TAG, "onReceive: invoke runApp()");
+            } else if(Intent.ACTION_SCREEN_OFF.equals(action)) {
+                stopApp();
+            }
+        }
+
+        private void stopApp() {
+
+            if(executor != null && handler != null) {
+                //handler.removeCallbacksAndMessages(null);
+                executor.shutdownNow();
+                Log.d(TAG, "stopApp(): Stoping countering");
+            }
+            isON = false;
+        }
+    }
 }
+
+
+
 
 
 
