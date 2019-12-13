@@ -51,7 +51,6 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.ImageSaver;
-import com.example.damian.monitorapp.broadcastRecivers.LaunchBroadcastReceiver;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 
@@ -77,6 +76,8 @@ public class CameraService extends Service {
     private static final String CHANNEL_ID = "cam_service_channel_id";
     private static final String CHANNEL_NAME = "cam_service_channel_name";
 
+    String tagLock = "com.my_app:LOCK";
+
     private Boolean shouldShowPreview = true;
     private View rootView;
     private TextureView textureView;
@@ -95,7 +96,6 @@ public class CameraService extends Service {
     private CaptureRequest.Builder captureRequestBuilder;
     private CameraCaptureSession cameraCaptureSession;
 
-    private PowerManager powerManager;
     private PowerManager.WakeLock pmWakeLock;
 
     public static final int ACTIVITY_START_CAMERA_APP = 0;
@@ -167,6 +167,8 @@ public class CameraService extends Service {
         cameraPreviewFragment = new CameraPreviewFragment();
         openBackgroundThread();
 
+
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
@@ -199,7 +201,7 @@ public class CameraService extends Service {
         stopSelf();
         closeBackgroundThread();
         unlockCPU();
-//        pmWakeLock.release();
+        pmWakeLock.release();
 
         if(executor != null && handler != null) {
             handler.removeCallbacksAndMessages(null);
@@ -213,16 +215,22 @@ public class CameraService extends Service {
         if (mgr == null) {
             return;
         }
-        mWakeLock = mgr.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, this.getClass().getSimpleName());
-        mWakeLock.acquire();
-        Log.d(TAG, "Player lockCPU()");
+
+        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M &&
+                Build.MANUFACTURER.equals("Huawei")) {
+            tagLock = "LocationManagerService";
+            Log.d(TAG, "Device is Huawei manufacturer");
+        }
+        pmWakeLock = mgr.newWakeLock(1, tagLock);
+        pmWakeLock.acquire();
+        Log.d(TAG, "CameraService lockCPU()");
     }
 
     private void unlockCPU() {
-        if (mWakeLock != null && mWakeLock.isHeld()) {
-            mWakeLock.release();
-            mWakeLock = null;
-            Log.d(TAG, "Player unlockCPU()");
+        if (pmWakeLock != null && mWakeLock.isHeld()) {
+            pmWakeLock.release();
+            pmWakeLock = null;
+            Log.d(TAG, "CameraService unlockCPU()");
         }
     }
 
