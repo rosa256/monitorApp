@@ -78,14 +78,6 @@ public class CameraService extends Service {
 
     String tagLock = "com.my_app:LOCK";
 
-    private Boolean shouldShowPreview = true;
-    private View rootView;
-    private TextureView textureView;
-
-    private Activity activity;
-
-    private CameraPreviewFragment cameraPreviewFragment;
-    private TextureView.SurfaceTextureListener surfaceTextureListener;
     private CameraManager cameraManager;
     private String cameraId;
     private Size previewSize;
@@ -93,15 +85,10 @@ public class CameraService extends Service {
     private HandlerThread backgroundThread;
     private int cameraFacing;
     private CameraDevice cameraDevice;
-    private CaptureRequest.Builder captureRequestBuilder;
-    private CameraCaptureSession cameraCaptureSession;
+
 
     private PowerManager.WakeLock pmWakeLock;
 
-    public static final int ACTIVITY_START_CAMERA_APP = 0;
-    public static final int STATE_PREVIEW = 0;
-    public static final int STATE__WAIT_LOCK = 1;
-    private int mState;
     private ImageReader imageReader;
 
     private boolean isON = true;
@@ -113,10 +100,8 @@ public class CameraService extends Service {
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
 
-    static final String SERVICE_STATE_KEY = "serviceState";
     private boolean cameraClosed;
 
-    private WifiManager.WifiLock mWiFiLock;
     private PowerManager.WakeLock mWakeLock;
     private final Object mLock = new Object();
 
@@ -148,9 +133,7 @@ public class CameraService extends Service {
             switch (action) {
                 case ACTION_START:
                     start();
-                    break;
-                case ACTION_START_WITH_PREVIEW:
-                    startWithPreview();
+                    //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
                     break;
             }
         return START_STICKY; /** NIE WIEM O CO Z TYM CHODZI */
@@ -162,29 +145,13 @@ public class CameraService extends Service {
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         handler = new Handler();
-        cameraPreviewFragment = new CameraPreviewFragment();
         openBackgroundThread();
-
-
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
         registerReceiver(launchReceiver, filter);
 
-        surfaceTextureListener = new TextureView.SurfaceTextureListener() {
-            @Override
-            public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-                setUpCamera(width, height);
-                //openCamera();
-            }
-            @Override
-            public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int width, int height) { }
-            @Override
-            public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) { return false; }
-            @Override
-            public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) { }
-        };
         startWithForeground();
     }
 
@@ -220,7 +187,6 @@ public class CameraService extends Service {
         }
         pmWakeLock = mgr.newWakeLock(1, tagLock);
         pmWakeLock.acquire();
-        Log.d(TAG, "Manufacturer: " + Build.MANUFACTURER);
         Log.d(TAG, "CameraService lockCPU()");
     }
 
@@ -232,59 +198,15 @@ public class CameraService extends Service {
         }
     }
 
-    private void initOverlay(){
-        LayoutInflater li = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        rootView = (View) li.inflate(R.layout.overlay, null);
-        textureView = (TextureView) rootView.findViewById(R.id.texPreview);
-        cameraPreviewFragment.setTextureView(textureView);
-
-        WindowManager.LayoutParams params;
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            params = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE /*or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE*/,
-                    PixelFormat.TRANSLUCENT);
-        }else {
-            params = new WindowManager.LayoutParams(
-                    WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE /*or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE*/,
-                    PixelFormat.TRANSLUCENT
-            );
-        }
-
-        WindowManager wm = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
-        wm.addView(rootView, params);
-    }
     public void start(){
-        shouldShowPreview = false;
 
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
-        //TODO:SETUP PREVIEW SIZE FOR START();
         lockCPU();
-        setUpCamera(620,860);
+        setUpCamera();
 
         runApp();
 
-        //writeServiceStatePreference(1);
-    }
-
-    private void startWithPreview(){
-        shouldShowPreview = true;
-        Log.d(TAG, "startWithPreview: Run Service with PREVIEW");
-        // Initialize view drawn over other apps
-        initOverlay();
-
-        //TODO: Ustawienie Kamery
-        // Initialize camera here if texture view already initialized
-        if (textureView.isAvailable()){
-            setUpCamera(textureView.getWidth(), textureView.getHeight());
-            openCamera();
-            runApp();
-        }
-        else
-        textureView.setSurfaceTextureListener(surfaceTextureListener);
     }
 
 
@@ -311,20 +233,17 @@ public class CameraService extends Service {
                 .setTicker(getText(R.string.app_name))
                 .build();
 
+        Toast.makeText(context, "startWithForefroung()", Toast.LENGTH_LONG).show();
         startForeground(ONGOING_NOTIFICATION_ID, notification);
+
     }
 
-    private void setUpCamera(int width, int height) {
+    private void setUpCamera() {
         try {
             for (String cameraId : cameraManager.getCameraIdList()) {
                 CameraCharacteristics cameraCharacteristics = cameraManager.getCameraCharacteristics(cameraId);
                 if (cameraCharacteristics.get(CameraCharacteristics.LENS_FACING) == cameraFacing) {
                     this.cameraId = cameraId;
-
-                    StreamConfigurationMap streamConfigurationMap = cameraCharacteristics.get(
-                            CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
-
-                    previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), width, height);
                 }
             }
         } catch (CameraAccessException e) {
@@ -353,20 +272,6 @@ public class CameraService extends Service {
             closeCamera();
         }
     };
-
-    int readServiceStatePreference() {
-        // reads picture delay from preferences, updates this.pictureDelay and delay button text
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        return prefs.getInt(SERVICE_STATE_KEY,0);
-    }
-
-    void writeServiceStatePreference(int serviceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(SERVICE_STATE_KEY, serviceState);
-        editor.commit();
-    }
-
 
     public void takePhoto() throws CameraAccessException {
         if (null == cameraDevice) {
@@ -458,44 +363,6 @@ public class CameraService extends Service {
         }
     };
 
-    private void createPreviewSession() {
-        try {
-            //captureRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.);
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-            captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
-
-            captureRequestBuilder.addTarget(imageReader.getSurface());
-
-            captureRequestBuilder.set(CaptureRequest.JPEG_ORIENTATION, ORIENTATIONS.get(2));
-
-            cameraDevice.createCaptureSession(Arrays.asList(imageReader.getSurface()),
-                    new CameraCaptureSession.StateCallback() {
-                        @Override
-                        public void onConfigured(CameraCaptureSession cameraCaptureSession) {
-                            if (cameraDevice == null) {
-                                return;
-                            }
-                            try {
-                                CaptureRequest captureRequest = captureRequestBuilder.build();
-                                CameraService.this.cameraCaptureSession = cameraCaptureSession;
-                                //CameraService.this.cameraCaptureSession.capture();
-                                CameraService.this.cameraCaptureSession.setRepeatingRequest(captureRequest /*mPreviewCaptureRequest*/,
-                                        null , backgroundHandler);
-                            } catch (CameraAccessException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        @Override
-                        public void onConfigureFailed(CameraCaptureSession cameraCaptureSession) {
-                            System.out.println("FAILED CAPTURE SESSION");
-                        }
-                    }, backgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
     private void openBackgroundThread() {
         backgroundThread = new HandlerThread("camera_background_thread");
         backgroundThread.start();
@@ -530,7 +397,7 @@ public class CameraService extends Service {
             currentPictureID = 0;
             synchronized (mLock) {
                 executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
+                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay +1, TimeUnit.SECONDS);
             }
         } else { //OFF
             isON = true;
@@ -593,16 +460,8 @@ public class CameraService extends Service {
     }
 
     public void savePictureNow(){
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-//        int value = prefs.getInt("icrementValue",0);
-//        value++;
-//        SharedPreferences.Editor editor = prefs.edit();
-//        editor.putInt("icrementValue", value);
-//        editor.commit();
-//        Log.d(TAG, "VAAAAAAAAAAAAAAAALLLLLLLUUUUUEEEEEE: " + value);
         openCamera();
     }
-
 
     private void closeCamera() {
         Log.d(TAG, "closing camera " + cameraDevice.getId());
@@ -636,7 +495,7 @@ public class CameraService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if(Intent.ACTION_SCREEN_ON.equals(action)){
-                isON = true;
+                //isON = true;
                 //runApp();
                 Log.d(TAG, "onReceive: invoke runApp()");
             } else if(Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -651,34 +510,7 @@ public class CameraService extends Service {
                 executor.shutdownNow();
                 Log.d(TAG, "stopApp(): Stoping countering");
             }
-            isON = false;
+            //isON = false;
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-//    private int getJpegOrientation(CameraCharacteristics c, int deviceOrientation) {
-//        if (deviceOrientation == android.view.OrientationEventListener.ORIENTATION_UNKNOWN) return 0;
-//        int sensorOrientation = c.get(CameraCharacteristics.SENSOR_ORIENTATION);
-//
-//        // Round device orientation to a multiple of 90
-//        deviceOrientation = (deviceOrientation + 45) / 90 * 90;
-//
-//        // Reverse device orientation for front-facing cameras
-//        boolean facingFront = c.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT;
-//        if (facingFront) deviceOrientation = -deviceOrientation;
-//
-//        // Calculate desired JPEG orientation relative to camera orientation to make
-//        // the image upright relative to the device orientation
-//        int jpegOrientation = (sensorOrientation + deviceOrientation + 360) % 360;
-//
-//        return jpegOrientation;
-//    }
