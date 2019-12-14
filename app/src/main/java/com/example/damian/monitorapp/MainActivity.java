@@ -92,9 +92,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private Toolbar mToolbar;
     private boolean onOff = false;
 
-    private PowerManager powerManager;
-    private PowerManager.WakeLock pmWakeLock;
-
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
@@ -183,11 +180,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             System.out.println("Service START PREVIEW");
             Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
         }else {
-            powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-            pmWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "monitorApp:WakeLockTag");
-            pmWakeLock.acquire();
-
-
             serviceIntent = new Intent(this, CameraService.class);
             serviceIntent.setPackage("com.example.damian.monitorapp");
             serviceIntent.setAction(CameraService.ACTION_START);
@@ -209,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         //serviceIntent = new Intent(CameraService.ACTION_STOP);
         stopService(new Intent(this, CameraService.class));
         //writeServiceStatePreference(0); //Service OFF;
-        pmWakeLock.release();
         System.out.println("Service STOPED");
         Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
     }

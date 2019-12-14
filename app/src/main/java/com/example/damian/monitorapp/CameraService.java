@@ -144,7 +144,6 @@ public class CameraService extends Service {
         Log.i(TAG, "onStartCommand(): action = " + action);
 
 
-        if (intent!= null) {
             Log.d(TAG, "onStartCommand: *** action = " + action);
             switch (action) {
                 case ACTION_START:
@@ -154,7 +153,6 @@ public class CameraService extends Service {
                     startWithPreview();
                     break;
             }
-        }
         return START_STICKY; /** NIE WIEM O CO Z TYM CHODZI */
     }
 
@@ -201,7 +199,6 @@ public class CameraService extends Service {
         stopSelf();
         closeBackgroundThread();
         unlockCPU();
-        pmWakeLock.release();
 
         if(executor != null && handler != null) {
             handler.removeCallbacksAndMessages(null);
@@ -216,13 +213,14 @@ public class CameraService extends Service {
             return;
         }
 
-        if (Build.VERSION.SDK_INT == Build.VERSION_CODES.M &&
-                Build.MANUFACTURER.equals("Huawei")) {
-            tagLock = "LocationManagerService";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            Build.MANUFACTURER.equals("Huawei")) {
+            tagLock = "com.example.damian.monitorApp:LocationManagerService";
             Log.d(TAG, "Device is Huawei manufacturer");
         }
         pmWakeLock = mgr.newWakeLock(1, tagLock);
         pmWakeLock.acquire();
+        Log.d(TAG, "Manufacturer: " + Build.MANUFACTURER);
         Log.d(TAG, "CameraService lockCPU()");
     }
 
@@ -639,10 +637,10 @@ public class CameraService extends Service {
             String action = intent.getAction();
             if(Intent.ACTION_SCREEN_ON.equals(action)){
                 isON = true;
-                runApp();
+                //runApp();
                 Log.d(TAG, "onReceive: invoke runApp()");
             } else if(Intent.ACTION_SCREEN_OFF.equals(action)) {
-                stopApp();
+                //stopApp();
             }
         }
 
