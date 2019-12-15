@@ -186,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             fr.onStop();
             //writeServiceStatePreference(1); //Service ON;
             System.out.println("Service START NO PREVIEW");
-            Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+            //Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
@@ -199,7 +199,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     public void stopMyService(){
         if(serviceIntent != null)
         //serviceIntent = new Intent(CameraService.ACTION_STOP);
-        stopService(new Intent(this, CameraService.class));
+        stopService(serviceIntent);
         //writeServiceStatePreference(0); //Service OFF;
         System.out.println("Service STOPED");
         Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();

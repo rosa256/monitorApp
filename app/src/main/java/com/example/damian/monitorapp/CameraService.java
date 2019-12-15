@@ -1,7 +1,6 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -11,12 +10,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -29,13 +25,11 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.PowerManager;
-import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -43,11 +37,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
-import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.TextureView;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.ImageSaver;
@@ -105,6 +95,7 @@ public class CameraService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private final Object mLock = new Object();
 
+    BroadcastReceiver launchReceiver;
     /*
     * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
     * */
@@ -128,9 +119,7 @@ public class CameraService extends Service {
         String action = intent.getAction();
         Log.i(TAG, "onStartCommand(): action = " + action);
 
-
-            Log.d(TAG, "onStartCommand: *** action = " + action);
-            switch (action) {
+         switch (action) {
                 case ACTION_START:
                     start();
                     //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
@@ -149,7 +138,7 @@ public class CameraService extends Service {
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
+        launchReceiver = new LaunchBroadcastReceiver();
         registerReceiver(launchReceiver, filter);
 
         startWithForeground();
@@ -159,13 +148,17 @@ public class CameraService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        Toast.makeText(this, "BEFORE UNLOCK()", Toast.LENGTH_LONG).show();
         stopService();
+        unregisterReceiver(launchReceiver);
     }
 
     public void stopService(){
         stopSelf();
         closeBackgroundThread();
+
         unlockCPU();
+        Toast.makeText(this, "AFTER UNLOCK()", Toast.LENGTH_LONG).show();
 
         if(executor != null && handler != null) {
             handler.removeCallbacksAndMessages(null);
@@ -181,9 +174,9 @@ public class CameraService extends Service {
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            Build.MANUFACTURER.equals("Huawei")) {
-            tagLock = "com.example.damian.monitorApp:LocationManagerService";
+            Build.MANUFACTURER.equals("HUAWEI")) {
             Log.d(TAG, "Device is Huawei manufacturer");
+            tagLock = "com.example.damian.monitorApp:LocationManagerService";
         }
         pmWakeLock = mgr.newWakeLock(1, tagLock);
         pmWakeLock.acquire();
@@ -191,9 +184,9 @@ public class CameraService extends Service {
     }
 
     private void unlockCPU() {
+        pmWakeLock.release();
         if (pmWakeLock != null && mWakeLock.isHeld()) {
-            pmWakeLock.release();
-            pmWakeLock = null;
+            //pmWakeLock = null;
             Log.d(TAG, "CameraService unlockCPU()");
         }
     }
@@ -233,7 +226,7 @@ public class CameraService extends Service {
                 .setTicker(getText(R.string.app_name))
                 .build();
 
-        Toast.makeText(context, "startWithForefroung()", Toast.LENGTH_LONG).show();
+        //Toast.makeText(context, "startWithForefroung()", Toast.LENGTH_LONG).show();
         startForeground(ONGOING_NOTIFICATION_ID, notification);
 
     }
@@ -378,37 +371,24 @@ public class CameraService extends Service {
     }
 
     public void runApp(){
-        if (isON) { //ON
-
-            //(START) CHECK INTERNET CONNECTION
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
-                    connectivityManager.getActiveNetworkInfo().isConnected();
-            if(!isInternetConnection){
-                Log.i(TAG, "runApp: No Internet Connection");
-                System.out.println("NO INTERNET CONNECTION!");
-                Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
-                return;
-            }
-            //(END) CHECK INTERNET CONNECTION
-
-            isON = false;
-            currentPictureID = 0;
-            synchronized (mLock) {
-                executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay +1, TimeUnit.SECONDS);
-            }
-        } else { //OFF
-            isON = true;
-            executor.shutdownNow();
-
-            //Operations to end counting proccess.
-            currentPictureID++;
-            decrementTimer(-1);
-            //Stoping handler postDelayed.
-            handler.removeCallbacksAndMessages(null);
+        //(START) CHECK INTERNET CONNECTION
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
+                connectivityManager.getActiveNetworkInfo().isConnected();
+        if(!isInternetConnection){
+            Log.i(TAG, "runApp: No Internet Connection");
+            System.out.println("NO INTERNET CONNECTION!");
+            //Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
+            return;
         }
+        //(END) CHECK INTERNET CONNECTION
+
+        currentPictureID = 0;
+
+            executor = Executors.newSingleThreadScheduledExecutor();
+            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay +1, TimeUnit.SECONDS);
+
     }
 
     public void decrementTimer(final int pictureID){
