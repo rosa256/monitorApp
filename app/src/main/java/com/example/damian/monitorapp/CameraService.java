@@ -185,7 +185,7 @@ public class CameraService extends Service {
 
     private void unlockCPU() {
         pmWakeLock.release();
-        if (pmWakeLock != null && mWakeLock.isHeld()) {
+        if (pmWakeLock != null && pmWakeLock.isHeld()) {
             //pmWakeLock = null;
             Log.d(TAG, "CameraService unlockCPU()");
         }

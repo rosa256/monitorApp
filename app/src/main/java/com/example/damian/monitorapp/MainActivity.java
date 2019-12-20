@@ -14,6 +14,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -63,6 +64,7 @@ import java.util.concurrent.TimeUnit;
 public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
+    private static final String ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS = "123";
     private TextView usernameEditText;
     private FileManager fileManager;
     private Toolbar toolbar;
@@ -146,11 +148,12 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             fr.getImageViewSource().setImageBitmap(myBitmap);
         }
         //TODO--end
-
+        checkOptimization();
         this.readDelayPreference();
 
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -172,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.runServiceButton)
     public void runService(){
         //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
+
         boolean showPreview = false;
         if(showPreview) {
             serviceIntent = new Intent(this, CameraService.class);
@@ -192,6 +196,22 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             startForegroundService(serviceIntent);
         } else {
             startService(serviceIntent);
+        }
+    }
+
+    @SuppressLint({"NewApi", "BatteryLife"})
+    private void checkOptimization() {
+        String packageName = getApplicationContext().getPackageName();
+        PowerManager pm = (PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE);
+        if (pm != null) {
+            if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                Intent intent = new Intent();
+                intent.setAction(ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+                intent.setData(Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+            } else {
+
+            }
         }
     }
 
