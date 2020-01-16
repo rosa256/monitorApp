@@ -17,6 +17,9 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHan
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -28,10 +31,12 @@ public class RegisterActivity extends AppCompatActivity {
     CognitoUserAttributes userAttributes;
     EditText usernameGiven;
     EditText passwordGiven;
+    EditText confirmPasswordGiven;
     EditText emailGiven;
     @Bind(R.id.registerButton) Button buttonBtn;
 
     static final String TAG = "RegisterActivity";
+    private boolean wasFocusedUsername = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +45,19 @@ public class RegisterActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         usernameGiven = findViewById(R.id.usernameEditText);
-        usernameGiven.setText("maniek256");
+        //usernameGiven.setText("maniek256");
         passwordGiven = findViewById(R.id.passowrdTextView);
         passwordGiven.setText("ABCabc!@#");
+        confirmPasswordGiven= findViewById(R.id.passowrdConfirmTextView);
+        confirmPasswordGiven.setText("ABCabc!@#");
         emailGiven = findViewById(R.id.emailEditText);
         emailGiven.setText("d.rosinski256@gmail.com");
         /* Create a CognitoUserPool instance */
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(RegisterActivity.this);
+
+        usernameGiven.addTextChangedListener(new MyTextWatcher(usernameGiven));
+        usernameGiven.setOnFocusChangeListener(new MyFocusListener(usernameGiven));
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
@@ -85,6 +95,7 @@ public class RegisterActivity extends AppCompatActivity {
     @OnClick(R.id.registerButton)
     public void OnRegisterClcik(){
         Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
+
         userAttributes = new CognitoUserAttributes();
         userAttributes.addAttribute("email",emailGiven.getText().toString());
 
@@ -97,6 +108,36 @@ public class RegisterActivity extends AppCompatActivity {
         );
     }
 
+
+    private class MyFocusListener implements View.OnFocusChangeListener{
+        private View view;
+
+        private MyFocusListener(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            switch (view.getId()) {
+                case R.id.usernameEditText:
+                    if(!usernameGiven.getText().toString().isEmpty()) {
+                        wasFocusedUsername = true;
+                        validateUsername(usernameGiven);
+                    }else{
+                        usernameGiven.setError(null);
+                        wasFocusedUsername = false;
+                    }
+                    break;
+                case R.id.emailEditText:
+
+                    break;
+                case R.id.passowrdTextView:
+
+                    break;
+            }
+        }
+    }
+
     private class MyTextWatcher implements TextWatcher {
 
         private View view;
@@ -105,24 +146,61 @@ public class RegisterActivity extends AppCompatActivity {
             this.view = view;
         }
 
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
         @Override
-        public void afterTextChanged(Editable s) { }
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+        @Override
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.usernameEditText:
+                    if(wasFocusedUsername) {
+                        validateUsername(usernameGiven);
+                    }
+                    break;
+                case R.id.emailEditText:
+                    validateEmail(emailGiven);
+                    break;
+                case R.id.passowrdTextView:
+                    validatePassword(passwordGiven);
+                    break;
+            }
+        }
+
+
+    }
+
+    private void validateUsername(EditText usernameGiven) {
+        String dataToValid = usernameGiven.getText().toString();
+        Pattern patternUsername = Pattern.compile("^(?=.{8,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+*!=]).*$");
+        Matcher matcher = patternUsername.matcher(dataToValid);
+        Boolean isValidUsername = matcher.matches();
+
+        if (!isValidUsername)
+            usernameGiven.setError("Wrong username!");
+        else
+            usernameGiven.setError(null);
+/*
+            (/^
+            (?=.{6,})                //should be 6 characters or more
+            (?=.*[a-z])             //should contain at least one lower case
+            (?=.*[A-Z])             //should contain at least one upper case
+            (?=.*[@#$%^&+*!=])      //should contain at least 1 special characters
+            .*$/)
+*/
+
+    }
+
+    private void validatePassword(EditText passwordGiven) {
+        String dataToValid = usernameGiven.getText().toString();
+
+    }
+
+    private void validateEmail(EditText emailGiven) {
+        String dataToValid = usernameGiven.getText().toString();
+
     }
 }
 
-/*        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.input_name:
-                    validateName();
-                    break;
-                case R.id.input_email:
-                    validateEmail();
-                    break;
-                case R.id.input_password:
-                    validatePassword();
-                    break;
-            }
-        }*/
 

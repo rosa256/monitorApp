@@ -79,7 +79,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <string name="registerStr">Register</string>
+    <string name="registerStr"><b>Register</b></string>
     <string name="usernameHint">Username</string>
     <string name="emailHint">E-mail</string>
     <string name="passwordHint">Password</string>
