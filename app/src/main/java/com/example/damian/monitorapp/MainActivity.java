@@ -1,5 +1,6 @@
 package com.example.damian.monitorapp;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -7,10 +8,11 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.icu.util.LocaleData;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,19 +36,15 @@ import butterknife.OnClick;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
-import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
-import com.example.damian.monitorapp.models.UserDO;
 import com.example.damian.monitorapp.requester.DatabaseAccess;
-import com.example.damian.monitorapp.requester.InitDBConnectionAsync;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
@@ -54,7 +52,6 @@ import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialIconView;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,7 +60,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
     private static final String TAG = "MainActivity";
     private TextView usernameEditText;
@@ -81,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
+    static final String SERVICE_STATE_KEY = "serviceState";
     Handler handler = new Handler();
     // assign ID when we start a timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
     int currentPictureID = 0;
@@ -88,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private TextView statusTextField;
 
     private MaterialIconView playButton;
+    private MaterialIconView playService;
+    private MaterialIconView stopService;
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
     private boolean onOff = false;
@@ -95,12 +95,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
+    private CameraService cameraService;
 
     private DatabaseAccess databaseAccess;
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
     private String awsServiceOption = Constants.AWS_DETECT_FACES;
+
+    Intent serviceIntent;
+    CameraPreviewFragment fr;
 
 
     public MainActivity() { }
@@ -128,13 +132,15 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
 
         playButton = (MaterialIconView) findViewById(R.id.runAppButton);
+        playService = (MaterialIconView) findViewById(R.id.runServiceButton);
+        stopService = (MaterialIconView) findViewById(R.id.stopServiceButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
-        CameraPreviewFragment fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
         if (fr != null) {
             Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
             fr.getImageViewSource().setImageBitmap(myBitmap);
@@ -146,7 +152,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
-
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
@@ -163,6 +168,43 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         });
         thread.start();
     }
+
+    @OnClick(R.id.runServiceButton)
+    public void runService(){
+        //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
+        boolean showPreview = false;
+        if(showPreview) {
+            serviceIntent = new Intent(this, CameraService.class);
+            serviceIntent.setPackage("com.example.damian.monitorapp");
+            serviceIntent.setAction(CameraService.ACTION_START_WITH_PREVIEW);
+            System.out.println("Service START PREVIEW");
+            Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
+        }else {
+            serviceIntent = new Intent(this, CameraService.class);
+            serviceIntent.setPackage("com.example.damian.monitorapp");
+            serviceIntent.setAction(CameraService.ACTION_START);
+            fr.onStop();
+            //writeServiceStatePreference(1); //Service ON;
+            System.out.println("Service START NO PREVIEW");
+            Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent);
+        } else {
+            startService(serviceIntent);
+        }
+    }
+
+    @OnClick(R.id.stopServiceButton)
+    public void stopMyService(){
+        if(serviceIntent != null)
+        //serviceIntent = new Intent(CameraService.ACTION_STOP);
+        stopService(new Intent(this, CameraService.class));
+        //writeServiceStatePreference(0); //Service OFF;
+        System.out.println("Service STOPED");
+        Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
+    }
+
 
     @OnClick(R.id.runAppButton)
     public void runApp() {
@@ -334,6 +376,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         editor.commit();
     }
 
+
     void readDelayPreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -344,6 +387,20 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         this.pictureDelay = delay;
         updateDelayButton();
     }
+
+    void writeServiceStatePreference(int serviceState) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SERVICE_STATE_KEY, serviceState);
+        editor.commit();
+    }
+
+    int readServiceStatePreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        return prefs.getInt(SERVICE_STATE_KEY,0);
+    }
+
 
     public void aboutMe(View view) {
         Intent intent = new Intent(this, AbouteMe.class);
@@ -425,6 +482,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
     }
+
 
 
     public class DoComparisonThread extends Thread {

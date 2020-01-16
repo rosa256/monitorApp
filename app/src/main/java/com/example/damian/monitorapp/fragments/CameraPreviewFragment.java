@@ -2,6 +2,7 @@ package com.example.damian.monitorapp.fragments;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
@@ -15,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -66,6 +68,8 @@ public class CameraPreviewFragment extends Fragment {
     private ImageView imageViewTarget;
 
     private String cameraId;
+
+    static final String SERVICE_STATE_KEY = "serviceState";
 
     public CameraPreviewFragment() { }
 
@@ -205,7 +209,7 @@ public class CameraPreviewFragment extends Fragment {
     @SuppressLint("MissingPermission")
     private void openCamera() {
         try {
-            if (ActivityCompat.checkSelfPermission(getContext().getApplicationContext(), android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(requireContext().getApplicationContext(), android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
                 cameraManager.openCamera(cameraId, stateCallback, backgroundHandler);
             }
         } catch (CameraAccessException e) {
@@ -219,17 +223,34 @@ public class CameraPreviewFragment extends Fragment {
         super.onResume();
 
         openBackgroundThread();
-        if (textureView.isAvailable()) {
-            setUpCamera(textureView.getWidth(), textureView.getHeight());
-            openCamera();
-        } else {
-            textureView.setSurfaceTextureListener(surfaceTextureListener);
-        }
+        int state = readServiceStatePreference();
+        //if(state == 0) {
+            if (textureView.isAvailable()) {
+                setUpCamera(textureView.getWidth(), textureView.getHeight());
+                openCamera();
+            } else {
+                textureView.setSurfaceTextureListener(surfaceTextureListener);
+            }
+        //}
+    }
+
+    void writeServiceStatePreference(int serviceState) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SERVICE_STATE_KEY, serviceState);
+        editor.commit();
+    }
+
+    int readServiceStatePreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
+        return prefs.getInt(SERVICE_STATE_KEY,0);
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        Log.d(TAG, "onStop: Stoping Front Preview.");
         closeCamera();
         closeBackgroundThread();
     }
@@ -304,6 +325,10 @@ public class CameraPreviewFragment extends Fragment {
 
     public TextureView getTextureView() {
         return textureView;
+    }
+    public void setTextureView(TextureView textureView) {
+        this.textureView =  textureView;
+        this.textureView.setSurfaceTextureListener(surfaceTextureListener);
     }
     public ImageView getImageViewSource() {
         return imageViewSource;
