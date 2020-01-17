@@ -38,13 +38,13 @@ public class LoginActivity extends AppCompatActivity {
     private EditText username;
     private CognitoSettings cognitoSettings;
     private CognitoUserSession userSession;
-
+    private BusyIndicator busyIndicator;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
-
+        busyIndicator = new BusyIndicator(this);
 
         password = findViewById(R.id.inputLoginPassword);
         password.setText("ABCabc!@#");
@@ -82,6 +82,8 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick(R.id.loginButton)
     public void SignInUser(){
+        busyIndicator.dimBackground();
+
         cognitoUser = cognitoSettings.getUserPool().getUser(username.getText().toString());
         System.out.println(cognitoSettings.getUserPool().getCurrentUser());
         //Invoke Sign In process.
@@ -107,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
             intent.putExtra("userSession", new Gson().toJson(cognitoUserSession));
             startActivity(intent);
+            busyIndicator.unDimBackgorund();
         }
 
         @Override
@@ -127,6 +130,7 @@ public class LoginActivity extends AppCompatActivity {
         public void onFailure(Exception exception) {
             Log.i(TAG, "User faild to Sign-in: " + exception.getLocalizedMessage());
             Toast.makeText(LoginActivity.this,"User does not exist",Toast.LENGTH_SHORT).show();
+            busyIndicator.unDimBackgorund();
         }
     };
 
