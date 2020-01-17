@@ -17,22 +17,33 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHan
 import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    CognitoSettings cognitoSettings;
+    private CognitoSettings cognitoSettings;
     // Create a CognitoUserAttributes object and add user attributes
-    CognitoUserAttributes userAttributes;
-    EditText usernameGiven;
-    EditText passwordGiven;
-    EditText emailGiven;
+    private CognitoUserAttributes userAttributes;
+    private EditText usernameGiven;
+    private EditText passwordGiven;
+    private EditText confirmPasswordGiven;
+    private EditText emailGiven;
     @Bind(R.id.registerButton) Button buttonBtn;
 
     static final String TAG = "RegisterActivity";
+    private boolean wasFocusedUsername = false;
+    private boolean wasFocusedEmail = false;
+    private boolean wasFocusedPassword = false;
 
+    private boolean usernameCorrect = false;
+    private boolean emailCorrect = false;
+    private boolean passwordCorrect = false;
+    private boolean passwordConfirmCorrect = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,14 +51,24 @@ public class RegisterActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         usernameGiven = findViewById(R.id.usernameEditText);
-        usernameGiven.setText("maniek256");
+        //usernameGiven.setText("maniek256");
         passwordGiven = findViewById(R.id.passowrdTextView);
         passwordGiven.setText("ABCabc!@#");
+        confirmPasswordGiven= findViewById(R.id.passowrdConfirmTextView);
+        confirmPasswordGiven.setText("ABCabc!@#");
         emailGiven = findViewById(R.id.emailEditText);
         emailGiven.setText("d.rosinski256@gmail.com");
-        /* Create a CognitoUserPool instance */
+        /* Creating a CognitoUserPool instance */
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(RegisterActivity.this);
+
+        usernameGiven.addTextChangedListener(new MyTextWatcher(usernameGiven));
+        usernameGiven.setOnFocusChangeListener(new MyFocusListener(usernameGiven));
+        emailGiven.addTextChangedListener(new MyTextWatcher(emailGiven));
+        emailGiven.setOnFocusChangeListener(new MyFocusListener(emailGiven));
+        passwordGiven.addTextChangedListener(new MyTextWatcher(passwordGiven));
+        passwordGiven.setOnFocusChangeListener(new MyFocusListener(passwordGiven));
+        confirmPasswordGiven.addTextChangedListener(new MyTextWatcher(confirmPasswordGiven));
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
@@ -71,13 +92,14 @@ public class RegisterActivity extends AppCompatActivity {
             }
             else {
                 Log.i(TAG, "sing up success...confirmed:" + signUpResult.getUserConfirmed());
-                Toast.makeText(RegisterActivity.this,"Nie pomyślna rejestracja.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RegisterActivity.this,"Użytkownik jest już potwierdzony.", Toast.LENGTH_SHORT).show();
                 // The user has already been confirmed
             }
         }
         @Override
         public void onFailure(Exception exception) {
             Log.i(TAG, "sing up failure:" + exception.getLocalizedMessage());
+            Toast.makeText(RegisterActivity.this,"Nie pomyślna rejestracja. Byc może istnieje juz taki.", Toast.LENGTH_SHORT).show();
             // Sign-up failed, check exception for the cause
         }
     };
@@ -85,16 +107,71 @@ public class RegisterActivity extends AppCompatActivity {
     @OnClick(R.id.registerButton)
     public void OnRegisterClcik(){
         Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
-        userAttributes = new CognitoUserAttributes();
-        userAttributes.addAttribute("email",emailGiven.getText().toString());
 
-        cognitoSettings.getUserPool().signUpInBackground(
-                usernameGiven.getText().toString(),
-                passwordGiven.getText().toString(),
-                userAttributes,
-                null,
-                signupCallback
-        );
+        if(usernameCorrect && emailCorrect && passwordCorrect && passwordConfirmCorrect) {
+            userAttributes = new CognitoUserAttributes();
+            userAttributes.addAttribute("email", emailGiven.getText().toString());
+
+            cognitoSettings.getUserPool().signUpInBackground(
+                    usernameGiven.getText().toString(),
+                    passwordGiven.getText().toString(),
+                    userAttributes,
+                    null,
+                    signupCallback
+            );
+        }else{
+             validateUsername(usernameGiven);
+             validateEmail(emailGiven);
+             validatePassword(passwordGiven);
+             validatePasswordConfirmation(confirmPasswordGiven);
+        }
+    }
+
+
+    private class MyFocusListener implements View.OnFocusChangeListener{
+        private View view;
+
+        private MyFocusListener(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            switch (view.getId()) {
+                case R.id.usernameEditText:
+                    if(!usernameGiven.getText().toString().isEmpty()) {
+                        wasFocusedUsername = true;
+                        validateUsername(usernameGiven);
+                    }else{
+                        usernameGiven.setError(null);
+                        wasFocusedUsername = false;
+                    }
+                break;
+                case R.id.emailEditText:
+                    if(!emailGiven.getText().toString().isEmpty()) {
+                        wasFocusedEmail = true;
+                        validateEmail(emailGiven);
+                    }else{
+                        emailGiven.setError(null);
+                        wasFocusedEmail = false;
+                    }
+                break;
+                case R.id.passowrdTextView:
+                    if(!passwordGiven.getText().toString().isEmpty()) {
+                        wasFocusedPassword = true;
+                        validatePassword(passwordGiven);
+                    }else{
+                        passwordGiven.setError(null);
+                        wasFocusedPassword = false;
+                    }
+                break;
+                case R.id.passowrdConfirmTextView:
+                    if(!confirmPasswordGiven.getText().toString().isEmpty()) {
+                        validatePasswordConfirmation(confirmPasswordGiven);
+                    }
+                    break;
+            }
+        }
     }
 
     private class MyTextWatcher implements TextWatcher {
@@ -105,24 +182,100 @@ public class RegisterActivity extends AppCompatActivity {
             this.view = view;
         }
 
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
         @Override
-        public void afterTextChanged(Editable s) { }
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+        @Override
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.usernameEditText:
+                    if(wasFocusedUsername) {
+                        validateUsername(usernameGiven);
+                    }
+                    break;
+                case R.id.emailEditText:
+                    if(wasFocusedEmail) {
+                        validateEmail(emailGiven);
+                    }
+                    break;
+                case R.id.passowrdTextView:
+                    if(wasFocusedPassword) {
+                        validatePassword(passwordGiven);
+                        validatePasswordConfirmation(confirmPasswordGiven);
+                    }
+                    break;
+                case R.id.passowrdConfirmTextView:
+                    validatePasswordConfirmation(confirmPasswordGiven);
+                    break;
+            }
+        }
+    }
+
+    private void validateUsername(EditText usernameGiven) {
+        String dataToValid = usernameGiven.getText().toString();
+        String patternUsername = "^(?=.{6,})(?=.*[a-z])(?=.*[A-Z]).*$";
+        Pattern pattern = Pattern.compile(patternUsername);
+        Matcher matcher = pattern.matcher(dataToValid);
+        boolean isValidUsername = matcher.matches();
+
+        if (!isValidUsername) {
+            usernameGiven.setError("Incorrect username!\n*Min 6 long\n*Lower and Upper character");
+        }else{
+            usernameGiven.setError(null);
+            usernameCorrect = true;
+        }
+
+/*          (/^
+            (?=.{6,})               //should be 6 characters or more
+            (?=.*[a-z])             //should contain at least one lower case
+            (?=.*[A-Z])             //should contain at least one upper case
+            (?=.*[@#$%^&+*!=])      //should contain at least 1 special characters
+            .*$/)
+*/
+    }
+
+    private void validateEmail(EditText emailGiven) {
+        String dataToValid = emailGiven.getText().toString();
+        boolean isEmailValid = android.util.Patterns.EMAIL_ADDRESS.matcher(dataToValid).matches();
+
+        if(!isEmailValid) {
+            emailGiven.setError("Incorrect email!");
+        }else{
+            emailGiven.setError(null);
+            emailCorrect = true;
+        }
+    }
+
+    private void validatePassword(EditText passwordGiven) {
+        String dataToValid = passwordGiven.getText().toString();
+        String patternPassword = "^(?=.{6,})(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+*!=]).*$";
+        Pattern pattern = Pattern.compile(patternPassword);
+        Matcher matcher = pattern.matcher(dataToValid);
+        boolean isPasswordValid = matcher.matches();
+
+        if(!isPasswordValid) {
+            passwordGiven.setError(" Incorrect password!\n*Min. 6 long\n*Lower and Upper character\n*Special character");
+        }else{
+            passwordGiven.setError(null);
+            passwordCorrect = true;
+        }
+
+    }
+
+    private void validatePasswordConfirmation(EditText passwordConfirmationGiven) {
+        String dataToValid = passwordConfirmationGiven.getText().toString();
+
+        boolean isPasswordConfirmationValid = dataToValid.equals(passwordGiven.getText().toString());
+
+        if(!isPasswordConfirmationValid) {
+            passwordConfirmationGiven.setError("Does not match password!");
+        }else{
+            passwordConfirmationGiven.setError(null);
+            passwordConfirmCorrect = true;
+        }
     }
 }
 
-/*        public void afterTextChanged(Editable editable) {
-            switch (view.getId()) {
-                case R.id.input_name:
-                    validateName();
-                    break;
-                case R.id.input_email:
-                    validateEmail();
-                    break;
-                case R.id.input_password:
-                    validatePassword();
-                    break;
-            }
-        }*/
 
