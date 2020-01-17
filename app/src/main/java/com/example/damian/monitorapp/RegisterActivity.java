@@ -44,6 +44,8 @@ public class RegisterActivity extends AppCompatActivity {
     private boolean emailCorrect = false;
     private boolean passwordCorrect = false;
     private boolean passwordConfirmCorrect = false;
+    private BusyIndicator busyIndicator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +53,7 @@ public class RegisterActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         usernameGiven = findViewById(R.id.usernameEditText);
-        //usernameGiven.setText("maniek256");
+        usernameGiven.setText("Maniek256");
         passwordGiven = findViewById(R.id.passowrdTextView);
         passwordGiven.setText("ABCabc!@#");
         confirmPasswordGiven= findViewById(R.id.passowrdConfirmTextView);
@@ -69,6 +71,8 @@ public class RegisterActivity extends AppCompatActivity {
         passwordGiven.addTextChangedListener(new MyTextWatcher(passwordGiven));
         passwordGiven.setOnFocusChangeListener(new MyFocusListener(passwordGiven));
         confirmPasswordGiven.addTextChangedListener(new MyTextWatcher(confirmPasswordGiven));
+
+        busyIndicator = new BusyIndicator(this);
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
@@ -95,17 +99,20 @@ public class RegisterActivity extends AppCompatActivity {
                 Toast.makeText(RegisterActivity.this,"Użytkownik jest już potwierdzony.", Toast.LENGTH_SHORT).show();
                 // The user has already been confirmed
             }
+            busyIndicator.unDimBackgorund();
         }
         @Override
         public void onFailure(Exception exception) {
             Log.i(TAG, "sing up failure:" + exception.getLocalizedMessage());
             Toast.makeText(RegisterActivity.this,"Nie pomyślna rejestracja. Byc może istnieje juz taki.", Toast.LENGTH_SHORT).show();
             // Sign-up failed, check exception for the cause
+            busyIndicator.unDimBackgorund();
         }
     };
 
     @OnClick(R.id.registerButton)
     public void OnRegisterClcik(){
+        busyIndicator.dimBackground();
         Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
 
         if(usernameCorrect && emailCorrect && passwordCorrect && passwordConfirmCorrect) {
@@ -120,10 +127,11 @@ public class RegisterActivity extends AppCompatActivity {
                     signupCallback
             );
         }else{
-             validateUsername(usernameGiven);
-             validateEmail(emailGiven);
-             validatePassword(passwordGiven);
-             validatePasswordConfirmation(confirmPasswordGiven);
+            validateUsername(usernameGiven);
+            validateEmail(emailGiven);
+            validatePassword(passwordGiven);
+            validatePasswordConfirmation(confirmPasswordGiven);
+            busyIndicator.unDimBackgorund();
         }
     }
 

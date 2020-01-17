@@ -25,6 +25,8 @@ public class RegisterConfirmation extends AppCompatActivity {
     private TextView confirmTextView;
     private String  username;
 
+    private BusyIndicator busyIndicator;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,11 +37,14 @@ public class RegisterConfirmation extends AppCompatActivity {
         username = getIntent().getStringExtra("username");
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(RegisterConfirmation.this);
+
+        busyIndicator = new BusyIndicator(this);
     }
 
 
     @OnClick(R.id.confirmationButton)
     public void confrimAccount(){
+        busyIndicator.dimBackground();
         //TODO Walidacja
         cognitoUser = cognitoSettings.getUserPool().getUser(username);
 
@@ -58,12 +63,14 @@ public class RegisterConfirmation extends AppCompatActivity {
             startActivity(intent);
 
             // User was successfully confirmed
+            busyIndicator.unDimBackgorund();
         }
         @Override
         public void onFailure(Exception exception) {
             Log.i(TAG, "confirmation user failed:" + exception.getLocalizedMessage());
             Toast.makeText(RegisterConfirmation.this, "Nie udalo sie potiwerdzic", Toast.LENGTH_SHORT).show();
             // User confirmation failed. Check exception for the cause.
+            busyIndicator.unDimBackgorund();
         }
     };
 }
