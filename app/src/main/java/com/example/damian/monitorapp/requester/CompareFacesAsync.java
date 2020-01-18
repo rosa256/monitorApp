@@ -2,6 +2,7 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -30,15 +31,17 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     private Image target;
     private String confidence ="-1";
     private BusyIndicator busyIndicator;
+    private FloatingActionButton sendPhotoAwsButton;
 
     private Exception exception;
 
-    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context, CameraPreviewFragment cameraPreviewFragment) {
+    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
         super();
         this.amazonRekognitionClient = rekognitionClient;
         this.source = source;
         this.target = target;
         this.context = context;
+        this.sendPhotoAwsButton = sendPhotoAwsButton;
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
 
         objectMapper = new ObjectMapper();
@@ -90,5 +93,6 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
         super.onPostExecute(aVoid);
         Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
         busyIndicator.unDimBackgorund();
+        sendPhotoAwsButton.setEnabled(true);
     }
 }
