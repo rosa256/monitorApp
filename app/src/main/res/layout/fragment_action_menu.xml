@@ -13,15 +13,6 @@
             >
 
                 <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_take_photo"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:backgroundTint="@color/gray_lite"
-                    android:layout_gravity="center"
-                    />
-
-                <android.support.design.widget.FloatingActionButton
                     android:id="@+id/fab_send_photo_aws"
                     android:layout_width="43dp"
                     android:layout_height="43dp"

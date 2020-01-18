@@ -16,13 +16,11 @@ import android.widget.Toast;
 import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.FileManager;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -56,7 +54,6 @@ public class ActionMenu extends Fragment{
         super.onAttach(context);
     }
 
-    @OnClick(R.id.fab_take_photo)
     public void onTakePhoneButtonClicked() {
 
         cameraPreviewFragment = (CameraPreviewFragment) getFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
