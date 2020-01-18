@@ -50,4 +50,21 @@
             android:layout_marginRight="8dp"
             />
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/dim_fragment_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="invisible"
+        android:alpha="0.5"
+        android:background="@color/colorBlack"
+        >
+
+    <ProgressBar
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:focusable="false"
+        android:visibility="visible"
+        />
+    </RelativeLayout>
 </FrameLayout>

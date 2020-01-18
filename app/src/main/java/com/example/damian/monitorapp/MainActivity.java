@@ -1,6 +1,5 @@
 package com.example.damian.monitorapp;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 
@@ -12,7 +11,6 @@ import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
-import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private String awsServiceOption = Constants.AWS_DETECT_FACES;
 
     Intent serviceIntent;
-    CameraPreviewFragment fr;
+    private CameraPreviewFragment cameraPreviewFragment;
 
 
     public MainActivity() { }
@@ -140,10 +138,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
-        fr = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
-        if (fr != null) {
+        cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
+        if (cameraPreviewFragment != null) {
             Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
-            fr.getImageViewSource().setImageBitmap(myBitmap);
+            cameraPreviewFragment.getImageViewSource().setImageBitmap(myBitmap);
         }
         //TODO--end
 
@@ -155,12 +153,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
-
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, getApplicationContext());
+                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this, cameraPreviewFragment);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -183,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             serviceIntent = new Intent(this, CameraService.class);
             serviceIntent.setPackage("com.example.damian.monitorapp");
             serviceIntent.setAction(CameraService.ACTION_START);
-            fr.onStop();
+            cameraPreviewFragment.onStop();
             //writeServiceStatePreference(1); //Service ON;
             System.out.println("Service START NO PREVIEW");
             Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();

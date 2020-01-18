@@ -12,7 +12,9 @@ import com.amazonaws.services.rekognition.model.CompareFacesRequest;
 import com.amazonaws.services.rekognition.model.CompareFacesResult;
 import com.amazonaws.services.rekognition.model.ComparedFace;
 import com.amazonaws.services.rekognition.model.Image;
+import com.example.damian.monitorapp.BusyIndicator;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -27,17 +29,20 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     private Image source;
     private Image target;
     private String confidence ="-1";
+    private BusyIndicator busyIndicator;
 
     private Exception exception;
 
-    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context) {
+    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context, CameraPreviewFragment cameraPreviewFragment) {
         super();
         this.amazonRekognitionClient = rekognitionClient;
         this.source = source;
         this.target = target;
         this.context = context;
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
 
         objectMapper = new ObjectMapper();
+        busyIndicator.dimBackground();
     }
 
 
@@ -84,5 +89,6 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
+        busyIndicator.unDimBackgorund();
     }
 }

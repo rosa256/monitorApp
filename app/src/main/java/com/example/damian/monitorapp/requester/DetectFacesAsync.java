@@ -2,7 +2,6 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.os.CountDownTimer;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,10 +11,11 @@ import com.amazonaws.services.rekognition.model.AgeRange;
 import com.amazonaws.services.rekognition.model.DetectFacesRequest;
 import com.amazonaws.services.rekognition.model.DetectFacesResult;
 import com.amazonaws.services.rekognition.model.FaceDetail;
+import com.example.damian.monitorapp.BusyIndicator;
+import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResult> {
@@ -26,12 +26,16 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     private DetectFacesRequest request;
     private AmazonRekognitionClient amazonRekognitionClient;
     private String gender ="-1";
+    private BusyIndicator busyIndicator;
 
-    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context) {
+    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context, CameraPreviewFragment cameraPreviewFragment) {
         super();
         amazonRekognitionClient = rekognitionClient;
         this.context = context;
         this.request = request;
+
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        busyIndicator.dimBackground();
     }
 
     @Override
@@ -75,6 +79,7 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     protected void onPostExecute(DetectFacesResult detectFacesResult) {
         super.onPostExecute(detectFacesResult);
         Toast.makeText(context.getApplicationContext(), "Gender: " + gender, Toast.LENGTH_LONG).show();
+        busyIndicator.unDimBackgorund();
         context = null;
     }
 }
