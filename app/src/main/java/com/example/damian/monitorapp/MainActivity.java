@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -82,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     int currentPictureID = 0;
     int pictureTimer = 0;
     private TextView statusTextField;
+    private FloatingActionButton sendPhotoAwsButton;
 
     private MaterialIconView playButton;
     private MaterialIconView playService;
@@ -134,6 +136,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         stopService = (MaterialIconView) findViewById(R.id.stopServiceButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
+        sendPhotoAwsButton = (FloatingActionButton) findViewById(R.id.fab_send_photo_aws);
+
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
@@ -153,11 +157,12 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.fab_send_photo_aws)
     public void onSendPhotoToAWS() {
+        sendPhotoAwsButton.setEnabled(false);
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this, cameraPreviewFragment);
+                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this, cameraPreviewFragment, sendPhotoAwsButton);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

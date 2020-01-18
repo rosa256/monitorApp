@@ -2,6 +2,7 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -27,12 +28,14 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     private AmazonRekognitionClient amazonRekognitionClient;
     private String gender ="-1";
     private BusyIndicator busyIndicator;
+    private FloatingActionButton sendPhotoAwsButton;
 
-    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context, CameraPreviewFragment cameraPreviewFragment) {
+    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
         super();
         amazonRekognitionClient = rekognitionClient;
         this.context = context;
         this.request = request;
+        this.sendPhotoAwsButton = sendPhotoAwsButton;
 
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
         busyIndicator.dimBackground();
@@ -80,6 +83,7 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
         super.onPostExecute(detectFacesResult);
         Toast.makeText(context.getApplicationContext(), "Gender: " + gender, Toast.LENGTH_LONG).show();
         busyIndicator.unDimBackgorund();
+        sendPhotoAwsButton.setEnabled(true);
         context = null;
     }
 }
