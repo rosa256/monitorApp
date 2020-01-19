@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     static final String DELAY_PREFERENCES_KEY = "delay";
     static final String SERVICE_STATE_KEY = "serviceState";
     Handler handler = new Handler();
-    // assign ID when we start a timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
+    // assign ID when we start awsconfiguration timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
     int currentPictureID = 0;
     int pictureTimer = 0;
     private TextView statusTextField;

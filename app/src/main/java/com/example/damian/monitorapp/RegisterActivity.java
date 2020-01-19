@@ -27,7 +27,7 @@ import butterknife.OnClick;
 public class RegisterActivity extends AppCompatActivity {
 
     private CognitoSettings cognitoSettings;
-    // Create a CognitoUserAttributes object and add user attributes
+    // Create awsconfiguration CognitoUserAttributes object and add user attributes
     private CognitoUserAttributes userAttributes;
     private EditText usernameGiven;
     private EditText passwordGiven;
@@ -60,7 +60,7 @@ public class RegisterActivity extends AppCompatActivity {
         confirmPasswordGiven.setText("ABCabc!@#");
         emailGiven = findViewById(R.id.emailEditText);
         emailGiven.setText("d.rosinski256@gmail.com");
-        /* Creating a CognitoUserPool instance */
+        /* Creating awsconfiguration CognitoUserPool instance */
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(RegisterActivity.this);
 
@@ -90,7 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
                 intent.putExtra("username", usernameGiven.getText().toString());
                 startActivity(intent);
 
-                // This user must be confirmed and a confirmation code was sent to the user
+                // This user must be confirmed and awsconfiguration confirmation code was sent to the user
                 // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
                 // Get the confirmation code from user
             }
@@ -237,7 +237,7 @@ public class RegisterActivity extends AppCompatActivity {
 
 /*          (/^
             (?=.{6,})               //should be 6 characters or more
-            (?=.*[a-z])             //should contain at least one lower case
+            (?=.*[awsconfiguration-z])             //should contain at least one lower case
             (?=.*[A-Z])             //should contain at least one upper case
             (?=.*[@#$%^&+*!=])      //should contain at least 1 special characters
             .*$/)
