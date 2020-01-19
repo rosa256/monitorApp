@@ -20,6 +20,7 @@ import com.amazonaws.services.cognitoidentity.AmazonCognitoIdentityClient;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
+import com.example.damian.monitorapp.requester.RefreshAsyncTask;
 import com.google.gson.Gson;
 
 import java.util.HashMap;
@@ -37,11 +38,11 @@ public class LoginActivity extends AppCompatActivity {
     private EditText password;
     private EditText username;
     private CognitoSettings cognitoSettings;
-    private CognitoUserSession userSession;
     private BusyIndicator busyIndicator;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate: Invoked");
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         busyIndicator = new BusyIndicator(this);
@@ -65,12 +66,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG, "invoke onResume()");
-        if(userSession != null){
-        if(!userSession.isValid()) {
-            Intent intent = new Intent(this,LoginActivity.class);
-            startActivity(intent);
-            }
-        }
+        //PreferenceManager.getDefaultSharedPreferences(getBaseContext()).edit().clear().apply();
     }
 
 
@@ -94,7 +90,6 @@ public class LoginActivity extends AppCompatActivity {
     AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
         @Override
         public void onSuccess(CognitoUserSession cognitoUserSession, CognitoDevice newDevice) {
-            userSession = cognitoUserSession;
             Log.i(TAG, "Sign-in user: " + cognitoUserSession.getUsername());
 
 
@@ -149,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (idToken.length() > 0) {
                         // Set up as a credentials provider.
                         Log.i(TAG, "got id token - setting credentials using token");
-                        //new RefreshAsyncTask().execute(1);
+                        new RefreshAsyncTask().execute(1);
 
                     } else {
                         Log.i(TAG, "no token...");

@@ -112,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate: Invoked");
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.my_toolbar);
@@ -470,6 +471,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     protected void onResume() {
         super.onResume();
+        Log.i(TAG, "onResume: Invoked");
     }
 
     @Override
