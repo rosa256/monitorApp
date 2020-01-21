@@ -1,8 +1,10 @@
 package com.example.damian.monitorapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.amazonaws.mobile.auth.core.DefaultSignInResultHandler;
 import com.amazonaws.mobile.auth.core.IdentityManager;
@@ -11,14 +13,18 @@ import com.amazonaws.mobile.auth.core.StartupAuthErrorDetails;
 import com.amazonaws.mobile.auth.core.StartupAuthResult;
 import com.amazonaws.mobile.auth.core.StartupAuthResultHandler;
 import com.amazonaws.mobile.auth.core.signin.AuthException;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.activity.SignInActivity;
+import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 
 import java.lang.ref.WeakReference;
 
 public class SplashActivity extends Activity implements StartupAuthResultHandler {
 
     private static final String TAG = "SplashActivity";
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +59,7 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
             Log.i(TAG, "onComplete(): User is Signed In.");
             final IdentityProvider identityProvider = identityManager.getCurrentIdentityProvider();
 
+            getDetails();
         }else{
             Log.i(TAG, "onComplete(): User is not Signed In.");
 
@@ -65,6 +72,7 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
                         providerAuthException.getProvider().getDisplayName()), providerAuthException);
             }
             doSignIn(identityManager);
+            return;
         }
     }
 
@@ -88,5 +96,39 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
             }
         });
         SignInActivity.startSignInActivity(this, UILApplication.sAuthUIConfiguration);
+    }
+
+    GetDetailsHandler getDetailsHandler = new GetDetailsHandler() {
+        @Override
+        public void onSuccess(CognitoUserDetails cognitoUserDetails) {
+            // The user detail are in cognitoUserDetails
+            AppHelper.setUserDetails(cognitoUserDetails);
+            String displayName="";
+            if(AppHelper.getItemCount()>0) {
+                displayName = String.format("%s",AppHelper.getItemForDisplay(0).getDataText());
+
+            }else{
+                displayName=username;
+            }
+            Toast.makeText(SplashActivity.this, String.format(getString(R.string.sign_in_message),
+                    displayName), Toast.LENGTH_LONG).show();
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        }
+        @Override
+        public void onFailure(Exception exception) {
+            //closeWaitDialog();
+            // Fetch user details failed, check exception for the cause
+            Log.e(TAG,"Failed to fetch user details "+ exception.getMessage());
+        }
+    };
+
+    private void getDetails() {
+        //showWaitDialog("Signing in...");
+        username = AppHelper.getPool().getCurrentUser().getUserId();
+        if(username!=null) {
+            AppHelper.getPool().getUser(username).getDetailsInBackground(getDetailsHandler);
+        }else{
+            Toast.makeText(this,"Unable to fetch user details", Toast.LENGTH_LONG).show();
+        }
     }
 }

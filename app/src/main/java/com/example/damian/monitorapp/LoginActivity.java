@@ -70,11 +70,10 @@ public class LoginActivity extends AppCompatActivity {
 
         CustomPrivileges.setUpPrivileges(this);
 
-
-//        if(checkCacheCredentials()){
-//            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-//            startActivity(intent);
-//        }
+        if(checkCacheCredentials()){
+            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
     }
 
     @Override

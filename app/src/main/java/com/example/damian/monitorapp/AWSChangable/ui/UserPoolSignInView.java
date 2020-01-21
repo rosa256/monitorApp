@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.amazonaws.mobile.auth.core.signin.SignInManager;
 import com.amazonaws.mobile.auth.userpools.FormView;
 import com.example.damian.monitorapp.AWSChangable.utils.CustomCognitoUserPoolsSignInProvider;
+import com.example.damian.monitorapp.R;
 
 import static com.amazonaws.mobile.auth.core.signin.ui.DisplayUtils.dp;
 import static com.amazonaws.mobile.auth.userpools.UserPoolFormConstants.FORM_SIDE_MARGIN_RATIO;
@@ -80,7 +81,7 @@ public class UserPoolSignInView extends com.amazonaws.mobile.auth.userpools.User
         //super.getChildCount()
         this.setOrientation(VERTICAL);
         this.setGravity(Gravity.CENTER);
-        this.setId(com.amazonaws.mobile.auth.userpools.R.id.user_pool_sign_in_view_id);
+        this.setId(R.id.user_pool_sign_in_view_id);
 
         setupCredentialsForm(context);
         setupSignInButton(context);
@@ -117,7 +118,7 @@ public class UserPoolSignInView extends com.amazonaws.mobile.auth.userpools.User
                 // User Pools requires sign in with the username or verified channel.
                 // Mobile Hub does not set up email verification because it requires SES verification.
                 // Hence, prompt customers to login using the username or phone number.
-                context.getString(com.amazonaws.mobile.auth.userpools.R.string.sign_in_username));
+                context.getString(R.string.sign_in_username));
         passwordEditText = credentialsFormView.addFormField(context,
                 InputType.TYPE_CLASS_TEXT| InputType.TYPE_TEXT_VARIATION_PASSWORD,
                 context.getString(com.amazonaws.mobile.auth.userpools.R.string.sign_in_password));
@@ -131,12 +132,12 @@ public class UserPoolSignInView extends com.amazonaws.mobile.auth.userpools.User
         signInButton.setText(context.getString(com.amazonaws.mobile.auth.userpools.R.string.sign_in_button_text));
         signInButton.setAllCaps(false);
         signInButton.setBackgroundDrawable(
-                getResources().getDrawable(com.ipragmatech.aws.cognito.cognitousersample.R.drawable.round_login_button));
+                getResources().getDrawable(R.drawable.round_login_button));
 
         final Resources resources = getResources();
         final LayoutParams signInButtonLayoutParams = new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                resources.getDimensionPixelSize(com.ipragmatech.aws.cognito.cognitousersample.R.dimen.sign_in_custom_button_height));
+                resources.getDimensionPixelSize(R.dimen.sign_in_custom_button_height));
         final int signInButtonMarginTopBottom
                 = resources.getDimensionPixelSize(com.amazonaws.mobile.auth.userpools.R.dimen.user_pools_sign_in_button_margin_top_bottom);
         signInButtonLayoutParams.setMargins(

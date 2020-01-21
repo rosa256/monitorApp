@@ -1,9 +1,4 @@
 package com.example.damian.monitorapp.AWSChangable.ui;
-
-/**
- * Created by noopur on 09/11/17.
- */
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -55,7 +50,7 @@ public class SignInView extends LinearLayout {
     private static final String AWS_MOBILE_AUTH_GROUP_NAME = "com.amazonaws";
 
     /** Dependency name for UserPool SignIn View class. */
-    private static final String USER_POOL_SIGN_IN_VIEW = "com.ipragmatech.aws.cognito.cognitousersample.ui.customeView.UserPoolSignInView";
+    private static final String USER_POOL_SIGN_IN_VIEW = "com.example.damian.monitorapp.AWSChangable.ui.UserPoolSignInView";
 
     /** Dependency name for FormView of UserPool SignIn. */
     private static final String FORM_VIEW = NAMESPACE_COMMON_PREFIX + ".userpools.FormView";

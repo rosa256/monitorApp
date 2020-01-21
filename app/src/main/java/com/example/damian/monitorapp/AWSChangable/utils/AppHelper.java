@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class AppHelper {
-    public static final String IDENTITY_POOL_ID = "us-east-1:ba3d2ee7-97ec-432e-b778-be6816264677";
+    public static final String IDENTITY_POOL_ID = "eu-west-2:6c31e36c-774e-4130-bc73-db9117a699fa";
     // App settings
 
     private static List<String> attributeDisplaySeq;
@@ -56,25 +56,25 @@ public class AppHelper {
     /**
      * Add your pool id here
      */
-    public static final String userPoolId = "us-east-1_H9jNLncP8";
+    public static final String userPoolId = "eu-west-2_sCEw4HzrG";
 
     /**
      * Add you app id
      */
-    private static final String clientId = "7ksggetonggpvu4rcj3thea606";
+    private static final String clientId = "mvta0p8a66pu2cj331gacpada";
 
     /**
      * App secret associated with your app id - if the App id does not have an associated App secret,
      * set the App secret to null.
      * e.g. clientSecret = null;
      */
-    private static final String clientSecret = "ln76nu7gohokmbbrsk7lu96v4bmmi1gvc5hlmt1en4ooq4u2cub";
+    private static final String clientSecret = "14tt69f0bbarcc5hs1b8rjafhlk2nkbhn5ojnnmh7prd7ivmviat";
 
     /**
      * Set Your User Pools region.
      * e.g. if your user pools are in US East (N Virginia) then set cognitoRegion = Regions.US_EAST_1.
      */
-    public static final Regions cognitoRegion = Regions.US_EAST_1;
+    public static final Regions cognitoRegion = Regions.EU_WEST_2;
 
     // User details from the service
     private static CognitoUserSession currSession;

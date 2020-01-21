@@ -53,7 +53,7 @@ public class ClientAWSFactory extends AppCompatActivity{
                     String idToken = userSession.getIdToken().getJWTToken();
 
                     if (idToken.length() > 0) {
-                        // Set up as awsconfiguration credentials provider.
+                        // Set up as a credentials provider.
                         Log.i(TAG, "got id token - setting credentials using token");
                         Map<String, String> logins = new HashMap<>();
                         System.out.println("Size:"+credentialsProvider.getLogins().size());

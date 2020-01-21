@@ -10,6 +10,7 @@ import com.amazonaws.mobile.config.AWSConfiguration;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.AWSChangable.utils.AuthUIConfiguration;
 import com.example.damian.monitorapp.AWSChangable.utils.CustomCognitoUserPoolsSignInProvider;
+import com.example.damian.monitorapp.R;
 
 public class UILApplication extends MultiDexApplication {
     private static boolean activityVisible;

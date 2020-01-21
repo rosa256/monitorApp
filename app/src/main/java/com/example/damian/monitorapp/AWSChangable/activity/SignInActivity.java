@@ -11,7 +11,9 @@ import com.amazonaws.mobile.auth.core.SignInResultHandler;
 import com.amazonaws.mobile.auth.core.signin.SignInManager;
 import com.amazonaws.mobile.auth.core.signin.SignInProviderResultHandler;
 import com.example.damian.monitorapp.AWSChangable.utils.AuthUIConfiguration;
+import com.example.damian.monitorapp.MainActivity;
 import com.example.damian.monitorapp.R;
+import com.example.damian.monitorapp.SplashActivity;
 
 import java.util.HashMap;
 import java.util.UUID;
@@ -96,7 +98,9 @@ public class SignInActivity extends AppCompatActivity {
             SignInManager.dispose();
             SignInResultHandler signInResultsHandler = SignInActivity.this.signInManager.getResultHandler();
             signInResultsHandler.onSuccess(SignInActivity.this, provider);
+            startActivity(new Intent(SignInActivity.this, MainActivity.class));
             SignInActivity.this.finish();
+
         }
 
         public void onCancel(IdentityProvider provider) {
@@ -110,3 +114,4 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 }
+
