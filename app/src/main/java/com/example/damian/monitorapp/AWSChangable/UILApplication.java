@@ -22,7 +22,7 @@ public class UILApplication extends MultiDexApplication {
                     .userPools(true)
                     //.logoResId(R.drawable.default_sign_in_logo)
                     .build();
-
+    public static CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider;
     @TargetApi(Build.VERSION_CODES.GINGERBREAD)
     @SuppressWarnings("unused")
 
@@ -41,7 +41,7 @@ public class UILApplication extends MultiDexApplication {
 
 
         if (IdentityManager.getDefaultIdentityManager() == null) {
-            CognitoCachingCredentialsProvider credentials = new CognitoCachingCredentialsProvider(
+            cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
                     getApplicationContext(),
                     AppHelper.IDENTITY_POOL_ID,
                     AppHelper.cognitoRegion);

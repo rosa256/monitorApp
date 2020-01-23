@@ -89,7 +89,7 @@ public class SignInView extends LinearLayout {
     public static final int DEFAULT_BACKGROUND_COLOR = Color.TRANSPARENT;
 
     /** Resource Identitifer for default Logo Image. */
-    public static final int DEFAULT_LOGO_IMAGE_RES_ID = R.drawable.ip_logo;
+    public static final int DEFAULT_LOGO_IMAGE_RES_ID = R.drawable.splash_nobg;
 
     /** Image View. */
     private ImageView imageView;

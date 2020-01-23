@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -33,13 +34,19 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.auth.core.IdentityManager;
+import com.amazonaws.mobile.auth.core.IdentityProvider;
+import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
+import com.example.damian.monitorapp.AWSChangable.UILApplication;
+import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
@@ -92,6 +99,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private Toolbar mToolbar;
     private boolean onOff = false;
 
+    private AppHelper appHelper;
+
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
@@ -130,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         fileManager.initFileManager(this.getResources());
 
         usernameEditText = findViewById(R.id.usernameEditText);
-        usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
+        usernameEditText.setText(AppHelper.getPool().getCurrentUser().getUserId());
 
         playButton = (MaterialIconView) findViewById(R.id.runAppButton);
         playService = (MaterialIconView) findViewById(R.id.runServiceButton);
@@ -142,6 +151,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
+
+        Toast.makeText(getApplicationContext(), AppHelper.getPool().getCurrentUser().getUserId(), Toast.LENGTH_LONG ).show();
+        boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
+        Toast.makeText(getApplicationContext(), Boolean.toString(b), Toast.LENGTH_LONG ).show();
+
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
         if (cameraPreviewFragment != null) {
@@ -151,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         //TODO--end
 
         this.readDelayPreference();
-
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
     }

@@ -16,11 +16,8 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- Since android Pie (API level 28), need to add the FOREGROUND_SERVICE permission. -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <!---<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
 
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        tools:node="replace" />
 
     <application
         android:name=".AWSChangable.UILApplication"

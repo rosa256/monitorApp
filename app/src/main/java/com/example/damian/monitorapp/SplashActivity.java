@@ -18,6 +18,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetail
 import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.activity.SignInActivity;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
+import com.example.damian.monitorapp.Utils.CustomPrivileges;
 
 import java.lang.ref.WeakReference;
 
@@ -58,7 +59,7 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
         if(authResults.isUserSignedIn()){
             Log.i(TAG, "onComplete(): User is Signed In.");
             final IdentityProvider identityProvider = identityManager.getCurrentIdentityProvider();
-
+            IdentityManager.setDefaultIdentityManager(authResults.getIdentityManager());
             getDetails();
         }else{
             Log.i(TAG, "onComplete(): User is not Signed In.");
@@ -71,6 +72,7 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
                         "Credentials for Previously signed-in provider %s could not be refreshed.",
                         providerAuthException.getProvider().getDisplayName()), providerAuthException);
             }
+
             doSignIn(identityManager);
             return;
         }
@@ -95,7 +97,12 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
                 return false;
             }
         });
+
         SignInActivity.startSignInActivity(this, UILApplication.sAuthUIConfiguration);
+
+        CustomPrivileges.setUpPrivileges(this);
+
+
     }
 
     GetDetailsHandler getDetailsHandler = new GetDetailsHandler() {
@@ -110,8 +117,8 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
             }else{
                 displayName=username;
             }
-            Toast.makeText(SplashActivity.this, String.format(getString(R.string.sign_in_message),
-                    displayName), Toast.LENGTH_LONG).show();
+           // Toast.makeText(SplashActivity.this, String.format(getString(R.string.sign_in_message),
+            //        displayName), Toast.LENGTH_LONG).show();
             startActivity(new Intent(SplashActivity.this, MainActivity.class));
         }
         @Override

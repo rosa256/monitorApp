@@ -12,6 +12,7 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
+import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.models.UserDO;
@@ -35,12 +36,12 @@ public class DatabaseAccess {
         this.context = context;
 
         cognitoSettings = CognitoSettings.getInstance();
-        credentialsProvider = cognitoSettings.getCredentialsProvider();
+        credentialsProvider = UILApplication.cognitoCachingCredentialsProvider;
 
-        amazonDynamoDBClient = new AmazonDynamoDBClient(credentialsProvider);
+        amazonDynamoDBClient = new AmazonDynamoDBClient(UILApplication.cognitoCachingCredentialsProvider);
         amazonDynamoDBClient.setRegion(Region.getRegion(Constants.COGNITO_REGION));
 
-        dbTable = Table.loadTable(amazonDynamoDBClient, TABLE_NAME);
+        //dbTable = Table.loadTable(amazonDynamoDBClient, TABLE_NAME);
     }
 
     public static synchronized DatabaseAccess getInstance(Context context){
@@ -55,13 +56,13 @@ public class DatabaseAccess {
             userCheckDocument.put("userId", credentialsProvider.getCachedIdentityId());
         }
         if(!userCheckDocument.containsKey(""))
-
+        return;
 
 /*
         PutItemOperationConfig putItemOperationConfig = new PutItemOperationConfig();
         putItemOperationConfig.withReturnValues(ReturnValue.ALL_OLD);
 */
-        dbTable.putItem(userCheckDocument/*, putItemOperationConfig*/);
+    //    dbTable.putItem(userCheckDocument/*, putItemOperationConfig*/);
     }
 
 
