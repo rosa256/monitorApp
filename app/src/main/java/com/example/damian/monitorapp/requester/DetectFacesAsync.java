@@ -37,8 +37,8 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
         this.request = request;
         this.sendPhotoAwsButton = sendPhotoAwsButton;
 
-        busyIndicator = new BusyIndicator(cameraPreviewFragment);
-        busyIndicator.dimBackground();
+        //busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        //busyIndicator.dimBackground();
     }
 
     @Override
@@ -82,8 +82,8 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     protected void onPostExecute(DetectFacesResult detectFacesResult) {
         super.onPostExecute(detectFacesResult);
         Toast.makeText(context.getApplicationContext(), "Gender: " + gender, Toast.LENGTH_LONG).show();
-        busyIndicator.unDimBackgorund();
-        sendPhotoAwsButton.setEnabled(true);
+        //busyIndicator.unDimBackgorund();
+        //sendPhotoAwsButton.setEnabled(true);
         context = null;
     }
 }

@@ -38,7 +38,9 @@ import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.Size;
@@ -50,8 +52,13 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.amazonaws.services.rekognition.AmazonRekognitionClient;
+import com.example.damian.monitorapp.Utils.ClientAWSFactory;
+import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.Utils.ImageSaver;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
+import com.example.damian.monitorapp.requester.RekognitionRequester;
 
 
 import java.util.ArrayList;
@@ -75,6 +82,8 @@ public class CameraService extends Service {
     private static final Integer ONGOING_NOTIFICATION_ID = 6660;
     private static final String CHANNEL_ID = "cam_service_channel_id";
     private static final String CHANNEL_NAME = "cam_service_channel_name";
+    private static final String DELAY_PREFERENCES_KEY = "delay";
+
 
     String tagLock = "com.my_app:LOCK";
 
@@ -105,6 +114,10 @@ public class CameraService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private final Object mLock = new Object();
 
+    private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
+    CameraPreviewFragment cameraPreviewFragment;
+    private FloatingActionButton sendPhotoAwsButton;
+
     /*
     * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
     * */
@@ -116,6 +129,8 @@ public class CameraService extends Service {
         ORIENTATIONS.append(Surface.ROTATION_180, 270);
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
+
+    private AmazonRekognitionClient rekognitionClient;
 
     @Nullable
     @Override
@@ -148,6 +163,9 @@ public class CameraService extends Service {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         handler = new Handler();
         openBackgroundThread();
+        rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
+        readDelayPreference();
+
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
@@ -322,6 +340,8 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
+            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_DETECT_FACES, CameraService.this, cameraPreviewFragment, sendPhotoAwsButton);
+
         }
     };
 
@@ -516,4 +536,15 @@ public class CameraService extends Service {
             //isON = false;
         }
     }
+
+    void readDelayPreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int delay = prefs.getInt(DELAY_PREFERENCES_KEY, -1);
+      //  if (!DELAY_DURATIONS.contains(delay)) {
+      //      delay = DEFAULT_DELAY;
+      //  }
+        this.pictureDelay = delay;
+    }
+
 }
