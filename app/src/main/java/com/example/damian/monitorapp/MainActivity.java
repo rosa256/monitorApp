@@ -33,6 +33,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobile.auth.core.IdentityManager;
 import com.amazonaws.mobile.auth.core.IdentityProvider;
@@ -92,9 +93,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private TextView statusTextField;
     private FloatingActionButton sendPhotoAwsButton;
 
-    private MaterialIconView playButton;
-    private MaterialIconView playService;
-    private MaterialIconView stopService;
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
     private boolean onOff = false;
@@ -141,9 +139,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         usernameEditText = findViewById(R.id.usernameEditText);
         usernameEditText.setText(AppHelper.getPool().getCurrentUser().getUserId());
 
-        playButton = (MaterialIconView) findViewById(R.id.runAppButton);
-        playService = (MaterialIconView) findViewById(R.id.runServiceButton);
-        stopService = (MaterialIconView) findViewById(R.id.stopServiceButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         sendPhotoAwsButton = (FloatingActionButton) findViewById(R.id.fab_send_photo_aws);
@@ -151,10 +146,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
-
-        Toast.makeText(getApplicationContext(), AppHelper.getPool().getCurrentUser().getUserId(), Toast.LENGTH_LONG ).show();
         boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
-        Toast.makeText(getApplicationContext(), Boolean.toString(b), Toast.LENGTH_LONG ).show();
+        Toast.makeText(getApplicationContext(), Boolean.toString(b), Toast.LENGTH_SHORT ).show();
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
@@ -188,22 +181,32 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.runServiceButton)
     public void runService(){
         //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
-        boolean showPreview = false;
-        if(showPreview) {
-            serviceIntent = new Intent(this, CameraService.class);
-            serviceIntent.setPackage("com.example.damian.monitorapp");
-            serviceIntent.setAction(CameraService.ACTION_START_WITH_PREVIEW);
-            System.out.println("Service START PREVIEW");
-            Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
-        }else {
-            serviceIntent = new Intent(this, CameraService.class);
-            serviceIntent.setPackage("com.example.damian.monitorapp");
-            serviceIntent.setAction(CameraService.ACTION_START);
-            cameraPreviewFragment.onStop();
-            //writeServiceStatePreference(1); //Service ON;
-            System.out.println("Service START NO PREVIEW");
-            Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
+                connectivityManager.getActiveNetworkInfo().isConnected();
+        if(!isInternetConnection){
+            Log.i(TAG, "runService(): No Internet Connection");
+            Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_LONG).show();
+            return;
         }
+
+        serviceIntent = new Intent(this, CameraService.class);
+        serviceIntent.setPackage("com.example.damian.monitorapp");
+        serviceIntent.setAction(CameraService.ACTION_START);
+
+        currentPictureID = 0;
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
+
+        Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+
+        //VisualChanges - BEGIN
+        appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
+        appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+        //VisualChanges - END
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
         } else {
@@ -213,49 +216,24 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.stopServiceButton)
     public void stopMyService(){
-        if(serviceIntent != null)
-        //serviceIntent = new Intent(CameraService.ACTION_STOP);
-        stopService(new Intent(this, CameraService.class));
-        //writeServiceStatePreference(0); //Service OFF;
-        System.out.println("Service STOPED");
-        Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
-    }
 
+        serviceIntent = new Intent(this, CameraService.class);
+        serviceIntent.setPackage("com.example.damian.monitorapp");
+        serviceIntent.setAction(CameraService.ACTION_STOP);
 
-    @OnClick(R.id.runAppButton)
-    public void runApp() {
-        if (!onOff) { //ON
-
-            //Class for checking network conectivity.
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-            boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
-                    connectivityManager.getActiveNetworkInfo().isConnected();
-            if(!isInternetConnection){
-                Log.i(TAG, "runApp: No Internet Connection");
-                System.out.println("NO INTERNET CONNECTION!");
-                Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            onOff = true;
-            currentPictureID = 0;
-            appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
-            appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
-            executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
-
-        } else { //OFF
-            onOff = false;
+        if(serviceIntent != null) {
+            //VisualChanges
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
-            executor.shutdownNow();
+            //VisualChanges
 
-            //Operations to end counting proccess.
+
+            startService(serviceIntent);
+            executor.shutdownNow();
+            handler.removeCallbacksAndMessages(null);
             currentPictureID++;
-            decrementTimer(-1);
-                //Stoping handler postDelayed.
-                handler.removeCallbacksAndMessages(null);
+
+            Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -281,14 +259,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
         if (takePicture) {
-            savePictureNow();
-            //playTimerBeep();
+            //savePictureNow(); - polaczenie z DB i zapis
         } else if (pictureTimer > 0) {
-
             updateTimerMessage(false);
-
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
-            //if (pictureTimer<3) playTimerBeep();
         }
     }
 
@@ -299,7 +273,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 String messageFormat = getString(R.string.timerCountdownMessageFormat);
                 statusTextField.setText(String.format(messageFormat, pictureTimer));
                 if(operationStoped){
-                    messageFormat = "Start Taking Pictures";
+                    messageFormat = "Taking Picture";
                     statusTextField.setText(String.format(messageFormat, pictureTimer));
                 }
             }
@@ -309,7 +283,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.fab_delay_photo)
     public void savePicture() {
         if (this.pictureDelay == 0) {
-            savePictureNow();
+            //savePictureNow();
         } else {
 
             savePictureAfterDelay(this.pictureDelay);

@@ -127,16 +127,18 @@ public class CameraService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         Log.i(TAG, "onStartCommand(): action = " + action);
-
-
-            Log.d(TAG, "onStartCommand: *** action = " + action);
-            switch (action) {
-                case ACTION_START:
-                    start();
-                    //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
-                    break;
-            }
-        return START_STICKY; /** NIE WIEM O CO Z TYM CHODZI */
+        switch (action) {
+            case ACTION_START:
+                start();
+                //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
+                break;
+            case ACTION_STOP:
+                Log.i(TAG, "Received Stop Foreground Intent");
+                stopForeground(true);
+                stopSelf();
+                break;
+        }
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -191,7 +193,7 @@ public class CameraService extends Service {
     }
 
     private void unlockCPU() {
-        if (pmWakeLock != null && mWakeLock.isHeld()) {
+        if (pmWakeLock != null && pmWakeLock.isHeld()) {
             pmWakeLock.release();
             pmWakeLock = null;
             Log.d(TAG, "CameraService unlockCPU()");
@@ -426,6 +428,7 @@ public class CameraService extends Service {
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
         }
     }
+
 
     Runnable periodicTask = new Runnable() {
         public void run() {

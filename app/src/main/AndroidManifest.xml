@@ -50,6 +50,7 @@
             <intent-filter>
                 <action android:name="com.example.damian.monitorApp.START" />
                 <action android:name="com.example.damian.monitorApp.START_WITH_PREVIEW" />
+                <action android:name="com.example.damian.monitorApp.STOP" />
             </intent-filter>
         </service>
     </application>

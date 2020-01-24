@@ -59,7 +59,7 @@
                 android:layout_weight="1"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                app:materialIcon="play_network"
+                app:materialIcon="play_circle_outline"
                 app:materialIconSize="32dp"
                 app:materialIconColor="#DDDDDD"
                 />
@@ -74,18 +74,6 @@
                 app:materialIcon="stop_circle"
                 app:materialIconSize="32dp"
                 app:materialIconColor="#DD2222"
-                />
-
-            <net.steamcrafted.materialiconlib.MaterialIconView
-                android:id="@+id/runAppButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp"
-                app:materialIcon="play_circle_outline"
-                app:materialIconSize="32dp"
-                app:materialIconColor="#DDDDDD"
                 />
 
             <Space
