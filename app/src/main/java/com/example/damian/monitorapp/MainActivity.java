@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
-    static final String SERVICE_STATE_KEY = "serviceState";
+    private static final String SERVICE_STATE_KEY = "service_state";
     Handler handler = new Handler();
     // assign ID when we start awsconfiguration timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
     int currentPictureID = 0;
@@ -146,8 +146,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
-        boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
-        Toast.makeText(getApplicationContext(), Boolean.toString(b), Toast.LENGTH_SHORT ).show();
+        //boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
+
+        Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
@@ -162,6 +163,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        if(readServiceStatePreference()) {
+            resumeUIState();
+        }
+
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -387,17 +392,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         updateDelayButton();
     }
 
-    void writeServiceStatePreference(int serviceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(SERVICE_STATE_KEY, serviceState);
-        editor.commit();
-    }
 
-    int readServiceStatePreference() {
+    boolean readServiceStatePreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        return prefs.getInt(SERVICE_STATE_KEY,0);
+        return prefs.getBoolean(SERVICE_STATE_KEY, false);
     }
 
 
@@ -484,30 +483,22 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
 
-
-    public class DoComparisonThread extends Thread {
-        private static final String TAG = "DoComparisonThread";
-        volatile boolean flag = true;
-
-        @Override
-        public void run() {
-            Log.i(TAG, "begin comparison thread");
-            while (flag) {
-                savePicture();
-                try {
-                    this.sleep(pictureDelay);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
             savePicture();
         }
     };
+
+    void resumeUIState(){
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
+
+        //VisualChanges - BEGIN
+        appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
+        appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+        //VisualChanges - END
+        busyIndicator.dimBackground();
+    }
 }
 

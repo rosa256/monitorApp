@@ -83,6 +83,7 @@ public class CameraService extends Service {
     private static final String CHANNEL_ID = "cam_service_channel_id";
     private static final String CHANNEL_NAME = "cam_service_channel_name";
     private static final String DELAY_PREFERENCES_KEY = "delay";
+    private static final String SERVICE_STATE_KEY = "service_state";
 
 
     String tagLock = "com.my_app:LOCK";
@@ -145,9 +146,10 @@ public class CameraService extends Service {
         switch (action) {
             case ACTION_START:
                 start();
-                //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
+                writeServiceStateSharedPref(true);
                 break;
             case ACTION_STOP:
+                writeServiceStateSharedPref(false);
                 Log.i(TAG, "Received Stop Foreground Intent");
                 stopForeground(true);
                 stopSelf();
@@ -229,10 +231,7 @@ public class CameraService extends Service {
 
     }
 
-
     private void startWithForeground(){
-
-        System.out.println(TAG + ": startWithForeground() ---------------");
         Intent notificationIntent = new Intent(CameraService.this, context.getClass());
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0, notificationIntent, 0);
 
@@ -253,9 +252,7 @@ public class CameraService extends Service {
                 .setTicker(getText(R.string.app_name))
                 .build();
 
-        Toast.makeText(context, "startWithForefroung()", Toast.LENGTH_LONG).show();
         startForeground(ONGOING_NOTIFICATION_ID, notification);
-
     }
 
     private void setUpCamera() {
@@ -546,6 +543,13 @@ public class CameraService extends Service {
       //      delay = DEFAULT_DELAY;
       //  }
         this.pictureDelay = delay;
+    }
+
+    void writeServiceStateSharedPref(boolean state) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(SERVICE_STATE_KEY, state);
+        editor.commit();
     }
 
 }
