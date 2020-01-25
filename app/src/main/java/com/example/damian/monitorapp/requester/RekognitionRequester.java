@@ -12,7 +12,6 @@ import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.util.IOUtils;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.FileManager;
-import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,16 +23,16 @@ public class RekognitionRequester {
     private static final String TAG = "RekognitionRequester";
     private Context context;
 
-    public static void doAwsService(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, String awsServiceOption, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton){
+    public static void doAwsService(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, String awsServiceOption, Context context){
         Log.i(TAG, "doAwsService() - Invoke with awsServiceOption: "+awsServiceOption);
         if(Constants.AWS_DETECT_FACES.equals(awsServiceOption)){
-            doAwsFaceDetection(rekognitionClient, currentTakenPhotoFile, context, cameraPreviewFragment, sendPhotoAwsButton);
+            doAwsFaceDetection(rekognitionClient, currentTakenPhotoFile, context);
         }else if(Constants.AWS_COMPARE_FACES.equals(awsServiceOption)){
-            doAwsCompareFaces(rekognitionClient, currentTakenPhotoFile, context, cameraPreviewFragment, sendPhotoAwsButton);
+            doAwsCompareFaces(rekognitionClient, currentTakenPhotoFile, context);
         }
     }
 
-    private static void doAwsFaceDetection(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
+    private static void doAwsFaceDetection(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context) {
         Log.i(TAG,"doAwsDetectFaces() - Started");
         ByteBuffer sourceImageBytes = null;
 
@@ -52,12 +51,12 @@ public class RekognitionRequester {
                 .withAttributes(Attribute.ALL.toString());
 
         Log.i(TAG,"doAwsFaceDetection() - invoke DetectFacesAsync");
-        new DetectFacesAsync(rekognitionClient, request, context, cameraPreviewFragment, sendPhotoAwsButton).execute();
+        new DetectFacesAsync(rekognitionClient, request, context).execute();
 
         Log.i(TAG,"doAwsDetectFaces() - Finished");
     }
 
-    private static void doAwsCompareFaces(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
+    private static void doAwsCompareFaces(AmazonRekognitionClient rekognitionClient, File currentTakenPhotoFile, Context context) {
         Log.i(TAG,"doAwsCompareFaces() - Started");
 
         ByteBuffer sourceImageBytes = null;
@@ -86,7 +85,7 @@ public class RekognitionRequester {
 
 
         Log.i(TAG,"doAwsCompareFaces() - invoke CompareFacesAsync");
-        new CompareFacesAsync(rekognitionClient, source, target, context, cameraPreviewFragment, sendPhotoAwsButton).execute();
+        new CompareFacesAsync(rekognitionClient, source, target, context).execute();
 
         Log.i(TAG,"doAwsCompareFaces() - Finished");
     }

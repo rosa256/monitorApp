@@ -27,18 +27,12 @@ public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResu
     private DetectFacesRequest request;
     private AmazonRekognitionClient amazonRekognitionClient;
     private String gender ="-1";
-    private BusyIndicator busyIndicator;
-    private FloatingActionButton sendPhotoAwsButton;
 
-    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
+    public DetectFacesAsync(AmazonRekognitionClient rekognitionClient, DetectFacesRequest request, Context context) {
         super();
         amazonRekognitionClient = rekognitionClient;
         this.context = context;
         this.request = request;
-        this.sendPhotoAwsButton = sendPhotoAwsButton;
-
-        //busyIndicator = new BusyIndicator(cameraPreviewFragment);
-        //busyIndicator.dimBackground();
     }
 
     @Override

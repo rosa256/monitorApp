@@ -340,7 +340,7 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
-            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_DETECT_FACES, CameraService.this, cameraPreviewFragment, sendPhotoAwsButton);
+            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_DETECT_FACES, CameraService.this);
 
         }
     };
@@ -453,6 +453,7 @@ public class CameraService extends Service {
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
+
                 savePicture();
         }
     };

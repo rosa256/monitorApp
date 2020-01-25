@@ -112,7 +112,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     Intent serviceIntent;
     private CameraPreviewFragment cameraPreviewFragment;
-
+    private BusyIndicator busyIndicator;
 
     public MainActivity() { }
 
@@ -160,6 +160,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         this.readDelayPreference();
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -169,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             @Override
             public void run() {
                 try {
-                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this, cameraPreviewFragment, sendPhotoAwsButton);
+                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -212,6 +214,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         } else {
             startService(serviceIntent);
         }
+
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        busyIndicator.dimBackground();
+
     }
 
     @OnClick(R.id.stopServiceButton)
@@ -227,11 +233,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
             //VisualChanges
 
-
             startService(serviceIntent);
             executor.shutdownNow();
             handler.removeCallbacksAndMessages(null);
             currentPictureID++;
+
+            busyIndicator.unDimBackgorund();
+            sendPhotoAwsButton.setEnabled(true);
 
             Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
         }
@@ -354,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             this.pictureDelay = DELAY_DURATIONS.get((index + 1) % DELAY_DURATIONS.size());
         }
         writeDelayPreference();
+        //readDelayPreference(); Jezeli by nie dzialalo.
         updateDelayButton();
 
         executor.shutdown();
