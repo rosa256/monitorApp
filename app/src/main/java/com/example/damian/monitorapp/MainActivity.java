@@ -1,8 +1,12 @@
 package com.example.damian.monitorapp;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -33,21 +37,15 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
-import com.amazonaws.mobile.auth.core.IdentityManager;
-import com.amazonaws.mobile.auth.core.IdentityProvider;
-import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.Utils.CustomPrivileges;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
@@ -81,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private CognitoSettings cognitoSettings;
     private Button pictureDelayButton;
 
-    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30);
+    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30, 60);
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
@@ -99,10 +97,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     private AppHelper appHelper;
 
+    private TimeLevelReceiver timeLevelReceiver;
+
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
-    private CameraService cameraService;
 
     private DatabaseAccess databaseAccess;
 
@@ -113,6 +112,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     Intent serviceIntent;
     private CameraPreviewFragment cameraPreviewFragment;
     private BusyIndicator busyIndicator;
+    private IntentFilter mIntentFilter;
 
     public MainActivity() { }
 
@@ -148,7 +148,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         //boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
 
+        timeLevelReceiver = new TimeLevelReceiver();
+
         Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.example.damian.monitorApp.GET_TIME");
+        getApplicationContext().registerReceiver(timeLevelReceiver,mIntentFilter);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
@@ -166,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         if(readServiceStatePreference()) {
             resumeUIState();
         }
-
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -183,6 +188,15 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             }
         });
         thread.start();
+    }
+
+    class TimeLevelReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.example.damian.monitorApp.GET_TIME")) {
+                pictureTimer = intent.getIntExtra("LEVEL_TIME",0);
+            }
+        }
     }
 
     @OnClick(R.id.runServiceButton)
@@ -466,12 +480,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     protected void onResume() {
         super.onResume();
+        registerReceiver(timeLevelReceiver, mIntentFilter);
         Log.i(TAG, "onResume: Invoked");
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+        if(timeLevelReceiver != null) {
+            unregisterReceiver(timeLevelReceiver);
+        }
     }
 
     @Override

@@ -53,6 +53,14 @@
                 <action android:name="com.example.damian.monitorApp.STOP" />
             </intent-filter>
         </service>
+
+        <receiver android:name="com.example.damian.monitorapp.MainActivity$TimeLevelReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.damian.monitorApp.GET_TIME"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

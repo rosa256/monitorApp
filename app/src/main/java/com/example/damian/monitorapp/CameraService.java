@@ -1,7 +1,6 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,8 +14,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -29,7 +26,6 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,19 +33,12 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
-import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.TextureView;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
@@ -116,8 +105,8 @@ public class CameraService extends Service {
     private final Object mLock = new Object();
 
     private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
-    CameraPreviewFragment cameraPreviewFragment;
-    private FloatingActionButton sendPhotoAwsButton;
+    //private final IBinder binder = new LocalBinder();
+
 
     /*
     * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
@@ -133,7 +122,7 @@ public class CameraService extends Service {
 
     private AmazonRekognitionClient rekognitionClient;
 
-    @Nullable
+    //TODO: BĘDĘ MUSIAŁ ZROBIĆ SPRAWDZANIE TEGO TYPU: SERWIS DZIAŁA W TLE, WLACZAM APKE, I NIE LOGUJE MNIE... A sweris dalej dziala?? xD
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -172,7 +161,7 @@ public class CameraService extends Service {
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
-        registerReceiver(launchReceiver, filter);
+        //registerReceiver(launchReceiver, filter);
 
         startWithForeground();
     }
@@ -436,6 +425,7 @@ public class CameraService extends Service {
         }
         boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
+        sendDataToActivity();
         if (takePicture) {
             savePictureNow();
             //playTimerBeep();
@@ -533,6 +523,15 @@ public class CameraService extends Service {
             }
             //isON = false;
         }
+    }
+
+    private void sendDataToActivity()
+    {
+        System.out.println("SENDING TIMEE");
+        Intent sendLevel = new Intent();
+        sendLevel.setAction("com.example.damian.monitorApp.GET_TIME");
+        sendLevel.putExtra( "LEVEL_TIME", pictureTimer);
+        sendBroadcast(sendLevel);
     }
 
     void readDelayPreference() {
