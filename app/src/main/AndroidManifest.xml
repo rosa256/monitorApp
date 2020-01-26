@@ -61,6 +61,12 @@
             </intent-filter>
         </receiver>
 
+        <receiver android:name="com.example.damian.monitorapp.fragments.CameraPreviewFragment$PreviewBroadcastReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.damian.monitorApp.REOPEN_PREVIEW"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

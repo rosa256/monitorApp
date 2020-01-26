@@ -276,6 +276,7 @@ public class CameraService extends Service {
             super.onCaptureCompleted(session, request, result);
                 Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
             closeCamera();
+            reopenCameraPreview();
         }
     };
 
@@ -532,6 +533,14 @@ public class CameraService extends Service {
         sendLevel.setAction("com.example.damian.monitorApp.GET_TIME");
         sendLevel.putExtra( "LEVEL_TIME", pictureTimer);
         sendBroadcast(sendLevel);
+    }
+
+    private void reopenCameraPreview()
+    {
+        System.out.println("SENDING TO PREVIEW");
+        Intent reopenPreviewIntent = new Intent();
+        reopenPreviewIntent.setAction("com.example.damian.monitorApp.REOPEN_PREVIEW");
+        sendBroadcast(reopenPreviewIntent);
     }
 
     void readDelayPreference() {

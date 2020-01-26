@@ -221,8 +221,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
 
-        Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
-
         //VisualChanges - BEGIN
         appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
         appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
@@ -259,8 +257,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
             busyIndicator.unDimBackgorund();
             sendPhotoAwsButton.setEnabled(true);
-
-            Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
         }
     }
 
