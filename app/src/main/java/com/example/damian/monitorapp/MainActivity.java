@@ -1,8 +1,12 @@
 package com.example.damian.monitorapp;
 
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +17,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -37,6 +42,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHa
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
+import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
@@ -73,29 +79,29 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private CognitoSettings cognitoSettings;
     private Button pictureDelayButton;
 
-    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30);
+    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30, 60);
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
-    static final String SERVICE_STATE_KEY = "serviceState";
+    private static final String SERVICE_STATE_KEY = "service_state";
     Handler handler = new Handler();
-    // assign ID when we start a timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
+    // assign ID when we start awsconfiguration timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
     int currentPictureID = 0;
     int pictureTimer = 0;
     private TextView statusTextField;
     private FloatingActionButton sendPhotoAwsButton;
 
-    private MaterialIconView playButton;
-    private MaterialIconView playService;
-    private MaterialIconView stopService;
     private MaterialIconView appStatusIcon;
     private Toolbar mToolbar;
     private boolean onOff = false;
 
+    private AppHelper appHelper;
+
+    private TimeLevelReceiver timeLevelReceiver;
+
     ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor();
 
-    private CameraService cameraService;
 
     private DatabaseAccess databaseAccess;
 
@@ -105,13 +111,15 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     Intent serviceIntent;
     private CameraPreviewFragment cameraPreviewFragment;
-
+    private BusyIndicator busyIndicator;
+    private IntentFilter mIntentFilter;
 
     public MainActivity() { }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(TAG, "onCreate: Invoked");
         setContentView(R.layout.activity_main);
 
         toolbar = findViewById(R.id.my_toolbar);
@@ -129,17 +137,24 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         fileManager.initFileManager(this.getResources());
 
         usernameEditText = findViewById(R.id.usernameEditText);
-        usernameEditText.setText(cognitoSettings.getUserPool().getCurrentUser().getUserId());
+        usernameEditText.setText(AppHelper.getPool().getCurrentUser().getUserId());
 
-        playButton = (MaterialIconView) findViewById(R.id.runAppButton);
-        playService = (MaterialIconView) findViewById(R.id.runServiceButton);
-        stopService = (MaterialIconView) findViewById(R.id.stopServiceButton);
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         sendPhotoAwsButton = (FloatingActionButton) findViewById(R.id.fab_send_photo_aws);
 
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
+
+        //boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
+
+        timeLevelReceiver = new TimeLevelReceiver();
+
+        Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();
+
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.example.damian.monitorApp.GET_TIME");
+        getApplicationContext().registerReceiver(timeLevelReceiver,mIntentFilter);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
@@ -150,9 +165,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         //TODO--end
 
         this.readDelayPreference();
-
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        if(readServiceStatePreference()) {
+            resumeUIState();
+        }
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -162,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             @Override
             public void run() {
                 try {
-                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this, cameraPreviewFragment, sendPhotoAwsButton);
+                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -171,77 +190,73 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         thread.start();
     }
 
+    class TimeLevelReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.example.damian.monitorApp.GET_TIME")) {
+                pictureTimer = intent.getIntExtra("LEVEL_TIME",0);
+            }
+        }
+    }
+
     @OnClick(R.id.runServiceButton)
     public void runService(){
         //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
-        boolean showPreview = false;
-        if(showPreview) {
-            serviceIntent = new Intent(this, CameraService.class);
-            serviceIntent.setPackage("com.example.damian.monitorapp");
-            serviceIntent.setAction(CameraService.ACTION_START_WITH_PREVIEW);
-            System.out.println("Service START PREVIEW");
-            Toast.makeText(this, "Service START PREVIEW", Toast.LENGTH_LONG).show();
-        }else {
-            serviceIntent = new Intent(this, CameraService.class);
-            serviceIntent.setPackage("com.example.damian.monitorapp");
-            serviceIntent.setAction(CameraService.ACTION_START);
-            cameraPreviewFragment.onStop();
-            //writeServiceStatePreference(1); //Service ON;
-            System.out.println("Service START NO PREVIEW");
-            Toast.makeText(this, "Service START NO PREVIEW", Toast.LENGTH_LONG).show();
+
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
+                connectivityManager.getActiveNetworkInfo().isConnected();
+        if(!isInternetConnection){
+            Log.i(TAG, "runService(): No Internet Connection");
+            Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_LONG).show();
+            return;
         }
+
+        serviceIntent = new Intent(this, CameraService.class);
+        serviceIntent.setPackage("com.example.damian.monitorapp");
+        serviceIntent.setAction(CameraService.ACTION_START);
+
+        currentPictureID = 0;
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
+
+        //VisualChanges - BEGIN
+        appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
+        appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+        //VisualChanges - END
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(serviceIntent);
         } else {
             startService(serviceIntent);
         }
+
+        busyIndicator = new BusyIndicator(cameraPreviewFragment);
+        busyIndicator.dimBackground();
+
     }
 
     @OnClick(R.id.stopServiceButton)
     public void stopMyService(){
-        if(serviceIntent != null)
-        //serviceIntent = new Intent(CameraService.ACTION_STOP);
-        stopService(new Intent(this, CameraService.class));
-        //writeServiceStatePreference(0); //Service OFF;
-        System.out.println("Service STOPED");
-        Toast.makeText(this, "Service STOPED", Toast.LENGTH_SHORT).show();
-    }
 
+        serviceIntent = new Intent(this, CameraService.class);
+        serviceIntent.setPackage("com.example.damian.monitorapp");
+        serviceIntent.setAction(CameraService.ACTION_STOP);
 
-    @OnClick(R.id.runAppButton)
-    public void runApp() {
-        if (!onOff) { //ON
-
-            //Class for checking network conectivity.
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-            boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
-                    connectivityManager.getActiveNetworkInfo().isConnected();
-            if(!isInternetConnection){
-                Log.i(TAG, "runApp: No Internet Connection");
-                System.out.println("NO INTERNET CONNECTION!");
-                Toast.makeText(MainActivity.this, "No internet connection!", Toast.LENGTH_LONG).show();
-                return;
-            }
-
-            onOff = true;
-            currentPictureID = 0;
-            appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
-            appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
-            executor = Executors.newSingleThreadScheduledExecutor();
-            executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 3, TimeUnit.SECONDS);
-
-        } else { //OFF
-            onOff = false;
+        if(serviceIntent != null) {
+            //VisualChanges
             appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE_OFF);
             appStatusIcon.setColor(Color.rgb(170, 34, 34)); //RED
-            executor.shutdownNow();
+            //VisualChanges
 
-            //Operations to end counting proccess.
+            startService(serviceIntent);
+            executor.shutdownNow();
+            handler.removeCallbacksAndMessages(null);
             currentPictureID++;
-            decrementTimer(-1);
-                //Stoping handler postDelayed.
-                handler.removeCallbacksAndMessages(null);
+
+            busyIndicator.unDimBackgorund();
+            sendPhotoAwsButton.setEnabled(true);
         }
     }
 
@@ -267,14 +282,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
         if (takePicture) {
-            savePictureNow();
-            //playTimerBeep();
+            //savePictureNow(); - polaczenie z DB i zapis
         } else if (pictureTimer > 0) {
-
             updateTimerMessage(false);
-
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
-            //if (pictureTimer<3) playTimerBeep();
         }
     }
 
@@ -285,7 +296,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 String messageFormat = getString(R.string.timerCountdownMessageFormat);
                 statusTextField.setText(String.format(messageFormat, pictureTimer));
                 if(operationStoped){
-                    messageFormat = "Start Taking Pictures";
+                    messageFormat = "Taking Picture";
                     statusTextField.setText(String.format(messageFormat, pictureTimer));
                 }
             }
@@ -295,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @OnClick(R.id.fab_delay_photo)
     public void savePicture() {
         if (this.pictureDelay == 0) {
-            savePictureNow();
+            //savePictureNow();
         } else {
 
             savePictureAfterDelay(this.pictureDelay);
@@ -366,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             this.pictureDelay = DELAY_DURATIONS.get((index + 1) % DELAY_DURATIONS.size());
         }
         writeDelayPreference();
+        //readDelayPreference(); Jezeli by nie dzialalo.
         updateDelayButton();
 
         executor.shutdown();
@@ -390,17 +402,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         updateDelayButton();
     }
 
-    void writeServiceStatePreference(int serviceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(SERVICE_STATE_KEY, serviceState);
-        editor.commit();
-    }
 
-    int readServiceStatePreference() {
+    boolean readServiceStatePreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        return prefs.getInt(SERVICE_STATE_KEY,0);
+        return prefs.getBoolean(SERVICE_STATE_KEY, false);
     }
 
 
@@ -470,11 +476,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     protected void onResume() {
         super.onResume();
+        registerReceiver(timeLevelReceiver, mIntentFilter);
+        Log.i(TAG, "onResume: Invoked");
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onPause() {
+        super.onPause();
+        if(timeLevelReceiver != null) {
+            unregisterReceiver(timeLevelReceiver);
+        }
     }
 
     @Override
@@ -486,30 +497,22 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
 
-
-    public class DoComparisonThread extends Thread {
-        private static final String TAG = "DoComparisonThread";
-        volatile boolean flag = true;
-
-        @Override
-        public void run() {
-            Log.i(TAG, "begin comparison thread");
-            while (flag) {
-                savePicture();
-                try {
-                    this.sleep(pictureDelay);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
             savePicture();
         }
     };
+
+    void resumeUIState(){
+        executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
+
+        //VisualChanges - BEGIN
+        appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
+        appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
+        //VisualChanges - END
+        busyIndicator.dimBackground();
+    }
 }
 

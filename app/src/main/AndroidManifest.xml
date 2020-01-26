@@ -12,20 +12,15 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <!--<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />-->
-    <!-- Permission require to retrieve View, over other apps. -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
-    <!-- Since android Pie (API level 28), need to add the FOREGROUND_SERVICE permission. -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /> <!-- Permission require to retrieve View, over other apps. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" /> <!-- Since android Pie (API level 28), need to add the FOREGROUND_SERVICE permission. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <!---<uses-permission android:name="android.permission.GET_ACCOUNTS" />-->
 
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-
-
-    <uses-permission
-        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        tools:node="replace" />
 
     <application
+        android:name=".AWSChangable.UILApplication"
         android:allowBackup="true"
         android:icon="@drawable/ic_profile"
         android:label="@string/app_name"
@@ -33,25 +28,45 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SourcePhotoActivity"/>
+        <activity android:name=".AWSChangable.activity.SignInActivity"></activity>
+        <activity android:name=".SourcePhotoActivity" />
         <activity android:name=".RegisterConfirmation" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".MainActivity" />
-        <activity android:name=".LoginActivity">
+        <activity android:name=".LoginActivity"/>
+        <activity android:name=".AbouteMe" />
+        <activity android:name=".AuthenticatorActivity" />
+        <activity android:name=".SplashActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".AbouteMe" />
 
-        <service android:name=".CameraService" >
+        <service android:name=".CameraService">
             <intent-filter>
-                <action android:name="com.example.damian.monitorApp.START"/>
-                <action android:name="com.example.damian.monitorApp.START_WITH_PREVIEW"/>
+                <action android:name="com.example.damian.monitorApp.START" />
+                <action android:name="com.example.damian.monitorApp.START_WITH_PREVIEW" />
+                <action android:name="com.example.damian.monitorApp.STOP" />
             </intent-filter>
         </service>
+
+        <receiver android:name="com.example.damian.monitorapp.MainActivity$TimeLevelReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.damian.monitorApp.GET_TIME"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="com.example.damian.monitorapp.fragments.CameraPreviewFragment$PreviewBroadcastReceiver"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="com.example.damian.monitorApp.REOPEN_PREVIEW"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

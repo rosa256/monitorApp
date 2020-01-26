@@ -30,22 +30,17 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     private Image source;
     private Image target;
     private String confidence ="-1";
-    private BusyIndicator busyIndicator;
-    private FloatingActionButton sendPhotoAwsButton;
 
     private Exception exception;
 
-    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context, CameraPreviewFragment cameraPreviewFragment, FloatingActionButton sendPhotoAwsButton) {
+    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context) {
         super();
         this.amazonRekognitionClient = rekognitionClient;
         this.source = source;
         this.target = target;
         this.context = context;
-        this.sendPhotoAwsButton = sendPhotoAwsButton;
-        busyIndicator = new BusyIndicator(cameraPreviewFragment);
 
         objectMapper = new ObjectMapper();
-        busyIndicator.dimBackground();
     }
 
 
@@ -92,7 +87,5 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
-        busyIndicator.unDimBackgorund();
-        sendPhotoAwsButton.setEnabled(true);
     }
 }

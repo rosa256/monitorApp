@@ -1,7 +1,6 @@
 package com.example.damian.monitorapp;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -15,8 +14,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.PixelFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -29,7 +26,6 @@ import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -37,21 +33,21 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.util.Size;
 import android.util.SparseIntArray;
-import android.view.LayoutInflater;
 import android.view.Surface;
-import android.view.TextureView;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.Toast;
 
+import com.amazonaws.services.rekognition.AmazonRekognitionClient;
+import com.example.damian.monitorapp.Utils.ClientAWSFactory;
+import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.Utils.ImageSaver;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
+import com.example.damian.monitorapp.requester.RekognitionRequester;
 
 
 import java.util.ArrayList;
@@ -75,6 +71,9 @@ public class CameraService extends Service {
     private static final Integer ONGOING_NOTIFICATION_ID = 6660;
     private static final String CHANNEL_ID = "cam_service_channel_id";
     private static final String CHANNEL_NAME = "cam_service_channel_name";
+    private static final String DELAY_PREFERENCES_KEY = "delay";
+    private static final String SERVICE_STATE_KEY = "service_state";
+
 
     String tagLock = "com.my_app:LOCK";
 
@@ -105,6 +104,10 @@ public class CameraService extends Service {
     private PowerManager.WakeLock mWakeLock;
     private final Object mLock = new Object();
 
+    private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
+    //private final IBinder binder = new LocalBinder();
+
+
     /*
     * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
     * */
@@ -117,7 +120,9 @@ public class CameraService extends Service {
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
-    @Nullable
+    private AmazonRekognitionClient rekognitionClient;
+
+    //TODO: BĘDĘ MUSIAŁ ZROBIĆ SPRAWDZANIE TEGO TYPU: SERWIS DZIAŁA W TLE, WLACZAM APKE, I NIE LOGUJE MNIE... A sweris dalej dziala?? xD
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -127,16 +132,19 @@ public class CameraService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();
         Log.i(TAG, "onStartCommand(): action = " + action);
-
-
-            Log.d(TAG, "onStartCommand: *** action = " + action);
-            switch (action) {
-                case ACTION_START:
-                    start();
-                    //Toast.makeText(context, "start()", Toast.LENGTH_LONG).show();
-                    break;
-            }
-        return START_STICKY; /** NIE WIEM O CO Z TYM CHODZI */
+        switch (action) {
+            case ACTION_START:
+                start();
+                writeServiceStateSharedPref(true);
+                break;
+            case ACTION_STOP:
+                writeServiceStateSharedPref(false);
+                Log.i(TAG, "Received Stop Foreground Intent");
+                stopForeground(true);
+                stopSelf();
+                break;
+        }
+        return START_NOT_STICKY;
     }
 
     @Override
@@ -146,11 +154,14 @@ public class CameraService extends Service {
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         handler = new Handler();
         openBackgroundThread();
+        rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
+        readDelayPreference();
+
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
         BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
-        registerReceiver(launchReceiver, filter);
+        //registerReceiver(launchReceiver, filter);
 
         startWithForeground();
     }
@@ -191,7 +202,7 @@ public class CameraService extends Service {
     }
 
     private void unlockCPU() {
-        if (pmWakeLock != null && mWakeLock.isHeld()) {
+        if (pmWakeLock != null && pmWakeLock.isHeld()) {
             pmWakeLock.release();
             pmWakeLock = null;
             Log.d(TAG, "CameraService unlockCPU()");
@@ -209,10 +220,7 @@ public class CameraService extends Service {
 
     }
 
-
     private void startWithForeground(){
-
-        System.out.println(TAG + ": startWithForeground() ---------------");
         Intent notificationIntent = new Intent(CameraService.this, context.getClass());
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0, notificationIntent, 0);
 
@@ -233,9 +241,7 @@ public class CameraService extends Service {
                 .setTicker(getText(R.string.app_name))
                 .build();
 
-        Toast.makeText(context, "startWithForefroung()", Toast.LENGTH_LONG).show();
         startForeground(ONGOING_NOTIFICATION_ID, notification);
-
     }
 
     private void setUpCamera() {
@@ -270,6 +276,7 @@ public class CameraService extends Service {
             super.onCaptureCompleted(session, request, result);
                 Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
             closeCamera();
+            reopenCameraPreview();
         }
     };
 
@@ -320,6 +327,8 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
+            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_DETECT_FACES, CameraService.this);
+
         }
     };
 
@@ -417,6 +426,7 @@ public class CameraService extends Service {
         }
         boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
+        sendDataToActivity();
         if (takePicture) {
             savePictureNow();
             //playTimerBeep();
@@ -427,9 +437,11 @@ public class CameraService extends Service {
         }
     }
 
+
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
+
                 savePicture();
         }
     };
@@ -513,4 +525,39 @@ public class CameraService extends Service {
             //isON = false;
         }
     }
+
+    private void sendDataToActivity()
+    {
+        System.out.println("SENDING TIMEE");
+        Intent sendLevel = new Intent();
+        sendLevel.setAction("com.example.damian.monitorApp.GET_TIME");
+        sendLevel.putExtra( "LEVEL_TIME", pictureTimer);
+        sendBroadcast(sendLevel);
+    }
+
+    private void reopenCameraPreview()
+    {
+        System.out.println("SENDING TO PREVIEW");
+        Intent reopenPreviewIntent = new Intent();
+        reopenPreviewIntent.setAction("com.example.damian.monitorApp.REOPEN_PREVIEW");
+        sendBroadcast(reopenPreviewIntent);
+    }
+
+    void readDelayPreference() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int delay = prefs.getInt(DELAY_PREFERENCES_KEY, -1);
+      //  if (!DELAY_DURATIONS.contains(delay)) {
+      //      delay = DEFAULT_DELAY;
+      //  }
+        this.pictureDelay = delay;
+    }
+
+    void writeServiceStateSharedPref(boolean state) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(SERVICE_STATE_KEY, state);
+        editor.commit();
+    }
+
 }

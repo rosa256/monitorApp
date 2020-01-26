@@ -13,6 +13,7 @@ public class RefreshAsyncTask extends AsyncTask<Integer, Void, Integer> {
     protected Integer doInBackground(Integer... integers) {
         Log.i(TAG, "in asynctask doInBackground()");
         cognitoSettings = CognitoSettings.getInstance();
+        System.out.println("BEFORE REFRESH: "+cognitoSettings.getCredentialsProvider().getToken());
         cognitoSettings.getCredentialsProvider().refresh();
         return integers[0];
     }
@@ -20,5 +21,6 @@ public class RefreshAsyncTask extends AsyncTask<Integer, Void, Integer> {
     @Override
     protected void onPostExecute(Integer action) {
         Log.i(TAG, "in asynctask onPostExecute()");
+        Log.i(TAG, "onPostExecute(): Refresed credentails.");
     }
 }

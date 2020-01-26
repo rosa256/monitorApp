@@ -1,7 +1,10 @@
 package com.example.damian.monitorapp.fragments;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
@@ -71,11 +74,20 @@ public class CameraPreviewFragment extends Fragment {
 
     static final String SERVICE_STATE_KEY = "serviceState";
 
+    private IntentFilter intentFilter;
+    private PreviewBroadcastReceiver previewBroadcastReceiver;
+    private static String REOPEN_PREVIEW = "com.example.damian.monitorApp.REOPEN_PREVIEW";
+
     public CameraPreviewFragment() { }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        intentFilter = new IntentFilter();
+        intentFilter.addAction(REOPEN_PREVIEW);
+
+        previewBroadcastReceiver = new PreviewBroadcastReceiver();
+        getContext().registerReceiver(previewBroadcastReceiver, intentFilter);
     }
 
     @Override
@@ -196,10 +208,6 @@ public class CameraPreviewFragment extends Fragment {
                 //TODO - ROTATION: START https://www.youtube.com/watch?v=z3LAbtDh1VE
                 int deviceOrientation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
                 // TODO: END
-
-
-                //previewSize = chooseOptimalSize(streamConfigurationMap.getOutputSizes(SurfaceTexture.class), width, height);
-
             }
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -221,7 +229,7 @@ public class CameraPreviewFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+        getContext().registerReceiver(previewBroadcastReceiver, intentFilter);
         openBackgroundThread();
         int state = readServiceStatePreference();
         //if(state == 0) {
@@ -234,13 +242,6 @@ public class CameraPreviewFragment extends Fragment {
         //}
     }
 
-    void writeServiceStatePreference(int serviceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(SERVICE_STATE_KEY, serviceState);
-        editor.commit();
-    }
-
     int readServiceStatePreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext());
@@ -251,6 +252,9 @@ public class CameraPreviewFragment extends Fragment {
     public void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: Stoping Front Preview.");
+        if(previewBroadcastReceiver != null) {
+            getContext().unregisterReceiver(previewBroadcastReceiver);
+        }
         closeCamera();
         closeBackgroundThread();
     }
@@ -266,24 +270,6 @@ public class CameraPreviewFragment extends Fragment {
             backgroundThread.quitSafely();
             backgroundThread = null;
             backgroundHandler = null;
-        }
-    }
-
-    private void lock() {
-        try {
-            cameraCaptureSession.capture(captureRequestBuilder.build(),
-                    null, backgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void unlock() {
-        try {
-            cameraCaptureSession.setRepeatingRequest(captureRequestBuilder.build(),
-                    null, backgroundHandler);
-        } catch (CameraAccessException e) {
-            e.printStackTrace();
         }
     }
 
@@ -323,13 +309,21 @@ public class CameraPreviewFragment extends Fragment {
         }
     }
 
+    class PreviewBroadcastReceiver extends BroadcastReceiver{
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if("com.example.damian.monitorApp.REOPEN_PREVIEW".equals(action)) {
+                openCamera();
+            }
+        }
+    }
+
+
     public TextureView getTextureView() {
         return textureView;
     }
-    public void setTextureView(TextureView textureView) {
-        this.textureView =  textureView;
-        this.textureView.setSurfaceTextureListener(surfaceTextureListener);
-    }
+
     public ImageView getImageViewSource() {
         return imageViewSource;
     }
