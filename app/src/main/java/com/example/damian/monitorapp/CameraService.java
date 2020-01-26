@@ -106,6 +106,7 @@ public class CameraService extends Service {
 
     private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
     //private final IBinder binder = new LocalBinder();
+    private BroadcastReceiver launchReceiver;
 
 
     /*
@@ -158,10 +159,12 @@ public class CameraService extends Service {
         readDelayPreference();
 
 
-        IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        BroadcastReceiver launchReceiver = new LaunchBroadcastReceiver();
-        //registerReceiver(launchReceiver, filter);
+        launchReceiver = new LaunchBroadcastReceiver();
+        registerReceiver(launchReceiver, filter);
 
         startWithForeground();
     }
@@ -182,6 +185,8 @@ public class CameraService extends Service {
             handler.removeCallbacksAndMessages(null);
             executor.shutdownNow();
         }
+
+        unregisterReceiver(launchReceiver);
         Log.d(TAG, "stopService: Stopping service");
     }
 
@@ -506,12 +511,15 @@ public class CameraService extends Service {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(Intent.ACTION_SCREEN_ON.equals(action)){
-                //isON = true;
-                //runApp();
-                Log.d(TAG, "onReceive: invoke runApp()");
-            } else if(Intent.ACTION_SCREEN_OFF.equals(action)) {
-                //stopApp();
+            if (Intent.ACTION_USER_PRESENT.equals(action)) {
+                System.out.println("RECEIVED: PRESENT");
+                Log.d(TAG, "PRESENT!");
+            } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
+                System.out.println("RECEIVED: SCREEN ON");
+                Log.d(TAG, "SCREEN ON!");
+            } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                System.out.println("RECEIVED: SCREEN OFF");
+                Log.d(TAG, "SCREEN OFF!");
             }
         }
 
