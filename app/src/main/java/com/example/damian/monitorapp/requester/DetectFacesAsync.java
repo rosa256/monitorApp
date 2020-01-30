@@ -2,23 +2,12 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.amazonaws.services.rekognition.model.AgeRange;
 import com.amazonaws.services.rekognition.model.DetectFacesRequest;
 import com.amazonaws.services.rekognition.model.DetectFacesResult;
-import com.amazonaws.services.rekognition.model.FaceDetail;
-import com.example.damian.monitorapp.BusyIndicator;
-import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
-import com.example.damian.monitorapp.models.nosql.USERDO;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.util.List;
 
 public class DetectFacesAsync extends AsyncTask<String, Integer, DetectFacesResult> {
     private static final String TAG = "DetectFacesAsync";

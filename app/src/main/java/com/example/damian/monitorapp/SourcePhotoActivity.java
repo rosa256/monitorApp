@@ -7,7 +7,6 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.TextureView;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.CustomPrivileges;

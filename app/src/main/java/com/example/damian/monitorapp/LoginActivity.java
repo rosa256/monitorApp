@@ -1,7 +1,6 @@
 package com.example.damian.monitorapp;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,8 +9,6 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.mobile.auth.core.IdentityHandler;
-import com.amazonaws.mobile.auth.core.IdentityManager;
 import com.amazonaws.mobile.auth.ui.AuthUIConfiguration;
 import com.amazonaws.mobile.auth.ui.SignInUI;
 import com.amazonaws.mobile.client.AWSMobileClient;

@@ -2,7 +2,6 @@ package com.example.damian.monitorapp.requester;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -14,17 +13,10 @@ import com.amazonaws.services.rekognition.model.CompareFacesResult;
 import com.amazonaws.services.rekognition.model.ComparedFace;
 import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.services.rekognition.model.InvalidParameterException;
-import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
-import com.example.damian.monitorapp.BusyIndicator;
-import com.example.damian.monitorapp.CameraService;
 import com.example.damian.monitorapp.Utils.Constants;
-import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 public class CompareFacesAsync extends AsyncTask<String, Void, Void> {

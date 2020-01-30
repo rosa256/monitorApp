@@ -5,7 +5,6 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.example.damian.monitorapp.R;
-import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 
 import java.io.File;
 import java.io.IOException;
