@@ -13,12 +13,18 @@ import com.amazonaws.services.rekognition.model.CompareFacesRequest;
 import com.amazonaws.services.rekognition.model.CompareFacesResult;
 import com.amazonaws.services.rekognition.model.ComparedFace;
 import com.amazonaws.services.rekognition.model.Image;
+import com.amazonaws.services.rekognition.model.InvalidParameterException;
+import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.BusyIndicator;
+import com.example.damian.monitorapp.CameraService;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
@@ -29,7 +35,8 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     private Context context;
     private Image source;
     private Image target;
-    private String confidence ="-1";
+    private String confidence ="0";
+    boolean sendFalse;
 
     private Exception exception;
 
@@ -54,32 +61,41 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
                 .withSimilarityThreshold(Constants.SIMILARITY_THRESHOLD);
 
         // Call operation
-        CompareFacesResult compareFacesResult = amazonRekognitionClient.compareFaces(request);
+        // When in target or source photo there is no faces, then its return InvalidparametersExcpetion.
+        CompareFacesResult compareFacesResult;
+        sendFalse = false;
+        try{
+            compareFacesResult = amazonRekognitionClient.compareFaces(request);
 
-        //Display results
-        List<CompareFacesMatch> faceDetails = compareFacesResult.getFaceMatches();
-        for (CompareFacesMatch match: faceDetails){
-            ComparedFace face= match.getFace();
-            BoundingBox position = face.getBoundingBox();
-            System.out.println("Face at " + position.getLeft().toString()
-                    + " " + position.getTop()
-                    + " matches with " + match.getSimilarity().toString()
-                    + "% confidence.");
-            confidence = match.getSimilarity().toString();
-            try {
-                Log.i(TAG,"Complete set of attributes:");
-                Log.i(TAG, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(face));
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-                Log.e("monitorApp","exception",e);
+            List<CompareFacesMatch> faceDetails = compareFacesResult.getFaceMatches();
+            for (CompareFacesMatch match : faceDetails) {
+                ComparedFace face = match.getFace();
+                BoundingBox position = face.getBoundingBox();
+                System.out.println("Face at " + position.getLeft().toString()
+                        + " " + position.getTop()
+                        + " matches with " + match.getSimilarity().toString()
+                        + "% confidence.");
+                confidence = match.getSimilarity().toString();
+                try {
+                    Log.i(TAG, "Complete set of attributes:");
+                    Log.i(TAG, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(face));
+                } catch (JsonProcessingException e) {
+                    e.printStackTrace();
+                    Log.e("monitorApp", "exception", e);
+                }
             }
+
+            List<ComparedFace> uncompared = compareFacesResult.getUnmatchedFaces();
+
+            Log.i(TAG, "There was " + uncompared.size()
+                    + " face(s) that did not match");
+
+        }catch (InvalidParameterException e){
+            sendFalse = true;
         }
 
-        List<ComparedFace> uncompared = compareFacesResult.getUnmatchedFaces();
 
-        Log.i(TAG,"There was " + uncompared.size()
-                + " face(s) that did not match");
-
+        //Display results
         return null;
     }
 
@@ -87,5 +103,14 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
+
+        final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
+        Log.i(TAG, "onPostExecute: Start saving status to DB");
+        if(sendFalse){
+            databaseAccess.createStatus("0");
+        }else{
+            databaseAccess.createStatus(confidence);
+        }
+        Log.i(TAG, "onPostExecute: End saving status to DB");
     }
 }

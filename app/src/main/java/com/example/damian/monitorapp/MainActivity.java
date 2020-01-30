@@ -107,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
-    private String awsServiceOption = Constants.AWS_DETECT_FACES;
+    private String awsServiceOption = Constants.AWS_COMPARE_FACES;
 
     Intent serviceIntent;
     private CameraPreviewFragment cameraPreviewFragment;
@@ -147,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         statusTextField = (TextView) findViewById(R.id.statusTextField);
 
         //boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
-
+        DatabaseAccess.getInstance(this);
         timeLevelReceiver = new TimeLevelReceiver();
 
         Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();

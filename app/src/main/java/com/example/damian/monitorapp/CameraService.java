@@ -332,7 +332,7 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
-            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_DETECT_FACES, CameraService.this);
+            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_COMPARE_FACES, CameraService.this);
 
         }
     };
