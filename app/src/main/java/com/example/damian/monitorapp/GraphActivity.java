@@ -3,8 +3,11 @@ package com.example.damian.monitorapp;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
+import com.example.damian.monitorapp.models.nosql.STATUSDO;
+import com.example.damian.monitorapp.requester.DatabaseAccess;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -20,33 +23,41 @@ import java.util.TimeZone;
 
 public class GraphActivity extends AppCompatActivity {
 
-    LineChart lineChart;
-
+    private static final String TAG = "GraphActivity";
+    private LineChart lineChart;
+    private List<STATUSDO> allStatuses;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
-        lineChart = (LineChart) findViewById(R.id.lineChartId);
+
+        final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
+        Log.i(TAG, "onPostExecute: Start saving status to DB");
+
+        Runnable getStatusesTask = new Runnable() {
+            @Override
+            public void run() {
+                allStatuses = databaseAccess.getStatusFromToday();
+        }};
+
+        Thread statusThread = new Thread(getStatusesTask);
+        statusThread.start();
+        try {
+            statusThread.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         List<MyData> dataObjects = new ArrayList<>();
-        MyData data1 = new MyData(0,0);
-        MyData data2 = new MyData(12600,2);
-        MyData data3 = new MyData(25200,3);
-        MyData data4 = new MyData(61200,5);
-        MyData data5 = new MyData(72400,6);
-        MyData data6 = new MyData(84800,8);
-        MyData data7 = new MyData(86400,10);
 
-        //TODO: IMPORTANT! Values added to dataObject have to be in ascending order!!!!
-        dataObjects.add(data1);
-        dataObjects.add(data2);
-        dataObjects.add(data3);
-        dataObjects.add(data4);
-        dataObjects.add(data5);
-        dataObjects.add(data6);
-        dataObjects.add(data7);
+        int count = 1;
+        for (STATUSDO reply : allStatuses) {
+            dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()),count));
+            count++;
+        }
 
+        lineChart = (LineChart) findViewById(R.id.lineChartId);
 
         List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {

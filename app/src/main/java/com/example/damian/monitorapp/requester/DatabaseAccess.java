@@ -11,16 +11,20 @@ import com.amazonaws.mobileconnectors.dynamodbv2.document.Table;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Primitive;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
+import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.models.nosql.USERDO;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class DatabaseAccess {
@@ -150,6 +154,37 @@ public class DatabaseAccess {
         }
 
         return statusItem;
+    }
+
+
+    public List<STATUSDO> getStatusFromToday(){
+
+        Log.i(TAG, "getStatusFromToday: Find replies for thread Message = 'DynamoDB Thread 2' posted within a period.");
+        //long startDateMilli = (new Date()).getTime() - (14L * 24L * 60L * 60L * 1000L); // Two
+        //long endDateMilli = (new Date()).getTime() - (7L * 24L * 60L * 60L * 1000L); // One
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //String startDate = dateFormatter.format(startDateMilli);
+        //String endDate = dateFormatter.format(endDateMilli);
+
+        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
+        eav.put(":val1", new AttributeValue().withS(AppHelper.getPool().getCurrentUser().getUserId()));
+        //eav.put(":val2", new AttributeValue().withS(startDate));
+        //eav.put(":val3", new AttributeValue().withS(endDate));
+        STATUSDO hasKey = new STATUSDO();
+        hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
+
+        DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
+                .withHashKeyValues(hasKey);
+        //.withExpressionAttributeValues(eav);
+
+        List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
+        for (STATUSDO reply : allStatuses) {
+            System.out.format("Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n", reply.getUserId(),
+                    reply.getFullDate(), reply.getUnixTime(), reply.getVerified());
+        }
+
+        return allStatuses;
     }
 
 
