@@ -4,6 +4,8 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
@@ -16,30 +18,80 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 
+import net.steamcrafted.materialiconlib.MaterialIconView;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
+
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 
 public class GraphActivity extends AppCompatActivity {
 
     private static final String TAG = "GraphActivity";
     private LineChart lineChart;
     private List<STATUSDO> allStatuses;
+    private MaterialIconView refreshButton;
+    private Button refreshButtonWrapper;
+    final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
+        refreshButton = (MaterialIconView) findViewById(R.id.refreshGraphButton);
 
-        final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
+        lineChart = (LineChart) findViewById(R.id.lineChartId);
+
         Log.i(TAG, "onPostExecute: Start saving status to DB");
+
+        Description description = new Description();
+        description.setText("Wykres czasu");
+        lineChart.setDescription(description);
+
+        //lineChart.setVisibleXRangeMaximum(86400F);
+
+        Legend legend = lineChart.getLegend();
+        legend.setEnabled(false);
+
+        ButterKnife.bind(this);
+        lineChart.invalidate(); // refresh
+
+    }
+
+    class MyData{
+        public MyData(int x, int y) {
+            this.valueX = x;
+            this.valueY = y;
+        }
+
+        int valueX;
+        int valueY;
+
+        public int getValueX() {
+            return valueX;
+        }
+
+        public int getValueY() {
+            return valueY;
+        }
+
+    }
+
+    @OnClick({R.id.refreshGraphButton})
+    public void refreshGraph(){
+        Toast.makeText(this,"Refreshing",Toast.LENGTH_SHORT).show();
 
         Runnable getStatusesTask = new Runnable() {
             @Override
             public void run() {
                 allStatuses = databaseAccess.getStatusFromToday();
-        }};
+            }};
 
         Thread statusThread = new Thread(getStatusesTask);
         statusThread.start();
@@ -57,9 +109,8 @@ public class GraphActivity extends AppCompatActivity {
             count++;
         }
 
-        lineChart = (LineChart) findViewById(R.id.lineChartId);
 
-        List<Entry> entries = new ArrayList<Entry>();
+        final List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {
             // turn your data into Entry objects
             entries.add(new Entry(data.getValueX(), data.getValueY()));
@@ -73,7 +124,6 @@ public class GraphActivity extends AppCompatActivity {
         dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.BLUE);
 
-
         LineData lineData = new LineData(dataSet);
 
         lineChart.setDrawBorders(true);
@@ -81,14 +131,7 @@ public class GraphActivity extends AppCompatActivity {
 
         lineChart.setGridBackgroundColor(Color.parseColor("#bbbfbf"));
 
-
         lineChart.setDrawGridBackground(true);
-
-        Description description = new Description();
-        description.setText("Wykres czasu");
-        lineChart.setDescription(description);
-
-        //lineChart.setVisibleXRangeMaximum(86400F);
 
         lineChart.setData(lineData);
         XAxis xAxis = lineChart.getXAxis();
@@ -107,28 +150,8 @@ public class GraphActivity extends AppCompatActivity {
         HourAxisValueFormatter hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
         xAxis.setValueFormatter(hourAxisValueFormatter);
 
+        lineChart.invalidate();
 
-        Legend legend = lineChart.getLegend();
-        legend.setEnabled(false);
-
-        lineChart.invalidate(); // refresh
-    }
-    class MyData{
-        public MyData(int x, int y) {
-            this.valueX = x;
-            this.valueY = y;
-        }
-
-        int valueX;
-        int valueY;
-
-        public int getValueX() {
-            return valueX;
-        }
-
-        public int getValueY() {
-            return valueY;
-        }
 
 
     }

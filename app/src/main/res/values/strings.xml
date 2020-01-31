@@ -107,5 +107,12 @@
     <string name="timerCountdownMessageFormat">Taking picture in %d seconds</string>
     <string name="sign_in_message">"You successfully signed-in as %s."</string>
 
+    <string name="date_prompt">Choose day</string>
+
+    <string-array name="days_array">
+        <item>Today</item>
+        <item>Yesterday</item>
+        <item>Last 7 Days</item>
+    </string-array>
 
 </resources>

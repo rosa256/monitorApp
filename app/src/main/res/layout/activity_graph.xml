@@ -6,9 +6,77 @@
     android:layout_height="match_parent"
     android:id="@+id/LayoutToFill">
 
-    <com.github.mikephil.charting.charts.LineChart
-    android:id="@+id/lineChartId"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="6"
+        android:background="@color/gray_lite"
+        >
+
+
+        <LinearLayout
+            android:id="@+id/wraperLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/gray_strong">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/gray_lite"
+                    android:orientation="horizontal"
+                    android:paddingBottom="10dp"
+                    android:paddingTop="21dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp">
+
+                    <net.steamcrafted.materialiconlib.MaterialIconView
+                        android:background="@drawable/border_input"
+                        android:id="@+id/calendarIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:materialIconSize="38dp"
+                        app:materialIcon="calendar_today"
+                        android:layout_weight="0"
+                        android:layout_margin="2dp"/>
+
+
+                    <Spinner
+                        android:id="@+id/displayDateSpiner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/border_input"
+                        android:entries="@array/days_array"
+                        android:hint="Date"
+                        android:layout_weight="1"
+                        android:layout_margin="2dp"
+                        android:spinnerMode="dropdown"/>
+
+                    <net.steamcrafted.materialiconlib.MaterialIconView
+                        android:background="@drawable/border_input"
+                        android:id="@+id/refreshGraphButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:materialIconSize="38dp"
+                        app:materialIcon="refresh"
+                        android:layout_weight="0"
+                        android:layout_margin="2dp" />
+
+        </LinearLayout>
+
+
+            </LinearLayout>
+
+            <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChartId"
+            android:layout_weight="5"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+
+            </com.github.mikephil.charting.charts.LineChart>
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>
