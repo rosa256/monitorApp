@@ -19,6 +19,7 @@ public class STATUSDO {
     private String _confidence;
     private String _date;
     private String _hour;
+    private String _unixTime;
     private Boolean _verified;
 
     @DynamoDBHashKey(attributeName = "userId")
@@ -62,6 +63,14 @@ public class STATUSDO {
 
     public void setHour(final String _hour) {
         this._hour = _hour;
+    }
+    @DynamoDBAttribute(attributeName = "unix_time")
+    public String getUnixTime() {
+        return _unixTime;
+    }
+
+    public void setUnixTime(final String _unixTime) {
+        this._unixTime = _unixTime;
     }
     @DynamoDBAttribute(attributeName = "verified")
     public Boolean getVerified() {

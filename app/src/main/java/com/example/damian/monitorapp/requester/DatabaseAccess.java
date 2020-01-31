@@ -19,7 +19,9 @@ import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.models.nosql.USERDO;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class DatabaseAccess {
 
@@ -118,6 +120,7 @@ public class DatabaseAccess {
         final STATUSDO statusItem = new STATUSDO();
 
         Calendar now = Calendar.getInstance();
+
         int year = now.get(Calendar.YEAR);
         int month = now.get(Calendar.MONTH) + 1; // Note: zero based!
         int day = now.get(Calendar.DAY_OF_MONTH);
@@ -129,12 +132,16 @@ public class DatabaseAccess {
         String detailHour = String.format("%02d:%02d:%02d", hour, minute, second);
         String full_date =  String.format("%d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
 
+        int offset = now.getTimeZone().getRawOffset() / 1000;
+        int unix_time_utc = (int) (now.getTimeInMillis() / 1000);
+        String unixTime = String.valueOf(unix_time_utc + offset);
+
         statusItem.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
         statusItem.setDate(date);
         statusItem.setHour(detailHour);
         statusItem.setConfidence(confidence);
         statusItem.setFullDate(full_date);
-
+        statusItem.setUnixTime(unixTime);
 
         if(Double.parseDouble(confidence) > 75D ) {
             statusItem.setVerified(true);
@@ -152,12 +159,6 @@ public class DatabaseAccess {
         }
         if(!userCheckDocument.containsKey(""))
         return;
-
-/*
-        PutItemOperationConfig putItemOperationConfig = new PutItemOperationConfig();
-        putItemOperationConfig.withReturnValues(ReturnValue.ALL_OLD);
-*/
-    //    dbTable.putItem(userCheckDocument/*, putItemOperationConfig*/);
     }
 
 

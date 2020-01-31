@@ -9,7 +9,6 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -28,9 +27,7 @@ public class GraphActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
 
-
         lineChart = (LineChart) findViewById(R.id.lineChartId);
-        lineChart.invalidate(); // refresh
 
         List<MyData> dataObjects = new ArrayList<>();
         MyData data1 = new MyData(0,0);
@@ -58,11 +55,11 @@ public class GraphActivity extends AppCompatActivity {
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
-        dataSet.setColor(Color.BLUE);
-        dataSet.setLineWidth(4f);
-        dataSet.setCircleRadius(6f);
-        dataSet.setCircleColor(Color.RED);
-        dataSet.setValueTextSize(13f);
+        dataSet.setColor(Color.parseColor("#03adfc"));
+        dataSet.setLineWidth(3f);
+        dataSet.setCircleRadius(5f);
+        dataSet.setCircleColor(Color.parseColor("#228ea3"));
+        dataSet.setValueTextSize(12f);
         dataSet.setValueTextColor(Color.BLUE);
 
 
@@ -71,9 +68,10 @@ public class GraphActivity extends AppCompatActivity {
         lineChart.setDrawBorders(true);
         lineChart.setBorderColor(Color.BLACK);
 
+        lineChart.setGridBackgroundColor(Color.parseColor("#bbbfbf"));
+
 
         lineChart.setDrawGridBackground(true);
-        lineChart.setGridBackgroundColor(Color.GREEN);
 
         Description description = new Description();
         description.setText("Wykres czasu");
