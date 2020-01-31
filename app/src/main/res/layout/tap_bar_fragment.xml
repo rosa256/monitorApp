@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content" />
 
             <net.steamcrafted.materialiconlib.MaterialIconView
-                android:id="@+id/idCalendar"
+                android:id="@+id/chart_icon_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

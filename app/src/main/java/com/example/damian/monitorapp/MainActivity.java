@@ -271,6 +271,12 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         }
     }
 
+    @OnClick(R.id.chart_icon_id)
+    public void onChartButtonClick(){
+        Intent intent = new Intent(this, GraphActivity.class);
+        startActivity(intent);
+    }
+
     public void decrementTimer(final int pictureID) {
         if (pictureID != this.currentPictureID) {
             updateTimerMessage(true);
