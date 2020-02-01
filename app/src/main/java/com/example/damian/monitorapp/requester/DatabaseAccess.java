@@ -167,7 +167,7 @@ public class DatabaseAccess {
 
     public List<STATUSDO> getStatusFromToday(){
 
-        Log.i(TAG, "getStatusFromYesterday: Invoke method.");
+        Log.i(TAG, "getStatusFromToday(): Invoke method.");
 
         Calendar todayMidnightTime = Calendar.getInstance();
 
@@ -203,7 +203,7 @@ public class DatabaseAccess {
 
     public List<STATUSDO> getStatusFromYesterday(){
 
-        Log.i(TAG, "getStatusFromYesterday: Invoke method.");
+        Log.i(TAG, "getStatusFromYesterday(): Invoke method.");
         // today
         Calendar date = new GregorianCalendar();
 
@@ -213,23 +213,23 @@ public class DatabaseAccess {
         date.set(Calendar.SECOND, 0);
         date.set(Calendar.MILLISECOND, 0);
 
-        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday Start Midnight
+        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday End Midnight
 
         // next day
         date.add(Calendar.DAY_OF_MONTH, -1);
 
-        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday End Midnight
+        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday Start Midnight
 
-        ArrayList<AttributeValue> atributes = new ArrayList<>();
-        atributes.add(new AttributeValue().withS(startDate));
-        atributes.add(new AttributeValue().withS(endDate));
+        ArrayList<AttributeValue> attributes = new ArrayList<>();
+        attributes.add(new AttributeValue().withS(startDate));
+        attributes.add(new AttributeValue().withS(endDate));
 
         STATUSDO hasKey = new STATUSDO();
         hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
 
         Condition yesterdayStatusesCondition = new Condition();
         yesterdayStatusesCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
-        yesterdayStatusesCondition.setAttributeValueList(atributes);
+        yesterdayStatusesCondition.setAttributeValueList(attributes);
 
         DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
                 .withHashKeyValues(hasKey)
@@ -244,6 +244,47 @@ public class DatabaseAccess {
         return allStatuses;
     }
 
+    public List<STATUSDO> getStatusFromLastWeek(){
+
+        Log.i(TAG, "getStatusFromLastWeek(): Invoke method.");
+        // today
+        Calendar date = new GregorianCalendar();
+
+        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Right now time
+
+        // reset hour, minutes, seconds and millis
+        date.set(Calendar.HOUR_OF_DAY, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
+
+        // previous 7 days from midnight (example: 10.01.2020 00:00:00(previous 7 days) - 17.01.2020 15:34:22(right now time))
+        date.add(Calendar.DAY_OF_MONTH, -7);
+
+        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday Start Midnight
+
+        ArrayList<AttributeValue> attributes = new ArrayList<>();
+        attributes.add(new AttributeValue().withS(startDate));
+        attributes.add(new AttributeValue().withS(endDate));
+
+        STATUSDO hasKey = new STATUSDO();
+        hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
+
+        Condition lastWeekCondition = new Condition();
+        lastWeekCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        lastWeekCondition.setAttributeValueList(attributes);
+
+        DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
+                .withHashKeyValues(hasKey)
+                .withRangeKeyCondition("full_date", lastWeekCondition);
+
+        List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
+        for (STATUSDO status : allStatuses) {
+            System.out.format("Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n", status.getUserId(),
+                    status.getFullDate(), status.getUnixTime(), status.getVerified());
+        }
+        return allStatuses;
+    }
 
     public void createUserCheck(Document userCheckDocument){
         if(!userCheckDocument.containsKey("userId")){

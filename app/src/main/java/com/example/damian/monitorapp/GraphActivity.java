@@ -104,7 +104,7 @@ public class GraphActivity extends AppCompatActivity {
             getStatusesTask = new Runnable() {
                 @Override
                 public void run() {
-                    allStatuses = databaseAccess.getStatusFromToday();
+                    allStatuses = databaseAccess.getStatusFromLastWeek();
                 }};
         }
 
