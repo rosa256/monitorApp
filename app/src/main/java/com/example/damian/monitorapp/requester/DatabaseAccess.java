@@ -14,6 +14,8 @@ import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
+import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
+import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
@@ -21,7 +23,13 @@ import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.models.nosql.USERDO;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +185,49 @@ public class DatabaseAccess {
         DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
                 .withHashKeyValues(hasKey);
         //.withExpressionAttributeValues(eav);
+
+        List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
+        for (STATUSDO reply : allStatuses) {
+            System.out.format("Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n", reply.getUserId(),
+                    reply.getFullDate(), reply.getUnixTime(), reply.getVerified());
+        }
+
+        return allStatuses;
+    }
+
+    public List<STATUSDO> getStatusFromYesterday(){
+
+        Log.i(TAG, "getStatusFromYesterday: Invoke method.");
+        // today
+        Calendar date = new GregorianCalendar();
+
+        // reset hour, minutes, seconds and millis
+        date.set(Calendar.HOUR_OF_DAY, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
+
+        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday Start Midnight
+
+        // next day
+        date.add(Calendar.DAY_OF_MONTH, -1);
+
+        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date.getTime()); //Yesterday End Midnight
+
+        ArrayList<AttributeValue> atributes = new ArrayList<>();
+        atributes.add(new AttributeValue().withS(startDate));
+        atributes.add(new AttributeValue().withS(endDate));
+
+        STATUSDO hasKey = new STATUSDO();
+        hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
+
+        Condition condition = new Condition();
+        condition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        condition.setAttributeValueList(atributes);
+
+        DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
+                .withHashKeyValues(hasKey)
+                .withRangeKeyCondition("full_date", condition);
 
         List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
         for (STATUSDO reply : allStatuses) {
