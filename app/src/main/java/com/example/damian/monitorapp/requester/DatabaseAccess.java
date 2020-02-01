@@ -167,24 +167,30 @@ public class DatabaseAccess {
 
     public List<STATUSDO> getStatusFromToday(){
 
-        Log.i(TAG, "getStatusFromToday: Find replies for thread Message = 'DynamoDB Thread 2' posted within a period.");
-        //long startDateMilli = (new Date()).getTime() - (14L * 24L * 60L * 60L * 1000L); // Two
-        //long endDateMilli = (new Date()).getTime() - (7L * 24L * 60L * 60L * 1000L); // One
-        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
-        //String startDate = dateFormatter.format(startDateMilli);
-        //String endDate = dateFormatter.format(endDateMilli);
+        Log.i(TAG, "getStatusFromYesterday: Invoke method.");
 
-        Map<String, AttributeValue> eav = new HashMap<String, AttributeValue>();
-        eav.put(":val1", new AttributeValue().withS(AppHelper.getPool().getCurrentUser().getUserId()));
-        //eav.put(":val2", new AttributeValue().withS(startDate));
-        //eav.put(":val3", new AttributeValue().withS(endDate));
+        Calendar todayMidnightTime = Calendar.getInstance();
+
+        todayMidnightTime.set(Calendar.HOUR_OF_DAY,0);
+        todayMidnightTime.set(Calendar.MINUTE,0);
+        todayMidnightTime.set(Calendar.SECOND,0);
+        todayMidnightTime.set(Calendar.MILLISECOND, 0);
+
+        String todayMidnightString = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(todayMidnightTime.getTime());
+
         STATUSDO hasKey = new STATUSDO();
         hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
 
+        List<AttributeValue> attributeValue = new ArrayList<>();
+        attributeValue.add(new AttributeValue().withS(todayMidnightString));
+
+        Condition todayStatusesCondition = new Condition();
+        todayStatusesCondition.withComparisonOperator(ComparisonOperator.GE);
+        todayStatusesCondition.withAttributeValueList(attributeValue);
+
         DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
-                .withHashKeyValues(hasKey);
-        //.withExpressionAttributeValues(eav);
+                .withHashKeyValues(hasKey)
+                .withRangeKeyCondition("full_date", todayStatusesCondition);
 
         List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
         for (STATUSDO reply : allStatuses) {
@@ -221,13 +227,13 @@ public class DatabaseAccess {
         STATUSDO hasKey = new STATUSDO();
         hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
 
-        Condition condition = new Condition();
-        condition.setComparisonOperator(ComparisonOperator.BETWEEN);
-        condition.setAttributeValueList(atributes);
+        Condition yesterdayStatusesCondition = new Condition();
+        yesterdayStatusesCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        yesterdayStatusesCondition.setAttributeValueList(atributes);
 
         DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
                 .withHashKeyValues(hasKey)
-                .withRangeKeyCondition("full_date", condition);
+                .withRangeKeyCondition("full_date", yesterdayStatusesCondition);
 
         List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
         for (STATUSDO reply : allStatuses) {
