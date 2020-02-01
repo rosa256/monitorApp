@@ -113,6 +113,7 @@
         <item>Today</item>
         <item>Yesterday</item>
         <item>Last 7 Days</item>
+        <item>Custom Date</item>
     </string-array>
 
 </resources>
