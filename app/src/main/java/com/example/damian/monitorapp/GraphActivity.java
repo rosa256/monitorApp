@@ -48,6 +48,8 @@ public class GraphActivity extends AppCompatActivity {
     private Button refreshButtonWrapper;
     private SmoothDateRangePickerFragment smoothDateRangePickerFragment;
     final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
+    private Date customDateStart;
+    private Date customDateEnd;
 
     private final String todayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
     private final String yesterdayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date(System.currentTimeMillis()-24*60*60*1000));
@@ -92,14 +94,14 @@ public class GraphActivity extends AppCompatActivity {
         Runnable getStatusesTask;
 
         if(selectedItem.contains("Today")){
-            Log.i(TAG, "refreshGraph: Today");
+            Log.i(TAG, "refreshGraph(): Today");
             getStatusesTask = new Runnable() {
                 @Override
                 public void run() {
                     allStatuses = databaseAccess.getStatusFromToday();
             }};
         }else if(selectedItem.contains("Yesterday")) {
-            Log.i(TAG, "refreshGraph: Yesterday");
+            Log.i(TAG, "refreshGraph(): Yesterday");
             getStatusesTask = new Runnable() {
                 @Override
                 public void run() {
@@ -107,15 +109,32 @@ public class GraphActivity extends AppCompatActivity {
                 }
             };
         }else if(selectedItem.contains("Custom Date")){
+            Log.i(TAG, "refreshGraph(): Custom Date");
             Toast.makeText(this,"Select your custom Date",Toast.LENGTH_SHORT).show();
             return;
-        }else{
-            Log.i(TAG, "refreshGraph: Selected 7 days");
+        }else if(selectedItem.contains("Last 7 Days")){
+            Log.i(TAG, "refreshGraph(): Selected 7 days");
             getStatusesTask = new Runnable() {
                 @Override
                 public void run() {
                     allStatuses = databaseAccess.getStatusFromLastWeek();
                 }};
+        }else{
+            Log.i(TAG, "refreshGraph(): Selected Range Date");
+            if(customDateEnd != null && customDateStart != null) {
+                getStatusesTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        allStatuses = databaseAccess.getStatusFromCustomDate(customDateStart, customDateEnd);
+                    }
+                };
+            }else{
+                Log.i(TAG, "refreshGraph(): Selected Range Date wrong date: "+ customDateStart);
+                Log.i(TAG, "refreshGraph(): customDateStart: "+ customDateStart);
+                Log.i(TAG, "refreshGraph(): customDateEnd: "+ customDateEnd);
+                Toast.makeText(this,"Wrong Date Range",Toast.LENGTH_SHORT).show();
+                return;
+            }
         }
 
         Toast.makeText(this,"Refreshing",Toast.LENGTH_SHORT).show();
@@ -217,38 +236,23 @@ public class GraphActivity extends AppCompatActivity {
             String customDayEnd = values.get(dayEnd) + "." + values.get(monthEnd + 1) + "." + yearEnd;
             customDate = customDayStart + " - " + customDayEnd;
 
-                            System.out.println(customDayStart);
-                System.out.println(customDayEnd);
-                System.out.println(new Date().toString());
-
-            //---------------------------- Date Validation -------------------
-//            try {
-//                System.out.println(customDayStart);
-//                System.out.println(customDayEnd);
-//                Date customDateStart = new SimpleDateFormat("dd.MM.yyyy").parse(customDayStart);
-//                Date customDateEnd = new SimpleDateFormat("dd.MM.yyyy").parse(customDayEnd);
-//                System.out.println(customDateStart.toString());
-//                System.out.println(customDateEnd.toString());
-//                System.out.println(new Date().toString());
-//
-//                if( customDateStart.after(new Date()) || customDateEnd.after(new Date())){
-//                    Toast.makeText(GraphActivity.this, "Wrong Date Range", Toast.LENGTH_SHORT).show();
-//                    return;
-//                }else{
-//                    System.out.println("INNNNNYYYYYY");
-//                }
-//
-//            } catch (ParseException e) {
-//                e.printStackTrace();
-//            }
-
-
             days_array[days_array.length - 1] = customDate;
 
             ArrayAdapter<String> spinnerArrayAdapter = new ArrayAdapter<String>(GraphActivity.this, android.R.layout.simple_spinner_item, days_array);
             spinnerArrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item); // The drop down view
             dateSpinner.setAdapter(spinnerArrayAdapter);
             dateSpinner.setSelection(days_array.length - 1);
+
+            String customDayEndPlusOne = values.get(dayEnd) + "." + values.get(monthEnd + 1) + "." + yearEnd;
+            try {
+                customDateStart = new SimpleDateFormat("dd.MM.yyyy").parse(customDayStart);
+                customDateEnd = new SimpleDateFormat("dd.MM.yyyy").parse(customDayEndPlusOne);
+                customDateEnd.setHours(23);
+                customDateEnd.setMinutes(59);
+                customDateEnd.setSeconds(59);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
 
         }
     };

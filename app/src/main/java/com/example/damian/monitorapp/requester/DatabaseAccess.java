@@ -286,6 +286,42 @@ public class DatabaseAccess {
         return allStatuses;
     }
 
+    public List<STATUSDO> getStatusFromCustomDate(Date customDateStart, Date customDateEnd){
+
+        Log.i(TAG, "getStatusFromCustomDate(): Invoke method.");
+        // today
+
+        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(customDateStart);
+        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(customDateEnd);
+
+        Log.i(TAG, "getStatusFromCustomDate(): customDateStart: "+ customDateStart);
+        Log.i(TAG, "getStatusFromCustomDate(): customDateEnd: "+ customDateEnd);
+
+        ArrayList<AttributeValue> attributes = new ArrayList<>();
+        attributes.add(new AttributeValue().withS(startDate));
+        attributes.add(new AttributeValue().withS(endDate));
+
+        STATUSDO hasKey = new STATUSDO();
+        hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
+
+        Condition lastWeekCondition = new Condition();
+        lastWeekCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        lastWeekCondition.setAttributeValueList(attributes);
+
+        DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
+                .withHashKeyValues(hasKey)
+                .withRangeKeyCondition("full_date", lastWeekCondition);
+
+        List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
+        for (STATUSDO status : allStatuses) {
+            System.out.format("Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n", status.getUserId(),
+                    status.getFullDate(), status.getUnixTime(), status.getVerified());
+        }
+        return allStatuses;
+    }
+
+
+
     public void createUserCheck(Document userCheckDocument){
         if(!userCheckDocument.containsKey("userId")){
             userCheckDocument.put("userId", credentialsProvider.getCachedIdentityId());
