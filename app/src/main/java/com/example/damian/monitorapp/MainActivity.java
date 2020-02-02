@@ -70,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private Toolbar toolbar;
 
     private CognitoCachingCredentialsProvider credentialsProvider;
-    private RekognitionRequester rekognitionRequester;
     private AmazonRekognitionClient rekognitionClient;
     private AmazonDynamoDBClient dynamoDBClient;
     private CognitoSettings cognitoSettings;
@@ -81,24 +80,14 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
     private static final String SERVICE_STATE_KEY = "service_state";
-    Handler handler = new Handler();
     // assign ID when we start awsconfiguration timed picture, used in makeDecrementTimerFunction callback. If the ID changes, the countdown will stop.
-    int currentPictureID = 0;
-    int pictureTimer = 0;
+
     private TextView statusTextField;
     private FloatingActionButton sendPhotoAwsButton;
 
     private MaterialIconView appStatusIcon;
-    private Toolbar mToolbar;
-    private boolean onOff = false;
-
-    private AppHelper appHelper;
 
     private TimeLevelReceiver timeLevelReceiver;
-
-    ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor();
-
 
     private DatabaseAccess databaseAccess;
 
@@ -166,9 +155,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
-        if(readServiceStatePreference()) {
-            resumeUIState();
-        }
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -191,7 +177,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("com.example.damian.monitorApp.GET_TIME")) {
-                pictureTimer = intent.getIntExtra("LEVEL_TIME",0);
+                int timeToShow = intent.getIntExtra("LEVEL_TIME",0);
+                updateTimerMessage(timeToShow);
             }
         }
     }
@@ -213,10 +200,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         serviceIntent = new Intent(this, CameraService.class);
         serviceIntent.setPackage("com.example.damian.monitorapp");
         serviceIntent.setAction(CameraService.ACTION_START);
-
-        currentPictureID = 0;
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
 
         //VisualChanges - BEGIN
         appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
@@ -248,9 +231,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             //VisualChanges
 
             startService(serviceIntent);
-            executor.shutdownNow();
-            handler.removeCallbacksAndMessages(null);
-            currentPictureID++;
 
             busyIndicator.unDimBackgorund();
             sendPhotoAwsButton.setEnabled(true);
@@ -277,99 +257,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         startActivity(intent);
     }
 
-    public void decrementTimer(final int pictureID) {
-        if (pictureID != this.currentPictureID) {
-            updateTimerMessage(true);
-            return;
-        }
-        boolean takePicture = (pictureTimer == 1);
-        --pictureTimer;
-        if (takePicture) {
-            //savePictureNow(); - polaczenie z DB i zapis
-        } else if (pictureTimer > 0) {
-            updateTimerMessage(false);
-            handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
-        }
-    }
 
-    void updateTimerMessage(final Boolean operationStoped) {
+    void updateTimerMessage(final int timeToDisplay) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 String messageFormat = getString(R.string.timerCountdownMessageFormat);
-                statusTextField.setText(String.format(messageFormat, pictureTimer));
-                if(operationStoped){
-                    messageFormat = "Taking Picture";
-                    statusTextField.setText(String.format(messageFormat, pictureTimer));
-                }
+                statusTextField.setText(String.format(messageFormat, timeToDisplay));
             }
         });
     }
-
-    @OnClick(R.id.fab_delay_photo)
-    public void savePicture() {
-        if (this.pictureDelay == 0) {
-            //savePictureNow();
-        } else {
-
-            savePictureAfterDelay(this.pictureDelay);
-        }
-    }
-
-    void savePictureAfterDelay(int delay) {
-
-        pictureTimer = delay;
-        updateTimerMessage(false);
-        currentPictureID++;
-        handler.postDelayed(makeDecrementTimerFunction(currentPictureID), 1000);
-    }
-
-    Runnable makeDecrementTimerFunction(final int pictureID) {
-        return new Runnable() {
-            public void run() {
-                decrementTimer(pictureID);
-            }
-        };
-    }
-
-    public void savePictureNow() {
-        ActionMenu cameraPreviewFragment = (ActionMenu) getSupportFragmentManager().findFragmentById(R.id.actionMenuFragment);
-        statusTextField.setText("Taking picture...");
-
-        final Document userCheckDocument = new Document();
-        userCheckDocument.put(Constants.DYNAMODB_USERID,cognitoSettings.getUserPool().getCurrentUser().getUserId());
-        userCheckDocument.put(Constants.DYNAMODB_CONFIDENCE,"95");
-
-        final long timestamp = new Date().getTime();
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(timestamp);
-
-        final int hours = calendar.get(Calendar.HOUR);
-        final int minutes = calendar.get(Calendar.MINUTE);
-
-        final String dayString = new SimpleDateFormat("d-MM-YYYY").format(calendar.getTime());
-        final String timeString = new SimpleDateFormat("HH:mm:ss").format(calendar.getTime());
-
-        userCheckDocument.put(Constants.DYNAMODB_DATE,dayString);
-        userCheckDocument.put(Constants.DYNAMODB_HOUR,timeString);
-        userCheckDocument.put(Constants.DYNAMODB_FULLDATE,dayString +" "+timeString);
-
-        cameraPreviewFragment.onTakePhoneButtonClicked();
-
-        Thread threadWrite = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                databaseAccess = DatabaseAccess.getInstance(MainActivity.this);
-                //cognitoSettings.getCredentialsProvider().refresh();
-                //databaseAccess.readUserCheck();
-                databaseAccess.createUserCheck(userCheckDocument);
-            }
-        });
-        threadWrite.start();
-
-        //arManager.getCamera().autoFocus(this);
-    }
-
 
     @OnClick(R.id.button_delay_photo)
     public void cycleDelay() {
@@ -380,10 +277,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             this.pictureDelay = DELAY_DURATIONS.get((index + 1) % DELAY_DURATIONS.size());
         }
         writeDelayPreference();
-        //readDelayPreference(); Jezeli by nie dzialalo.
         updateDelayButton();
-
-        executor.shutdown();
     }
 
     void writeDelayPreference() {
@@ -479,6 +373,9 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     @Override
     protected void onResume() {
         super.onResume();
+        if(readServiceStatePreference()) {
+            resumeUIState();
+        }
         registerReceiver(timeLevelReceiver, mIntentFilter);
         Log.i(TAG, "onResume: Invoked");
     }
@@ -500,17 +397,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
 
-    Runnable periodicTask = new Runnable() {
-        public void run() {
-            // Invoke method(s) to do the work
-            savePicture();
-        }
-    };
-
     void resumeUIState(){
-        executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
-
         //VisualChanges - BEGIN
         appStatusIcon.setIcon(MaterialDrawableBuilder.IconValue.EYE);
         appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
