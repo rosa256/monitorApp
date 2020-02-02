@@ -111,16 +111,9 @@ public class DatabaseAccess {
 
         Runnable runnable = new Runnable() {
             public void run() {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        STATUSDO statusItem = createStatusToSave(confidence);
-
-                        Log.i(TAG, "createStatus: " + statusItem.toString());
-
-                        dynamoDBMapper.save(statusItem);
-                    }
-                }).start();
+                STATUSDO statusItem = createStatusToSave(confidence);
+                Log.i(TAG, "createStatus: " + statusItem.toString());
+                dynamoDBMapper.save(statusItem);
             }
         };
 

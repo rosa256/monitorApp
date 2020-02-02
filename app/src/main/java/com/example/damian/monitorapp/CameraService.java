@@ -73,6 +73,7 @@ public class CameraService extends Service {
     private static final String CHANNEL_NAME = "cam_service_channel_name";
     private static final String DELAY_PREFERENCES_KEY = "delay";
     private static final String SERVICE_STATE_KEY = "service_state";
+    private static final String SERVICE_PICTURE_DELAY_SAVED = "picture_delay_saved";
 
 
     String tagLock = "com.my_app:LOCK";
@@ -93,11 +94,11 @@ public class CameraService extends Service {
     private boolean isON = true;
     int currentPictureID = 0;
     int pictureTimer = 0;
-    ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor();
+    ScheduledExecutorService executor;
     Handler handler;
-    static final int DEFAULT_DELAY = 5;
-    int pictureDelay = DEFAULT_DELAY;
+    static final int DEFAULT_DELAY = 60;
+    int pictureDelay;
+    int pictureDelaySaved;
 
     private boolean cameraClosed;
 
@@ -157,7 +158,7 @@ public class CameraService extends Service {
         openBackgroundThread();
         rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
         readDelayPreference();
-
+        pictureDelaySaved = pictureDelay;
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_PRESENT);
@@ -282,6 +283,12 @@ public class CameraService extends Service {
                 Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
             closeCamera();
             reopenCameraPreview();
+            if(pictureDelay != pictureDelaySaved) {
+                pictureDelaySaved = pictureDelay;
+                executor.shutdown();
+                executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
+            }
         }
     };
 
@@ -332,7 +339,7 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
-            new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_COMPARE_FACES, CameraService.this);
+            //new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_COMPARE_FACES, CameraService.this);
 
         }
     };
@@ -343,7 +350,6 @@ public class CameraService extends Service {
             cameraClosed = false;
             cameraDevice = camera;
             Log.d(TAG, "onOpened: Camera " + camera.getId() + " is opened.");
-
             new Handler().post(new Runnable() {
                 @Override
                 public void run() {
@@ -406,7 +412,6 @@ public class CameraService extends Service {
                 return;
             }
             //(END) CHECK INTERNET CONNECTION
-
             isON = false;
             currentPictureID = 0;
             synchronized (mLock) {
@@ -437,7 +442,7 @@ public class CameraService extends Service {
             //playTimerBeep();
         } else if (pictureTimer > 0) {
 
-            System.out.println("ODLICZAM: "+pictureTimer);
+            System.out.println("ODLICZAM: " + pictureTimer);
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
         }
     }
@@ -446,7 +451,6 @@ public class CameraService extends Service {
     Runnable periodicTask = new Runnable() {
         public void run() {
             // Invoke method(s) to do the work
-
                 savePicture();
         }
     };
@@ -454,9 +458,12 @@ public class CameraService extends Service {
     public void savePicture(){
         if (this.pictureDelay == 0) {
             savePictureNow();
+        } else if(pictureDelay != pictureDelaySaved) {
+            savePictureAfterDelay(this.pictureDelaySaved);
+            Log.i(TAG, "savePicture(): with pictureDelaySaved: " + pictureDelaySaved);
         } else {
-
             savePictureAfterDelay(this.pictureDelay);
+            Log.i(TAG, "savePicture(): with pictureDelay: " + pictureDelay);
         }
     }
 
@@ -512,14 +519,19 @@ public class CameraService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
-                System.out.println("RECEIVED: PRESENT");
                 Log.d(TAG, "PRESENT!");
+                pictureDelaySaved = readServicePicutreDelaySharedPref();
+                executor = Executors.newSingleThreadScheduledExecutor();
+                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelaySaved + 1, TimeUnit.SECONDS);
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
-                System.out.println("RECEIVED: SCREEN ON");
                 Log.d(TAG, "SCREEN ON!");
+
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
-                System.out.println("RECEIVED: SCREEN OFF");
                 Log.d(TAG, "SCREEN OFF!");
+                handler.removeCallbacksAndMessages(null);
+                executor.shutdown();
+                writeServicePicutreDelaySharedPref(pictureTimer);
+
             }
         }
 
@@ -554,7 +566,7 @@ public class CameraService extends Service {
     void readDelayPreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int delay = prefs.getInt(DELAY_PREFERENCES_KEY, -1);
+        int delay = prefs.getInt(DELAY_PREFERENCES_KEY, DEFAULT_DELAY);
       //  if (!DELAY_DURATIONS.contains(delay)) {
       //      delay = DEFAULT_DELAY;
       //  }
@@ -565,6 +577,27 @@ public class CameraService extends Service {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(SERVICE_STATE_KEY, state);
+        editor.commit();
+    }
+
+    int readServicePicutreDelaySharedPref() {
+        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        int delay = prefs.getInt(SERVICE_PICTURE_DELAY_SAVED, DEFAULT_DELAY);
+        Log.i(TAG, "readServicePicutreDelaySharedPref(): Delay saved: " + delay);
+        //  if (!DELAY_DURATIONS.contains(delay)) {
+        //      delay = DEFAULT_DELAY;
+        //  }
+        return delay;
+    }
+
+
+
+    void writeServicePicutreDelaySharedPref(int pictureTimer) {
+        Log.i(TAG, "writeServicePicutreDelaySharedPref(): pictureTimer to save: " + pictureTimer);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SERVICE_PICTURE_DELAY_SAVED, pictureTimer);
         editor.commit();
     }
 
