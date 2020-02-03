@@ -17,6 +17,7 @@ import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
@@ -150,10 +151,13 @@ public class GraphActivity extends AppCompatActivity {
 
         List<MyData> dataObjects = new ArrayList<>();
 
-        int count = 1;
+        int time = 0;
         for (STATUSDO reply : allStatuses) {
-            dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()),count));
-            count++;
+            if(reply.getVerified().equals(true)) {
+                dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()), time)); //1000 * 60 minute
+                time = time + 60; // 60 minute
+            }else
+                dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()),time)); //1000 * 60 minute
         }
 
 
@@ -168,7 +172,7 @@ public class GraphActivity extends AppCompatActivity {
         dataSet.setLineWidth(3f);
         dataSet.setCircleRadius(5f);
         dataSet.setCircleColor(Color.parseColor("#228ea3"));
-        dataSet.setValueTextSize(12f);
+        dataSet.setValueTextSize(0f);
         dataSet.setValueTextColor(Color.BLUE);
 
         LineData lineData = new LineData(dataSet);
@@ -183,8 +187,10 @@ public class GraphActivity extends AppCompatActivity {
         lineChart.setData(lineData);
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
+        xAxis.setAvoidFirstLastClipping(false);
 
-        xAxis.setAvoidFirstLastClipping(true);
+        YAxis yAxisLeft = lineChart.getAxisLeft();
+        lineChart.getAxisRight().setEnabled(false);
 
         Calendar c = Calendar.getInstance(TimeZone.getTimeZone("GMT"));
         c.set(Calendar.HOUR_OF_DAY, -1); // -1 (Poland)
@@ -194,8 +200,11 @@ public class GraphActivity extends AppCompatActivity {
         long unixTimeStamp = c.getTimeInMillis() / 1000;
 
 
-        HourAxisValueFormatter hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
-        xAxis.setValueFormatter(hourAxisValueFormatter);
+        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
+        xAxis.setValueFormatter(X_hourAxisValueFormatter);
+
+        HourAxisValueFormatter Y_hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
+        yAxisLeft.setValueFormatter(Y_hourAxisValueFormatter);
 
         lineChart.invalidate();
     }
