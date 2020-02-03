@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
@@ -12,8 +13,8 @@ import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -34,9 +35,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
-import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
@@ -44,7 +47,6 @@ import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.FileManager;
-import com.example.damian.monitorapp.fragments.ActionMenu;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.example.damian.monitorapp.requester.DatabaseAccess;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
@@ -53,14 +55,8 @@ import com.michaldrabik.tapbarmenulib.TapBarMenu;
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
 import net.steamcrafted.materialiconlib.MaterialIconView;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener{
 
@@ -155,6 +151,16 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!prefs.getBoolean("firstTimeRun", false)) {
+            enableAutoStart();
+
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putBoolean("firstTimeRun", true);
+            editor.commit();
+        }
+
     }
 
     @OnClick(R.id.fab_send_photo_aws)
@@ -185,7 +191,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.runServiceButton)
     public void runService(){
-        //TODO:Zrobic sprawdzenie czy uzytkownik chce widziec podglad.
 
         ConnectivityManager connectivityManager =
                 (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -403,6 +408,152 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         appStatusIcon.setColor(Color.rgb(104, 182, 0)); //GREEN
         //VisualChanges - END
         busyIndicator.dimBackground();
+    }
+
+
+    private void enableAutoStart() {
+        if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Enable AutoStart")
+                    .content("Please allow monitorApp to always run in the background \n" +
+                            "Find monitorApp and Deselect \" Manage automatically \" \n" +
+                            "Else our services can't be accessed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.miui.securitycenter",
+                                    "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+
+        }else if (Build.BRAND.equalsIgnoreCase("huawei")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Allow Background work.")
+                    .content(
+                            "Find monitorApp and Deselect \"Manage automatically\" \n\n" +
+                            "Else our services can't be accessed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .positiveColor(Color.GRAY)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.huawei.systemmanager",
+                                    "com.huawei.systemmanager.startupmgr.ui.StartupNormalAppListActivity"));
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+        } else if (Build.BRAND.equalsIgnoreCase("Letv")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Enable AutoStart")
+                    .content(
+                            "Please allow monitorApp to always run in the background \n" +
+                            "Find monitorApp and Deselect \" Manage automatically \" \n" +
+                            "Else our services can't be accessed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.letv.android.letvsafe",
+                                    "com.letv.android.letvsafe.AutobootManageActivity"));
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+        } else if (Build.BRAND.equalsIgnoreCase("Honor")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Enable AutoStart")
+                    .content(
+                            "Please allow monitorApp to always run in the background \n" +
+                            "Find monitorApp and Deselect \" Manage automatically \" \n" +
+                            "Else our services can't be accessed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.huawei.systemmanager",
+                                    "com.huawei.systemmanager.optimize.process.ProtectActivity"));
+                            startActivity(intent);
+                        }
+                    })
+                    .show();
+        } else if (Build.MANUFACTURER.equalsIgnoreCase("oppo")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Enable AutoStart")
+                    .content(
+                            "Please allow monitorApp to always run in the background \n" +
+                            "Find monitorApp and Deselect \" Manage automatically \" \n" +
+                            "Else our services can't be accessed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            try {
+                                Intent intent = new Intent();
+                                intent.setClassName("com.coloros.safecenter",
+                                        "com.coloros.safecenter.permission.startup.StartupAppListActivity");
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.setClassName("com.oppo.safe",
+                                            "com.oppo.safe.permission.startup.StartupAppListActivity");
+                                    startActivity(intent);
+                                } catch (Exception ex) {
+                                    try {
+                                        Intent intent = new Intent();
+                                        intent.setClassName("com.coloros.safecenter",
+                                                "com.coloros.safecenter.startupapp.StartupAppListActivity");
+                                        startActivity(intent);
+                                    } catch (Exception exx) {
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .show();
+        } else if (Build.MANUFACTURER.contains("vivo")) {
+            new MaterialDialog.Builder(MainActivity.this).title("Enable AutoStart")
+                    .content(
+                            "Please allow monitorApp to always run in the background.Our app runs in background else our services can't be accesed.")
+                    .theme(Theme.LIGHT)
+                    .positiveText("ALLOW")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            try {
+                                Intent intent = new Intent();
+                                intent.setComponent(new ComponentName("com.iqoo.secure",
+                                        "com.iqoo.secure.ui.phoneoptimize.AddWhiteListActivity"));
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                try {
+                                    Intent intent = new Intent();
+                                    intent.setComponent(new ComponentName("com.vivo.permissionmanager",
+                                            "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
+                                    startActivity(intent);
+                                } catch (Exception ex) {
+                                    try {
+                                        Intent intent = new Intent();
+                                        intent.setClassName("com.iqoo.secure",
+                                                "com.iqoo.secure.ui.phoneoptimize.BgStartUpManager");
+                                        startActivity(intent);
+                                    } catch (Exception exx) {
+                                        ex.printStackTrace();
+                                    }
+                                }
+                            }
+                        }
+                    })
+                    .show();
+        }
     }
 }
 
