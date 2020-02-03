@@ -180,7 +180,7 @@ public class CameraService extends Service {
     public void stopService(){
         stopSelf();
         closeBackgroundThread();
-        unlockCPU();
+        //unlockCPU();
 
         if(executor != null && handler != null) {
             handler.removeCallbacksAndMessages(null);
@@ -219,7 +219,7 @@ public class CameraService extends Service {
 
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
-        lockCPU();
+        //lockCPU();
         setUpCamera();
 
         runApp();
