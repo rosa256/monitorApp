@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
@@ -51,6 +52,9 @@ public class GraphActivity extends AppCompatActivity {
     final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
     private Date customDateStart;
     private Date customDateEnd;
+    private TextView usingTimeTV;
+    private TextView offTimeTV;
+    private TextView summaryTimeTV;
     private static final int TWO_MINUTES =  2 * 60 ;
 
     private final String todayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
@@ -65,6 +69,9 @@ public class GraphActivity extends AppCompatActivity {
         refreshButton = (MaterialIconView) findViewById(R.id.refreshGraphButton);
         dateSpinner = (Spinner) findViewById(R.id.dateSpinner);
         lineChart = (LineChart) findViewById(R.id.lineChartId);
+        usingTimeTV = (TextView) findViewById(R.id.TimeTVvalue);
+        offTimeTV = (TextView) findViewById(R.id.deviceOffTimeTVvalue);
+        summaryTimeTV = (TextView) findViewById(R.id.summaryTimeTVvalue);
 
 
         String[] days_array= getResources().getStringArray(R.array.days_array);
@@ -155,12 +162,17 @@ public class GraphActivity extends AppCompatActivity {
         //TODO: Zrobic Logikę związaną ze sprawdzaniem Veryfied = 0!
         //TODO: Aktualny Unic timeStamp jest o godzinę do przodu. Należy cofnąć o godzinę unix time.
         long referenceTimeStamp = Long.parseLong(allStatuses.get(0).getUnixTime()); // Frist Unix_time of the day is reference Time.
+        String offTime = "";
+        long usingTime = 0L;
+        long summaryTime = 0L;
         int time = 0;
+
         Long previous_stamp = 0L;
         for (int i = 0; i < allStatuses.size(); i++){
             Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - referenceTimeStamp);
             if( new_X >= previous_stamp + TWO_MINUTES) {
                 dataObjects.add(new MyData((new_X - 60L), time));
+                usingTime += (new_X - previous_stamp);
             }
 
             if(i!=0) {
@@ -169,7 +181,11 @@ public class GraphActivity extends AppCompatActivity {
             dataObjects.add(new MyData(new_X, time));
             previous_stamp = new_X;
         }
-
+        summaryTime = usingTime + time;
+        offTime = String.valueOf(time);
+        offTimeTV.setText(offTime + " sec");
+        usingTimeTV.setText((usingTime) + " sec");
+        summaryTimeTV.setText((summaryTime) + " sec");
 
         final List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {
