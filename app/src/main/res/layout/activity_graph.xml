@@ -46,7 +46,7 @@
                         android:id="@+id/dateSpinner"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:background="@drawable/border_input"
+                        android:background="@drawable/border_input_spinner"
                         android:hint="Date"
                         android:layout_weight="1"
                         android:layout_margin="2dp"
