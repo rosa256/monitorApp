@@ -10,6 +10,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
+import com.example.damian.monitorapp.Utils.MarkerGraph;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.requester.DatabaseAccess;
 import com.github.mikephil.charting.charts.LineChart;
@@ -151,11 +152,11 @@ public class GraphActivity extends AppCompatActivity {
 
         List<MyData> dataObjects = new ArrayList<>();
 
-        long ref = Long.parseLong(allStatuses.get(0).getUnixTime()); // Frist Unix_time of the day is reference Time.
+        long referenceTimeStamp = Long.parseLong(allStatuses.get(0).getUnixTime()); // Frist Unix_time of the day is reference Time.
         int time = 0;
         Long previous_stamp = 0L;
         for (int i = 0; i < allStatuses.size(); i++){
-            Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - ref);
+            Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - referenceTimeStamp);
             if( new_X >= previous_stamp + TWO_MINUTES) {
                 dataObjects.add(new MyData((new_X - 60L), time));
             }
@@ -207,11 +208,14 @@ public class GraphActivity extends AppCompatActivity {
         long unixTimeStamp = c.getTimeInMillis() / 1000;
 
 
-        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(ref);
+        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(referenceTimeStamp);
         xAxis.setValueFormatter(X_hourAxisValueFormatter);
 
         HourAxisValueFormatter Y_hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
         yAxisLeft.setValueFormatter(Y_hourAxisValueFormatter);
+
+        MarkerGraph myMarkerView= new MarkerGraph(getApplicationContext(), R.layout.marker_graph, referenceTimeStamp);
+        lineChart.setMarker(myMarkerView);
 
         lineChart.invalidate();
     }
