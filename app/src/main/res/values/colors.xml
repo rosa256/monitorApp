@@ -12,5 +12,8 @@
     <color name="colorWarning">#f20</color>
     <color name="colorLemon">#99ff99</color>
     <color name="cardview_dark_background">#302010</color>
+    <color name="green_time">#0F6943</color>
+    <color name="red_time">#792A2A</color>
+
     <drawable name="notification_template_icon_bg">#3333B5E5</drawable>
 </resources>

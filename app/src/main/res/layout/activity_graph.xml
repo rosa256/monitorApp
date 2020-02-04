@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/LayoutToFill">
@@ -11,11 +10,10 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:weightSum="6"
-        android:background="@color/gray_lite"
-        >
+        android:background="@color/gray_lite">
 
 
-        <LinearLayout
+            <LinearLayout
             android:id="@+id/wraperLinearLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -62,8 +60,7 @@
                         android:layout_weight="0"
                         android:layout_margin="2dp" />
 
-        </LinearLayout>
-
+                </LinearLayout>
 
             </LinearLayout>
 
@@ -72,10 +69,101 @@
             android:layout_weight="5"
             android:layout_width="match_parent"
             android:layout_height="0dp">
-
-
             </com.github.mikephil.charting.charts.LineChart>
 
+        <LinearLayout
+            android:id="@+id/wraperBottomLinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_weight="1"
+            android:background="@color/gray_strong"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:background="@color/gray_lite"
+                android:orientation="horizontal"
+                android:weightSum="3">
+
+                <TextView
+                    android:id="@+id/TimeTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Użytkowanie"
+                    android:textAlignment="center"
+                    android:textColor="@color/green_time"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/deviceOffTimeTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Bezczynny"
+                    android:textAlignment="center"
+
+                    android:textColor="@color/red_time"
+                    android:textSize="18dp" />
+
+                <TextView
+                    android:id="@+id/summaryTimeTV"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Łącznie"
+                    android:textAlignment="center"
+
+                    android:textColor="@color/colorBlack"
+                    android:textSize="18dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/gray_lite"
+                android:orientation="horizontal"
+                android:layout_margin="5dp"
+                android:weightSum="3">
+
+                <TextView
+                    android:id="@+id/deviceOffTimeTVvalue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="18dp"
+                    android:hint="Użytkowanie"
+                    android:textAlignment="center"
+
+                    />
+
+                <TextView
+                    android:id="@+id/TimeTVvalue"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Bezczynny"
+                    android:textAlignment="center"
+                    android:textSize="18dp"
+
+                    />
+
+                <TextView
+                    android:id="@+id/summaryTimeTVvalue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="18dp"
+                    android:hint="Łącznie"
+                    android:textAlignment="center"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

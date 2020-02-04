@@ -152,6 +152,8 @@ public class GraphActivity extends AppCompatActivity {
 
         List<MyData> dataObjects = new ArrayList<>();
 
+        //TODO: Zrobic Logikę związaną ze sprawdzaniem Veryfied = 0!
+        //TODO: Aktualny Unic timeStamp jest o godzinę do przodu. Należy cofnąć o godzinę unix time.
         long referenceTimeStamp = Long.parseLong(allStatuses.get(0).getUnixTime()); // Frist Unix_time of the day is reference Time.
         int time = 0;
         Long previous_stamp = 0L;
@@ -171,7 +173,6 @@ public class GraphActivity extends AppCompatActivity {
 
         final List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {
-            System.out.println(data.getValueX() + ", " + data.getValueY());
             entries.add(new Entry(data.getValueX(), data.getValueY()));
         }
 
