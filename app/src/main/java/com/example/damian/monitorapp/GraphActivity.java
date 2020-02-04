@@ -7,7 +7,6 @@ import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.SpinnerAdapter;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
@@ -51,6 +50,7 @@ public class GraphActivity extends AppCompatActivity {
     final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
     private Date customDateStart;
     private Date customDateEnd;
+    private static final int TWO_MINUTES =  2 * 60 ;
 
     private final String todayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
     private final String yesterdayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date(System.currentTimeMillis()-24*60*60*1000));
@@ -151,26 +151,33 @@ public class GraphActivity extends AppCompatActivity {
 
         List<MyData> dataObjects = new ArrayList<>();
 
+        long ref = Long.parseLong(allStatuses.get(0).getUnixTime()); // Frist Unix_time of the day is reference Time.
         int time = 0;
-        for (STATUSDO reply : allStatuses) {
-            if(reply.getVerified().equals(true)) {
-                dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()), time)); //1000 * 60 minute
-                time = time + 60; // 60 minute
-            }else
-                dataObjects.add(new MyData(Integer.parseInt(reply.getUnixTime()),time)); //1000 * 60 minute
+        Long previous_stamp = 0L;
+        for (int i = 0; i < allStatuses.size(); i++){
+            Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - ref);
+            if( new_X >= previous_stamp + TWO_MINUTES) {
+                dataObjects.add(new MyData((new_X - 60L), time));
+            }
+
+            if(i!=0) {
+                time = time + 60; // 1 minute
+            }
+            dataObjects.add(new MyData(new_X, time));
+            previous_stamp = new_X;
         }
 
 
         final List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {
-            // turn your data into Entry objects
+            System.out.println(data.getValueX() + ", " + data.getValueY());
             entries.add(new Entry(data.getValueX(), data.getValueY()));
         }
 
         LineDataSet dataSet = new LineDataSet(entries, "Label"); // add entries to dataset
         dataSet.setColor(Color.parseColor("#03adfc"));
         dataSet.setLineWidth(3f);
-        dataSet.setCircleRadius(5f);
+        dataSet.setCircleRadius(4f);
         dataSet.setCircleColor(Color.parseColor("#228ea3"));
         dataSet.setValueTextSize(0f);
         dataSet.setValueTextColor(Color.BLUE);
@@ -200,7 +207,7 @@ public class GraphActivity extends AppCompatActivity {
         long unixTimeStamp = c.getTimeInMillis() / 1000;
 
 
-        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
+        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(ref);
         xAxis.setValueFormatter(X_hourAxisValueFormatter);
 
         HourAxisValueFormatter Y_hourAxisValueFormatter = new HourAxisValueFormatter(unixTimeStamp);
@@ -267,15 +274,15 @@ public class GraphActivity extends AppCompatActivity {
     };
 
     class MyData{
-        public MyData(int x, int y) {
+        public MyData(long x, int y) {
             this.valueX = x;
             this.valueY = y;
         }
 
-        int valueX;
+        long valueX;
         int valueY;
 
-        public int getValueX() {
+        public long getValueX() {
             return valueX;
         }
 
