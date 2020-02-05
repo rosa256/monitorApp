@@ -190,13 +190,6 @@ public class CameraService extends Service {
             executor.shutdownNow();
         }
 
-        // (START)Edited to work without charging
-        if (wakeLock.isHeld()) {
-            Log.d(TAG, "stopMyService: Release LOCK");
-            wakeLock.release();
-        }
-        // (END)Edited to work without charging
-
         unregisterReceiver(launchReceiver);
         Log.d(TAG, "stopService: Stopping service");
     }
@@ -229,13 +222,6 @@ public class CameraService extends Service {
 
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
-
-        // (START)Edited to work without charging
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
-        wakeLock.acquire();
-        // (END)Edited to work without charging
 
         //lockCPU();
         setUpCamera();
@@ -307,6 +293,13 @@ public class CameraService extends Service {
                 executor = Executors.newSingleThreadScheduledExecutor();
                 executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
             }
+            // (START)Edited to work without charging
+            if (wakeLock.isHeld()) {
+                Log.d(TAG, "stopMyService: Release LOCK");
+                wakeLock.release();
+            }
+            // (END)Edited to work without charging
+
         }
     };
 
@@ -457,6 +450,14 @@ public class CameraService extends Service {
         updateNotification(String.valueOf(pictureTimer));
         sendDataToActivity();
         if (takePicture) {
+
+            // (START)Edited to work without charging
+            PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag");
+            wakeLock.acquire();
+            // (END)Edited to work without charging
+
             savePictureNow();
             //playTimerBeep();
         } else if (pictureTimer > 0) {
@@ -482,9 +483,7 @@ public class CameraService extends Service {
     };
 
     public void savePicture(){
-        if (this.pictureDelay == 0) {
-            savePictureNow();
-        } else if(pictureDelay != pictureDelaySaved) {
+        if(pictureDelay != pictureDelaySaved) {
             savePictureAfterDelay(this.pictureDelaySaved);
             Log.i(TAG, "savePicture(): with pictureDelaySaved: " + pictureDelaySaved);
         } else {
