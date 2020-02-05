@@ -109,6 +109,8 @@ public class CameraService extends Service {
     //private final IBinder binder = new LocalBinder();
     private BroadcastReceiver launchReceiver;
 
+    PowerManager.WakeLock wakeLock;
+
 
     /*
     * Aby serwis działał w tle, muszę wyłączyć na Huwaweiu w Batery -> Launch Ap -> monitorApp
@@ -167,7 +169,8 @@ public class CameraService extends Service {
         launchReceiver = new LaunchBroadcastReceiver();
         registerReceiver(launchReceiver, filter);
 
-        startWithForeground();
+        startForeground(ONGOING_NOTIFICATION_ID, getNotification(""));
+
     }
 
 
@@ -186,6 +189,13 @@ public class CameraService extends Service {
             handler.removeCallbacksAndMessages(null);
             executor.shutdownNow();
         }
+
+        // (START)Edited to work without charging
+        if (wakeLock.isHeld()) {
+            Log.d(TAG, "stopMyService: Release LOCK");
+            wakeLock.release();
+        }
+        // (END)Edited to work without charging
 
         unregisterReceiver(launchReceiver);
         Log.d(TAG, "stopService: Stopping service");
@@ -219,6 +229,14 @@ public class CameraService extends Service {
 
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
+
+        // (START)Edited to work without charging
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
+        // (END)Edited to work without charging
+
         //lockCPU();
         setUpCamera();
 
@@ -226,7 +244,7 @@ public class CameraService extends Service {
 
     }
 
-    private void startWithForeground(){
+    private Notification getNotification(String timeStatus){
         Intent notificationIntent = new Intent(CameraService.this, context.getClass());
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0, notificationIntent, 0);
 
@@ -241,13 +259,13 @@ public class CameraService extends Service {
 
         Notification notification = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(getText(R.string.app_name))
-                .setContentText(getText(R.string.app_name))
+                .setContentText("Picture in: "+timeStatus)
                 .setSmallIcon(R.drawable.ic_bell)
                 .setContentIntent(pendingIntent)
                 .setTicker(getText(R.string.app_name))
                 .build();
 
-        startForeground(ONGOING_NOTIFICATION_ID, notification);
+        return notification;
     }
 
     private void setUpCamera() {
@@ -436,6 +454,7 @@ public class CameraService extends Service {
         }
         boolean takePicture = (pictureTimer == 1);
         --pictureTimer;
+        updateNotification(String.valueOf(pictureTimer));
         sendDataToActivity();
         if (takePicture) {
             savePictureNow();
@@ -445,6 +464,13 @@ public class CameraService extends Service {
             System.out.println("ODLICZAM: " + pictureTimer);
             handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
         }
+    }
+
+    private void updateNotification(String timer) {
+
+        Notification newNotification = getNotification(timer +" secounds.");
+        NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(ONGOING_NOTIFICATION_ID, newNotification);
     }
 
 
