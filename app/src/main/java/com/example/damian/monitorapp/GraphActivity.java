@@ -91,6 +91,8 @@ public class GraphActivity extends AppCompatActivity {
 
         Legend legend = lineChart.getLegend();
         legend.setEnabled(false);
+        lineChart.setNoDataText("Refresh to get data.");
+        lineChart.setNoDataTextColor(R.color.colorGreyLight);
 
         ButterKnife.bind(this);
         lineChart.invalidate(); // refresh

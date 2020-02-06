@@ -142,19 +142,20 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/montserrat_regular"
-                    android:hint="Użytkowanie"
+                    android:hint="00:00:00"
                     android:textAlignment="center"
                     android:textColor="@color/green_time"
+                    android:textColorHint="@color/green_time"
                     android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/TimeTVvalue"
                     android:textColor="@color/red_time"
-
+                    android:textColorHint="@color/red_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:hint="Bezczynny"
+                    android:hint="00:00:00"
                     android:textAlignment="center"
                     android:textSize="18sp"
                     android:fontFamily="@font/montserrat_regular"
@@ -166,7 +167,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textSize="18sp"
-                    android:hint="Łącznie"
+                    android:hint="00:00:00"
                     android:textAlignment="center"
                     android:fontFamily="@font/montserrat_regular"
                     />
