@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -185,9 +186,9 @@ public class GraphActivity extends AppCompatActivity {
         }
         summaryTime = usingTime + time;
         offTime = String.valueOf(time);
-        offTimeTV.setText(offTime + " sec");
-        usingTimeTV.setText((usingTime) + " sec");
-        summaryTimeTV.setText((summaryTime) + " sec");
+        offTimeTV.setText(getDurationString(time));
+        usingTimeTV.setText((getDurationString((int) usingTime)));
+        summaryTimeTV.setText(getDurationString((int) summaryTime));
 
         final List<Entry> entries = new ArrayList<Entry>();
         for (MyData data : dataObjects) {
@@ -313,5 +314,27 @@ public class GraphActivity extends AppCompatActivity {
             return valueY;
         }
 
+    }
+
+    private String getDurationString(int seconds) {
+
+        int hours = seconds / 3600;
+        int minutes = (seconds % 3600) / 60;
+        seconds = seconds % 60;
+
+        return twoDigitString(hours) + " : " + twoDigitString(minutes) + " : " + twoDigitString(seconds);
+    }
+
+    private String twoDigitString(int number) {
+
+        if (number == 0) {
+            return "00";
+        }
+
+        if (number / 10 == 0) {
+            return "0" + number;
+        }
+
+        return String.valueOf(number);
     }
 }
