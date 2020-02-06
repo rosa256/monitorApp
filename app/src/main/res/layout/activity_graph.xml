@@ -64,17 +64,16 @@
 
             </LinearLayout>
 
-            <com.github.mikephil.charting.charts.LineChart
+        <com.github.mikephil.charting.charts.LineChart
             android:id="@+id/lineChartId"
-            android:layout_weight="5"
             android:layout_width="match_parent"
-            android:layout_height="0dp">
-            </com.github.mikephil.charting.charts.LineChart>
+            android:layout_height="167dp"
+            android:layout_weight="5"></com.github.mikephil.charting.charts.LineChart>
 
         <LinearLayout
             android:id="@+id/wraperBottomLinearLayout"
             android:layout_width="match_parent"
-            android:layout_height="3dp"
+            android:layout_height="1dp"
             android:layout_weight="1"
             android:background="@color/gray_lite"
 
@@ -89,29 +88,27 @@
 
                 <TextView
                     android:id="@+id/TimeTV"
-                    android:layout_width="wrap_content"
+                    android:layout_width="58dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Użytkowanie"
-                    android:textAlignment="center"
-
-                    android:textSize="18sp"
                     android:fontFamily="@font/montserrat_regular"
+                    android:text="Użytkowanie"
+
+                    android:textAlignment="center"
                     android:textColor="@android:color/background_light"
-                    />
+                    android:textSize="18sp" />
 
                 <TextView
 
                     android:id="@+id/deviceOffTimeTV"
-                    android:layout_width="wrap_content"
+                    android:layout_width="50dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Bezczynny"
-                    android:textAlignment="center"
                     android:fontFamily="@font/montserrat_regular"
-                    android:textSize="18sp"
+                    android:text="Bezczynny"
+                    android:textAlignment="textEnd"
                     android:textColor="@android:color/background_light"
-                    />
+                    android:textSize="18sp" />
 
                 <TextView
 
@@ -119,22 +116,20 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/montserrat_regular"
                     android:text="Łącznie"
                     android:textAlignment="center"
-                    android:fontFamily="@font/montserrat_regular"
                     android:textColor="@android:color/background_light"
-                    android:textSize="18sp"
-                    />
+                    android:textSize="18sp" />
             </LinearLayout>
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat_regular"
                 android:orientation="horizontal"
-                android:layout_margin="5dp"
-                android:weightSum="3"
-                android:fontFamily="@font/montserrat_regular">
+                android:weightSum="3">
 
                 <TextView
                     android:id="@+id/deviceOffTimeTVvalue"
@@ -150,27 +145,25 @@
 
                 <TextView
                     android:id="@+id/TimeTVvalue"
-                    android:textColor="@color/red_time"
-                    android:textColorHint="@color/red_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:fontFamily="@font/montserrat_regular"
                     android:hint="00:00:00"
                     android:textAlignment="center"
-                    android:textSize="18sp"
-                    android:fontFamily="@font/montserrat_regular"
-                    />
+                    android:textColor="@color/red_time"
+                    android:textColorHint="@color/red_time"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/summaryTimeTVvalue"
-                    android:layout_width="wrap_content"
+                    android:layout_width="94dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="18sp"
+                    android:fontFamily="@font/montserrat_regular"
                     android:hint="00:00:00"
                     android:textAlignment="center"
-                    android:fontFamily="@font/montserrat_regular"
-                    />
+                    android:textSize="18sp" />
 
             </LinearLayout>
 
