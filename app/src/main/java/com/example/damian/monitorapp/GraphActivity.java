@@ -169,17 +169,19 @@ public class GraphActivity extends AppCompatActivity {
 
         Long previous_stamp = 0L;
         for (int i = 0; i < allStatuses.size(); i++){
-            Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - referenceTimeStamp);
-            if( new_X >= previous_stamp + TWO_MINUTES) {
-                dataObjects.add(new MyData((new_X - 60L), time));
-                usingTime += (new_X - previous_stamp);
-            }
+            if (allStatuses.get(i).getVerified()) {
+                Long new_X = (Long.parseLong(allStatuses.get(i).getUnixTime()) - referenceTimeStamp);
+                if (new_X >= previous_stamp + TWO_MINUTES) {
+                    dataObjects.add(new MyData((new_X - 60L), time));
+                    usingTime += (new_X - previous_stamp);
+                }
 
-            if(i!=0) {
-                time = time + 60; // 1 minute
+                if (i != 0) {
+                    time = time + 60; // 1 minute
+                }
+                dataObjects.add(new MyData(new_X, time));
+                previous_stamp = new_X;
             }
-            dataObjects.add(new MyData(new_X, time));
-            previous_stamp = new_X;
         }
         summaryTime = usingTime + time;
         offTime = String.valueOf(time);

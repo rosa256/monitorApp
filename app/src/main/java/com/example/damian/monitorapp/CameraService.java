@@ -148,7 +148,7 @@ public class CameraService extends Service {
                 stopSelf();
                 break;
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override

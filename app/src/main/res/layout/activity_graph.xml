@@ -76,14 +76,14 @@
             android:layout_width="match_parent"
             android:layout_height="3dp"
             android:layout_weight="1"
-            android:background="@color/gray_strong"
+            android:background="@color/gray_lite"
+
             android:orientation="vertical">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:background="@color/gray_lite"
+                android:layout_marginTop="10dp"
                 android:orientation="horizontal"
                 android:weightSum="3">
 
@@ -94,61 +94,70 @@
                     android:layout_weight="1"
                     android:text="Użytkowanie"
                     android:textAlignment="center"
-                    android:textColor="@color/green_time"
-                    android:textSize="18dp" />
+
+                    android:textSize="18sp"
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textColor="@android:color/background_light"
+                    />
 
                 <TextView
+
                     android:id="@+id/deviceOffTimeTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Bezczynny"
                     android:textAlignment="center"
-
-                    android:textColor="@color/red_time"
-                    android:textSize="18dp" />
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/background_light"
+                    />
 
                 <TextView
+
                     android:id="@+id/summaryTimeTV"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="Łącznie"
                     android:textAlignment="center"
-
-                    android:textColor="@color/colorBlack"
-                    android:textSize="18dp" />
+                    android:fontFamily="@font/montserrat_regular"
+                    android:textColor="@android:color/background_light"
+                    android:textSize="18sp"
+                    />
             </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/gray_lite"
                 android:orientation="horizontal"
                 android:layout_margin="5dp"
-                android:weightSum="3">
+                android:weightSum="3"
+                android:fontFamily="@font/montserrat_regular">
 
                 <TextView
                     android:id="@+id/deviceOffTimeTVvalue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="18dp"
+                    android:fontFamily="@font/montserrat_regular"
                     android:hint="Użytkowanie"
                     android:textAlignment="center"
-
-                    />
+                    android:textColor="@color/green_time"
+                    android:textSize="18sp" />
 
                 <TextView
                     android:id="@+id/TimeTVvalue"
+                    android:textColor="@color/red_time"
 
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:hint="Bezczynny"
                     android:textAlignment="center"
-                    android:textSize="18dp"
-
+                    android:textSize="18sp"
+                    android:fontFamily="@font/montserrat_regular"
                     />
 
                 <TextView
@@ -156,9 +165,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textSize="18dp"
+                    android:textSize="18sp"
                     android:hint="Łącznie"
                     android:textAlignment="center"
+                    android:fontFamily="@font/montserrat_regular"
                     />
 
             </LinearLayout>
