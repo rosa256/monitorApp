@@ -77,7 +77,6 @@ public class CameraService extends Service {
 
     private CameraManager cameraManager;
     private String cameraId;
-    private Size previewSize;
     private Handler backgroundHandler;
     private HandlerThread backgroundThread;
     private int cameraFacing;
@@ -85,25 +84,17 @@ public class CameraService extends Service {
 
     private ImageReader imageReader;
 
-    private boolean isON = true;
-    int currentPictureID = 0;
-    int pictureTimer = 0;
-    ScheduledExecutorService executor;
-    Handler handler;
     static final int DEFAULT_DELAY = 60000;
     int pictureDelay;
     int pictureDelaySaved;
 
     private boolean cameraClosed;
 
-    private PowerManager.WakeLock mWakeLock;
-    private final Object mLock = new Object();
-
     private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
     //private final IBinder binder = new LocalBinder();
     private BroadcastReceiver launchReceiver;
 
-    PowerManager.WakeLock wakeLock;
+    private PowerManager.WakeLock wakeLock;
     private CustomCountDownTimer countDownTimer = null;
 
 
@@ -151,7 +142,6 @@ public class CameraService extends Service {
         super.onCreate();
         cameraFacing = CameraCharacteristics.LENS_FACING_FRONT;
         cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-        handler = new Handler();
         openBackgroundThread();
         rekognitionClient = (AmazonRekognitionClient) clientAWSFactory.createRekognitionClient(getApplicationContext());
         readDelayPreference();
@@ -178,19 +168,15 @@ public class CameraService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        countDownTimer.cancel();
+        if(countDownTimer != null) {
+            countDownTimer.cancel();
+        }
         stopService();
     }
 
     public void stopService(){
         stopSelf();
         closeBackgroundThread();
-
-        if(executor != null && handler != null) {
-            handler.removeCallbacksAndMessages(null);
-            executor.shutdownNow();
-        }
-
         unregisterReceiver(launchReceiver);
         Log.d(TAG, "stopService: Stopping service");
     }
@@ -225,10 +211,10 @@ public class CameraService extends Service {
     public void start(){
 
         // Initialize view drawn over other apps
-        Log.d(TAG, "start: Run Service with NO PREVIEW.");
+        Log.d(TAG, "start(): Run Service with NO PREVIEW.");
 
         setUpCamera();
-        runApp();
+        isInternetConnection();
         initCustomTimer();
 
     }
@@ -291,7 +277,6 @@ public class CameraService extends Service {
             closeCamera();
             unlockCPU();
             reopenCameraPreview();
-
         }
     };
 
@@ -400,31 +385,17 @@ public class CameraService extends Service {
         }
     }
 
-    public void runApp(){
-        if (isON) { //ON
+    public void isInternetConnection(){
 
-            //(START) CHECK INTERNET CONNECTION
-            ConnectivityManager connectivityManager =
-                    (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
-            boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
-                    connectivityManager.getActiveNetworkInfo().isConnected();
-            if(!isInternetConnection){
-                Log.i(TAG, "runApp: No Internet Connection");
-                System.out.println("NO INTERNET CONNECTION!");
-                Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
-                return;
-            }
-            //(END) CHECK INTERNET CONNECTION
-            isON = false;
-            currentPictureID = 0;
-        } else { //OFF
-            isON = true;
-            executor.shutdownNow();
-
-            //Operations to end counting proccess.
-            currentPictureID++;
-            //Stoping handler postDelayed.
-            handler.removeCallbacksAndMessages(null);
+        //(START) CHECK INTERNET CONNECTION
+        ConnectivityManager connectivityManager =
+                (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        boolean isInternetConnection = connectivityManager.getActiveNetworkInfo() != null &&
+                connectivityManager.getActiveNetworkInfo().isConnected();
+        if(!isInternetConnection){
+            Log.i(TAG, "isInternetConnection(): No Internet Connection");
+            System.out.println("NO INTERNET CONNECTION!");
+            Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -468,10 +439,7 @@ public class CameraService extends Service {
                 Log.d(TAG, "SCREEN ON!");
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 Log.d(TAG, "SCREEN OFF!");
-                countDownTimer.cancel();
-                handler.removeCallbacksAndMessages(null);
                 countDownTimer.pauseTimer();
-
             }
         }
     }
@@ -509,7 +477,7 @@ public class CameraService extends Service {
     private long readLeftTimeSharedPref() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         long delay = prefs.getLong(SERVICE_PICTURE_DELAY_SAVED, DEFAULT_DELAY);
-        Log.i(TAG, "readServicePicutreDelaySharedPref(): Delay saved: " + delay);
+        Log.i(TAG, "readLeftTimeSharedPref(): Delay saved: " + delay);
         return delay;
     }
 }
