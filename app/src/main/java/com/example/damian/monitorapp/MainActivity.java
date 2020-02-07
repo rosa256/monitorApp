@@ -80,6 +80,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     private TextView statusTextField;
     private FloatingActionButton sendPhotoAwsButton;
+    private MaterialIconView runServiceButton;
+    private MaterialIconView stopServiceButton;
 
     private MaterialIconView appStatusIcon;
 
@@ -124,6 +126,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
         sendPhotoAwsButton = (FloatingActionButton) findViewById(R.id.fab_send_photo_aws);
+        runServiceButton = (MaterialIconView) findViewById(R.id.runServiceButton);
+        stopServiceButton = (MaterialIconView) findViewById(R.id.stopServiceButton);
 
         pictureDelayButton = (Button) findViewById(R.id.button_delay_photo);
         statusTextField = (TextView) findViewById(R.id.statusTextField);
@@ -191,6 +195,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.runServiceButton)
     public void runService(){
+        runServiceButton.setEnabled(false);
+        stopServiceButton.setEnabled(true);
 
         ConnectivityManager connectivityManager =
                 (ConnectivityManager)MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -224,7 +230,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.stopServiceButton)
     public void stopMyService(){
-
+        stopServiceButton.setEnabled(false);
+        runServiceButton.setEnabled(true);
         serviceIntent = new Intent(this, CameraService.class);
         serviceIntent.setPackage("com.example.damian.monitorapp");
         serviceIntent.setAction(CameraService.ACTION_STOP);
