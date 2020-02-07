@@ -27,6 +27,7 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
 import android.os.Build;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -44,19 +45,15 @@ import android.widget.Toast;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.Utils.CustomCountDownTimer;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.Utils.ImageSaver;
-import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 public class CameraService extends Service {
@@ -110,6 +107,7 @@ public class CameraService extends Service {
     private BroadcastReceiver launchReceiver;
 
     PowerManager.WakeLock wakeLock;
+    private CustomCountDownTimer countDownTimer = null;
 
 
     /*
@@ -126,7 +124,7 @@ public class CameraService extends Service {
 
     private AmazonRekognitionClient rekognitionClient;
 
-    //TODO: BĘDĘ MUSIAŁ ZROBIĆ SPRAWDZANIE TEGO TYPU: SERWIS DZIAŁA W TLE, WLACZAM APKE, I NIE LOGUJE MNIE... A sweris dalej dziala?? xD
+    //TODO: BĘDĘ MUSIAŁ ZROBIĆ SPRAWDZANIE TEGO PRZYPADKU: SERWIS DZIAŁA W TLE, WLACZAM APKE, I NIE LOGUJE MNIE... A sweris dalej dziala?? xD
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -173,10 +171,17 @@ public class CameraService extends Service {
 
     }
 
+    public void initCustomTimer() {
+        Log.d(TAG, "initCustomTimer(): Invoked");
+        countDownTimer = new CustomCountDownTimer(DEFAULT_DELAY, 1000, this);
+        countDownTimer.start();
+    }
+
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+        countDownTimer.cancel();
         stopService();
     }
 
@@ -239,8 +244,8 @@ public class CameraService extends Service {
 
         //lockCPU();
         setUpCamera();
-
         runApp();
+        initCustomTimer();
 
     }
 
@@ -301,12 +306,6 @@ public class CameraService extends Service {
                 Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
             closeCamera();
             reopenCameraPreview();
-            if(pictureDelay != pictureDelaySaved) {
-                pictureDelaySaved = pictureDelay;
-                executor.shutdown();
-                executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay + 1, TimeUnit.SECONDS);
-            }
         }
     };
 
@@ -432,81 +431,27 @@ public class CameraService extends Service {
             //(END) CHECK INTERNET CONNECTION
             isON = false;
             currentPictureID = 0;
-            synchronized (mLock) {
-                executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelay +1, TimeUnit.SECONDS);
-            }
         } else { //OFF
             isON = true;
             executor.shutdownNow();
 
             //Operations to end counting proccess.
             currentPictureID++;
-            decrementTimer(-1);
             //Stoping handler postDelayed.
             handler.removeCallbacksAndMessages(null);
         }
     }
 
-    public void decrementTimer(final int pictureID){
-        if (pictureID != this.currentPictureID) {
-            return;
-        }
-        boolean takePicture = (pictureTimer == 1);
-        --pictureTimer;
-        updateNotification(String.valueOf(pictureTimer));
-        sendDataToActivity();
-        if (takePicture) {
-            savePictureNow();
-            //playTimerBeep();
-        } else if (pictureTimer > 0) {
-
-            System.out.println("ODLICZAM: " + pictureTimer);
-            handler.postDelayed(makeDecrementTimerFunction(pictureID), 1000);
-        }
-    }
-
-    private void updateNotification(String timer) {
+    public void updateNotification(String timer) {
 
         Notification newNotification = getNotification(timer +" secounds.");
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, newNotification);
     }
 
-
-    Runnable periodicTask = new Runnable() {
-        public void run() {
-            // Invoke method(s) to do the work
-                savePicture();
-        }
-    };
-
     public void savePicture(){
-        if (this.pictureDelay == 0) {
-            savePictureNow();
-        } else if(pictureDelay != pictureDelaySaved) {
-            savePictureAfterDelay(this.pictureDelaySaved);
-            Log.i(TAG, "savePicture(): with pictureDelaySaved: " + pictureDelaySaved);
-        } else {
-            savePictureAfterDelay(this.pictureDelay);
-            Log.i(TAG, "savePicture(): with pictureDelay: " + pictureDelay);
-        }
-    }
-
-    void savePictureAfterDelay(int delay) {
-
-        pictureTimer = delay;
-        //updateTimerMessage(false);
-        currentPictureID++;
-        handler.postDelayed(makeDecrementTimerFunction(currentPictureID), 1000);
-    }
-
-    Runnable makeDecrementTimerFunction(final int pictureID) {
-        return new Runnable() {
-            public void run() {
-                    decrementTimer(pictureID);
-            }
-        };
+        Log.i(TAG, "savePicture(): Invoked");
+        savePictureNow();
     }
 
     public void savePictureNow(){
@@ -525,71 +470,39 @@ public class CameraService extends Service {
         }
     }
 
-    private static Size chooseOptimalSize(Size[] choices, int width, int height){
-        List<Size> bigEnough = new ArrayList<Size>();
-        for(Size option: choices){
-            if(option.getHeight() == option.getWidth() * height/ width &&
-                    option.getWidth() >= width && option.getHeight() >= height){
-                bigEnough.add(option);
-            }
-        }
-        if(bigEnough.size() > 0){
-            return Collections.min(bigEnough, new CameraPreviewFragment.CompareSizeByArea());
-        } else{
-            return choices[0];
-        }
-    }
-
     private class LaunchBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 Log.d(TAG, "PRESENT!");
-                pictureDelaySaved = readServicePicutreDelaySharedPref();
-                executor = Executors.newSingleThreadScheduledExecutor();
-                executor.scheduleAtFixedRate(periodicTask, 0, pictureDelaySaved + 1, TimeUnit.SECONDS);
+                resumeTimer();
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 Log.d(TAG, "SCREEN ON!");
-
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 Log.d(TAG, "SCREEN OFF!");
+                countDownTimer.cancel();
                 handler.removeCallbacksAndMessages(null);
-                executor.shutdown();
-                writeServicePicutreDelaySharedPref(pictureTimer);
+                countDownTimer.pauseTimer();
 
             }
         }
-
-        private void stopApp() {
-
-            if(executor != null && handler != null) {
-                //handler.removeCallbacksAndMessages(null);
-                executor.shutdownNow();
-                Log.d(TAG, "stopApp(): Stoping countering");
-            }
-            //isON = false;
-        }
     }
 
-    private void sendDataToActivity()
-    {
-        System.out.println("SENDING TIMEE");
-        Intent sendLevel = new Intent();
-        sendLevel.setAction("com.example.damian.monitorApp.GET_TIME");
-        sendLevel.putExtra( "LEVEL_TIME", pictureTimer);
-        sendBroadcast(sendLevel);
+    private void resumeTimer() {
+        Log.i(TAG, "resumeTimer(): Time Left:" + readLeftTimeSharedPref());
+        countDownTimer = new CustomCountDownTimer(readLeftTimeSharedPref(), 1000, CameraService.this);
+        countDownTimer.start();
     }
 
-    private void reopenCameraPreview()
-    {
+    private void reopenCameraPreview() {
         System.out.println("SENDING TO PREVIEW");
         Intent reopenPreviewIntent = new Intent();
         reopenPreviewIntent.setAction("com.example.damian.monitorApp.REOPEN_PREVIEW");
         sendBroadcast(reopenPreviewIntent);
     }
 
-    void readDelayPreference() {
+    private void readDelayPreference() {
         // reads picture delay from preferences, updates this.pictureDelay and delay button text
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         int delay = prefs.getInt(DELAY_PREFERENCES_KEY, DEFAULT_DELAY);
@@ -599,32 +512,17 @@ public class CameraService extends Service {
         this.pictureDelay = delay;
     }
 
-    void writeServiceStateSharedPref(boolean state) {
+    private void writeServiceStateSharedPref(boolean state) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(SERVICE_STATE_KEY, state);
         editor.commit();
     }
 
-    int readServicePicutreDelaySharedPref() {
-        // reads picture delay from preferences, updates this.pictureDelay and delay button text
+    private long readLeftTimeSharedPref() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        int delay = prefs.getInt(SERVICE_PICTURE_DELAY_SAVED, DEFAULT_DELAY);
+        long delay = prefs.getLong(SERVICE_PICTURE_DELAY_SAVED, DEFAULT_DELAY);
         Log.i(TAG, "readServicePicutreDelaySharedPref(): Delay saved: " + delay);
-        //  if (!DELAY_DURATIONS.contains(delay)) {
-        //      delay = DEFAULT_DELAY;
-        //  }
         return delay;
     }
-
-
-
-    void writeServicePicutreDelaySharedPref(int pictureTimer) {
-        Log.i(TAG, "writeServicePicutreDelaySharedPref(): pictureTimer to save: " + pictureTimer);
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putInt(SERVICE_PICTURE_DELAY_SAVED, pictureTimer);
-        editor.commit();
-    }
-
 }

@@ -187,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("com.example.damian.monitorApp.GET_TIME")) {
-                int timeToShow = intent.getIntExtra("LEVEL_TIME",0);
+                String timeToShow = intent.getStringExtra("LEVEL_TIME");
                 updateTimerMessage(timeToShow);
             }
         }
@@ -270,7 +270,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
 
-    void updateTimerMessage(final int timeToDisplay) {
+    void updateTimerMessage(final String timeToDisplay) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

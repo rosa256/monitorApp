@@ -104,7 +104,7 @@
 
     <string name="delayButtonLabelSecondsFormat">Delay: %d Sec</string>
     <string name="delayButtonLabelNone">Delay: None</string>
-    <string name="timerCountdownMessageFormat">Taking picture in %d seconds</string>
+    <string name="timerCountdownMessageFormat">Taking picture in %s seconds</string>
     <string name="sign_in_message">"You successfully signed-in as %s."</string>
 
     <string name="date_prompt">Choose day</string>
