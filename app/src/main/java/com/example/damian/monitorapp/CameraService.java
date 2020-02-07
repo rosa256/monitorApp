@@ -83,9 +83,6 @@ public class CameraService extends Service {
     private int cameraFacing;
     private CameraDevice cameraDevice;
 
-
-    private PowerManager.WakeLock pmWakeLock;
-
     private ImageReader imageReader;
 
     private boolean isON = true;
@@ -188,46 +185,41 @@ public class CameraService extends Service {
     public void stopService(){
         stopSelf();
         closeBackgroundThread();
-        //unlockCPU();
 
         if(executor != null && handler != null) {
             handler.removeCallbacksAndMessages(null);
             executor.shutdownNow();
         }
 
-        // (START)Edited to work without charging
-        if (wakeLock.isHeld()) {
-            Log.d(TAG, "stopMyService: Release LOCK");
-            wakeLock.release();
-        }
-        // (END)Edited to work without charging
-
         unregisterReceiver(launchReceiver);
         Log.d(TAG, "stopService: Stopping service");
     }
 
     private void lockCPU() {
-        PowerManager mgr = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if (mgr == null) {
-            return;
-        }
+        Log.i(TAG, "lockCPU(): Invoked");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-            Build.MANUFACTURER.equals("Huawei")) {
-            tagLock = "com.example.damian.monitorApp:LocationManagerService";
-            Log.d(TAG, "Device is Huawei manufacturer");
+        // (START)Edited to work without charging
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        if (powerManager == null) {
+            Log.i(TAG, "lockCPU(): Failed to lock CPU.");
+            return;
+
         }
-        pmWakeLock = mgr.newWakeLock(1, tagLock);
-        pmWakeLock.acquire();
-        Log.d(TAG, "CameraService lockCPU()");
+        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag");
+        wakeLock.acquire();
+        // (END)Edited to work without charging
+        Log.i(TAG, "lockCPU(): success");
     }
 
     private void unlockCPU() {
-        if (pmWakeLock != null && pmWakeLock.isHeld()) {
-            pmWakeLock.release();
-            pmWakeLock = null;
-            Log.d(TAG, "CameraService unlockCPU()");
+        Log.i(TAG, "unlockCPU(): Invoked");
+        // (START)Edited to work without charging
+        if (wakeLock.isHeld() && wakeLock != null) {
+            Log.i(TAG, "unlockCPU(): Release LOCK");
+            wakeLock.release();
         }
+        // (END)Edited to work without charging
     }
 
     public void start(){
@@ -235,14 +227,6 @@ public class CameraService extends Service {
         // Initialize view drawn over other apps
         Log.d(TAG, "start: Run Service with NO PREVIEW.");
 
-        // (START)Edited to work without charging
-        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-        wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag");
-        wakeLock.acquire();
-        // (END)Edited to work without charging
-
-        //lockCPU();
         setUpCamera();
         runApp();
         initCustomTimer();
@@ -305,7 +289,9 @@ public class CameraService extends Service {
             super.onCaptureCompleted(session, request, result);
                 Log.i(TAG, "done taking picture from camera " + cameraDevice.getId());
             closeCamera();
+            unlockCPU();
             reopenCameraPreview();
+
         }
     };
 
@@ -455,6 +441,7 @@ public class CameraService extends Service {
     }
 
     public void savePictureNow(){
+        lockCPU();
         openCamera();
     }
 
