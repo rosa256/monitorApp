@@ -237,6 +237,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         serviceIntent = new Intent(this, CameraService.class);
         serviceIntent.setPackage("com.example.damian.monitorapp");
         serviceIntent.setAction(CameraService.ACTION_STOP);
+        statusTextField.setText("Time Left");
 
         if(serviceIntent != null) {
             //VisualChanges

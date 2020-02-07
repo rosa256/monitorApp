@@ -64,11 +64,33 @@
 
             </LinearLayout>
 
-        <com.github.mikephil.charting.charts.LineChart
-            android:id="@+id/lineChartId"
+
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="167dp"
-            android:layout_weight="5"></com.github.mikephil.charting.charts.LineChart>
+            android:layout_height="1dp"
+            android:layout_weight="5">
+            <com.github.mikephil.charting.charts.LineChart
+                android:id="@+id/lineChartId"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"></com.github.mikephil.charting.charts.LineChart>
+
+            <RelativeLayout
+                android:id="@+id/dim_graph_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="invisible"
+                android:alpha="0.5"
+                android:background="@color/colorBlack"
+                >
+
+                <ProgressBar
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:focusable="false"
+                    android:visibility="visible"
+                    />
+            </RelativeLayout>
+        </RelativeLayout>
 
         <LinearLayout
             android:id="@+id/wraperBottomLinearLayout"

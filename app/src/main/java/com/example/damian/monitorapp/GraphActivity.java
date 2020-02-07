@@ -4,8 +4,10 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -56,6 +57,7 @@ public class GraphActivity extends AppCompatActivity {
     private TextView usingTimeTV;
     private TextView offTimeTV;
     private TextView summaryTimeTV;
+    private RelativeLayout layoutToDim;
     private static final int TWO_MINUTES =  2 * 60 ;
 
     private final String todayString = new SimpleDateFormat("dd.MM.yyyy").format(new Date());
@@ -73,7 +75,7 @@ public class GraphActivity extends AppCompatActivity {
         usingTimeTV = (TextView) findViewById(R.id.TimeTVvalue);
         offTimeTV = (TextView) findViewById(R.id.deviceOffTimeTVvalue);
         summaryTimeTV = (TextView) findViewById(R.id.summaryTimeTVvalue);
-
+        layoutToDim = (RelativeLayout) findViewById(R.id.dim_graph_layout);
 
         String[] days_array= getResources().getStringArray(R.array.days_array);
         days_array[0] = days_array[0].concat(" - "+ todayString); //Today
@@ -101,11 +103,14 @@ public class GraphActivity extends AppCompatActivity {
     public void refreshGraph(){
 
         String selectedItem = dateSpinner.getSelectedItem().toString();
+        Toast.makeText(this,"Refreshing",Toast.LENGTH_SHORT).show();
 
+        layoutToDim.setVisibility(View.VISIBLE);
         Runnable getStatusesTask;
 
         if(selectedItem.contains("Today")){
             Log.i(TAG, "refreshGraph(): Today");
+
             getStatusesTask = new Runnable() {
                 @Override
                 public void run() {
@@ -147,8 +152,6 @@ public class GraphActivity extends AppCompatActivity {
                 return;
             }
         }
-
-        Toast.makeText(this,"Refreshing",Toast.LENGTH_SHORT).show();
 
         Thread statusThread = new Thread(getStatusesTask);
         statusThread.start();
@@ -238,6 +241,7 @@ public class GraphActivity extends AppCompatActivity {
         MarkerGraph myMarkerView= new MarkerGraph(getApplicationContext(), R.layout.marker_graph, referenceTimeStamp);
         lineChart.setMarker(myMarkerView);
 
+        layoutToDim.setVisibility(View.INVISIBLE);
         lineChart.invalidate();
     }
 
