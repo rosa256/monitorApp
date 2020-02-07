@@ -90,7 +90,7 @@ public class CameraService extends Service {
     int pictureTimer = 0;
     ScheduledExecutorService executor;
     Handler handler;
-    static final int DEFAULT_DELAY = 60;
+    static final int DEFAULT_DELAY = 60000;
     int pictureDelay;
     int pictureDelaySaved;
 
