@@ -144,10 +144,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
-        if (cameraPreviewFragment != null) {
-            Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
-            cameraPreviewFragment.getImageViewSource().setImageBitmap(myBitmap);
-        }
+
         //TODO--end
 
         this.readDelayPreference();
@@ -195,6 +192,11 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.runServiceButton)
     public void runService(){
+        if(!fileManager.checkIfExistsSourcePhotoFile()){
+            Intent sourceImageIntent = new Intent(MainActivity.this, SourcePhotoActivity.class);
+            startActivity(sourceImageIntent);
+            return;
+        }
         runServiceButton.setEnabled(false);
         stopServiceButton.setEnabled(true);
 
@@ -389,6 +391,17 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             resumeUIState();
         }
         registerReceiver(timeLevelReceiver, mIntentFilter);
+
+        //check Source Photo
+        if (cameraPreviewFragment != null) {
+            if(fileManager.checkIfExistsSourcePhotoFile()){
+                Bitmap myBitmap = BitmapFactory.decodeFile(fileManager.getSourcePhotoFile().getAbsolutePath());
+                cameraPreviewFragment.getImageViewSource().setImageBitmap(myBitmap);
+            }else{
+                cameraPreviewFragment.getImageViewSource().setImageBitmap(null);
+            }
+        }
+
         Log.i(TAG, "onResume: Invoked");
     }
 

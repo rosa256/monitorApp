@@ -21,7 +21,7 @@ import java.io.IOException;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class SourcePhotoActivity extends AppCompatActivity implements CameraPreviewFragment.OnFragmentInteractionListener {
+public class SourcePhotoActivity extends AppCompatActivity {
     private static final String TAG = "SourcePhotoActivity";
     private FileManager fileManager;
     private CameraPreviewFragment cameraPreviewFragment;
@@ -92,7 +92,4 @@ public class SourcePhotoActivity extends AppCompatActivity implements CameraPrev
             }
         }
     }
-
-    @Override
-    public void onFragmentInteraction(Uri uri) { }
 }
