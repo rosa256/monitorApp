@@ -27,7 +27,6 @@ import android.media.Image;
 import android.media.ImageReader;
 import android.net.ConnectivityManager;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -52,9 +51,6 @@ import com.example.damian.monitorapp.requester.RekognitionRequester;
 
 
 import java.util.Arrays;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-
 
 public class CameraService extends Service {
     Context context = this;
@@ -209,10 +205,8 @@ public class CameraService extends Service {
     }
 
     public void start(){
-
         // Initialize view drawn over other apps
         Log.d(TAG, "start(): Run Service with NO PREVIEW.");
-
         setUpCamera();
         isInternetConnection();
         initCustomTimer();
@@ -222,6 +216,9 @@ public class CameraService extends Service {
     private Notification getNotification(String timeStatus){
         Intent notificationIntent = new Intent(CameraService.this, context.getClass());
         PendingIntent pendingIntent = PendingIntent.getActivity(context,0, notificationIntent, 0);
+
+        PendingIntent intentOnNotificationTap = PendingIntent.getActivity(this, 0,
+        new Intent(this, MainActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
 
         //ONLY FOR API 26 and HIGHER!
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -238,7 +235,9 @@ public class CameraService extends Service {
                 .setSmallIcon(R.drawable.ic_bell)
                 .setContentIntent(pendingIntent)
                 .setTicker(getText(R.string.app_name))
+                .setContentIntent(intentOnNotificationTap)
                 .build();
+
 
         return notification;
     }

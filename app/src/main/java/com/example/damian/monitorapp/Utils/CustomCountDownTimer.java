@@ -57,7 +57,7 @@ public class CustomCountDownTimer extends CountDownTimer {
     }
 
     private void writeTimeLeftSharedPref(long pictureTimer) {
-        Log.i(TAG, "writeServicePicutreDelaySharedPref(): pictureTimer to save: " + pictureTimer);
+        Log.i(TAG, "writeTimeLeftSharedPref(): pictureTimer to save: " + pictureTimer);
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(cameraService.getBaseContext());
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(SERVICE_PICTURE_DELAY_SAVED, pictureTimer);

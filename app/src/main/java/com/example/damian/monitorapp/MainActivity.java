@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private CognitoSettings cognitoSettings;
     private Button pictureDelayButton;
 
-    static final List<Integer> DELAY_DURATIONS = Arrays.asList(0, 5, 15, 30, 60);
+    static final List<Integer> DELAY_DURATIONS = Arrays.asList(60,60);
     static final int DEFAULT_DELAY = 5;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
@@ -134,13 +134,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         //boolean b =IdentityManager.getDefaultIdentityManager().areCredentialsExpired();
         DatabaseAccess.getInstance(this);
-        timeLevelReceiver = new TimeLevelReceiver();
+        timeLevelReceiver = new MainActivity.TimeLevelReceiver();
 
         Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction("com.example.damian.monitorApp.GET_TIME");
-        getApplicationContext().registerReceiver(timeLevelReceiver,mIntentFilter);
+        getApplicationContext().registerReceiver(timeLevelReceiver, mIntentFilter);
 
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         thread.start();
     }
 
-    class TimeLevelReceiver extends BroadcastReceiver {
+    private class TimeLevelReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("com.example.damian.monitorApp.GET_TIME")) {
@@ -416,7 +416,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         //VisualChanges - END
         busyIndicator.dimBackground();
     }
-
 
     private void enableAutoStart() {
         if (Build.BRAND.equalsIgnoreCase("xiaomi")) {

@@ -67,13 +67,6 @@
         </service>
 
         <receiver
-            android:name=".MainActivity$TimeLevelReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="com.example.damian.monitorApp.GET_TIME" />
-            </intent-filter>
-        </receiver>
-        <receiver
             android:name=".fragments.CameraPreviewFragment$PreviewBroadcastReceiver"
             android:enabled="true">
             <intent-filter>
