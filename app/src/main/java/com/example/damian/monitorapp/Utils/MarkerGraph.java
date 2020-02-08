@@ -30,7 +30,7 @@ public class MarkerGraph extends MarkerView {
         // this markerview only displays a textview
         tvContent = (TextView) findViewById(R.id.tvContent);
         this.referenceTimestamp = referenceTimestamp;
-        this.mDataFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+        this.mDataFormat = new SimpleDateFormat("dd.MM HH:mm:ss", Locale.ENGLISH);
         this.mDate = new Date();
     }
 
@@ -41,7 +41,12 @@ public class MarkerGraph extends MarkerView {
         long currentTimestamp = (int)e.getX() + referenceTimestamp;
         String timeDate = getTimedate(currentTimestamp);
         String spentTimeInSecounds = Utils.formatNumber(e.getY(), 0, true);
-        String fullInfo =  timeDate + " - " + spentTimeInSecounds + "sec";
+        Integer spentTimeInt = Integer.parseInt(spentTimeInSecounds.replace(".", ""));
+        int hours = spentTimeInt / 3600;
+        int minutes = (spentTimeInt % 3600) / 60;
+        int seconds = spentTimeInt % 60;
+        String timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        String fullInfo =  timeDate + " - " + timeString;
         tvContent.setText(fullInfo);
 
         super.refreshContent(e, highlight);

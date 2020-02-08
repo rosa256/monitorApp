@@ -268,7 +268,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @OnClick(R.id.chart_icon_id)
     public void onChartButtonClick(){
-        Intent intent = new Intent(this, GraphActivity.class);
+        //Intent intent = new Intent(this, GraphActivity.class);
+        Intent intent = new Intent(this, GraphTabActivity.class);
         startActivity(intent);
     }
 

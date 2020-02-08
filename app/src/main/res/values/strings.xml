@@ -115,5 +115,6 @@
         <item>Last 7 Days</item>
         <item>Custom Date</item>
     </string-array>
+    <string name="title_activity_graph_tab">GraphTabActivity</string>
 
 </resources>
