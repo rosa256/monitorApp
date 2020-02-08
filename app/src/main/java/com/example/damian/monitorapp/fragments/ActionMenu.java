@@ -89,19 +89,6 @@ public class ActionMenu extends Fragment{
         }
     }
 
-    //TODO: Very slow working.. Have to check this.
-    //TODO: Fix loading photo from gallery (gallery path not initalize(null)).
-    @OnClick(R.id.fab_select_photo)
-    public void onSelectPhotoButtonClicked() {
-        pickImage();
-    }
-
-    public void pickImage() {
-        cameraPreviewFragment = (CameraPreviewFragment) getFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
-        Intent photoPickerIntent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        startActivityForResult(photoPickerIntent, RESULT_LOAD_IMG);
-    }
-
 
     public void onActivityResult(int reqCode, int resultCode, Intent data) {
         super.onActivityResult(reqCode, resultCode, data);

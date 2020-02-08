@@ -8,46 +8,45 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:background="@color/colorPrimary"
-            >
+            android:gravity="end"
+            android:background="@color/colorPrimary">
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_send_photo_aws"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
-                    android:src="@android:drawable/ic_dialog_email"
-                    app:backgroundTint="@color/gray_lite"
-                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_gravity="center"
-                    />
+<!--                <android.support.design.widget.FloatingActionButton-->
+<!--                    android:id="@+id/fab_send_photo_aws"-->
+<!--                    android:layout_width="43dp"-->
+<!--                    android:layout_height="43dp"-->
+<!--                    android:src="@android:drawable/ic_dialog_email"-->
+<!--                    app:backgroundTint="@color/gray_lite"-->
+<!--                    android:layout_marginLeft="@dimen/inputLeftRightMargin"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    />-->
 
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_select_photo"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
-                    android:src="@android:drawable/ic_dialog_dialer"
-                    app:backgroundTint="@color/gray_lite"
-                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_gravity="center"
-                    />
-                <android.support.design.widget.FloatingActionButton
-                    android:id="@+id/fab_delay_photo"
-                    android:layout_width="43dp"
-                    android:layout_height="43dp"
-                    android:src="@android:drawable/ic_menu_camera"
-                    app:backgroundTint="@color/gray_lite"
-                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_gravity="center"
-                    />
+<!--                <android.support.design.widget.FloatingActionButton-->
+<!--                    android:id="@+id/fab_select_photo"-->
+<!--                    android:layout_width="43dp"-->
+<!--                    android:layout_height="43dp"-->
+<!--                    android:src="@android:drawable/ic_dialog_dialer"-->
+<!--                    app:backgroundTint="@color/gray_lite"-->
+<!--                    android:layout_marginLeft="@dimen/inputLeftRightMargin"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    />-->
+<!--                <android.support.design.widget.FloatingActionButton-->
+<!--                    android:id="@+id/fab_delay_photo"-->
+<!--                    android:layout_width="43dp"-->
+<!--                    android:layout_height="43dp"-->
+<!--                    android:src="@android:drawable/ic_menu_camera"-->
+<!--                    app:backgroundTint="@color/gray_lite"-->
+<!--                    android:layout_marginLeft="@dimen/inputLeftRightMargin"-->
+<!--                    android:layout_gravity="center"-->
+<!--                    />-->
                 <Button
                     android:id="@+id/button_delay_photo"
                     android:layout_width="150dp"
                     android:layout_height="43dp"
+
                     android:text="Default"
                     app:backgroundTint="@color/gray_lite"
-                    android:layout_marginLeft="@dimen/inputLeftRightMargin"
-                    android:layout_gravity="center"
+                    android:layout_marginRight="10dp"
                     />
 
         </LinearLayout>

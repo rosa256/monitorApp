@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private Button pictureDelayButton;
 
     static final List<Integer> DELAY_DURATIONS = Arrays.asList(60,60);
-    static final int DEFAULT_DELAY = 5;
+    static final int DEFAULT_DELAY = 60;
     int pictureDelay = DEFAULT_DELAY;
     static final String DELAY_PREFERENCES_KEY = "delay";
     private static final String SERVICE_STATE_KEY = "service_state";
@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
-        sendPhotoAwsButton = (FloatingActionButton) findViewById(R.id.fab_send_photo_aws);
         runServiceButton = (MaterialIconView) findViewById(R.id.runServiceButton);
         stopServiceButton = (MaterialIconView) findViewById(R.id.stopServiceButton);
 
@@ -161,23 +160,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             editor.putBoolean("firstTimeRun", true);
             editor.commit();
         }
+        
 
-    }
-
-    @OnClick(R.id.fab_send_photo_aws)
-    public void onSendPhotoToAWS() {
-        sendPhotoAwsButton.setEnabled(false);
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    new RekognitionRequester().doAwsService(rekognitionClient, fileManager.getCurrentTakenPhotoFile(), awsServiceOption, MainActivity.this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        thread.start();
     }
 
     private class TimeLevelReceiver extends BroadcastReceiver {
@@ -248,7 +232,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             startService(serviceIntent);
 
             busyIndicator.unDimBackgorund();
-            sendPhotoAwsButton.setEnabled(true);
         }
     }
 
