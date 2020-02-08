@@ -94,7 +94,7 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_LONG).show();
+        Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_SHORT).show();
 
         final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
         Log.i(TAG, "onPostExecute: Start saving status to DB");

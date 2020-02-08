@@ -2,9 +2,11 @@ package com.example.damian.monitorapp.Utils;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.icu.text.UnicodeSetSpanner;
 import android.os.CountDownTimer;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.damian.monitorapp.CameraService;
 
@@ -28,6 +30,10 @@ public class CustomCountDownTimer extends CountDownTimer {
         timeLeftMili = millisUntilFinished;
         long timeInSecounds = millisUntilFinished / 1000;
         Log.i(TAG, "Countdown seconds remaining: " + timeInSecounds);
+
+        if(timeInSecounds == 30 || timeInSecounds == 10 || timeInSecounds == 5){
+            Toast.makeText(cameraService.getApplicationContext(),timeInSecounds + " sec remaining",Toast.LENGTH_SHORT).show();
+        }
 
         cameraService.updateNotification(String.valueOf(timeInSecounds));
         sendDataToActivity(String.valueOf(timeInSecounds));
