@@ -75,7 +75,12 @@
         </receiver>
         <receiver
             android:name=".CameraService$LaunchBroadcastReceiver"
-            android:enabled="true" />
+            android:enabled="true" >
+        </receiver>
+        <receiver
+            android:name=".CameraService$NetworkChangeReceiver"
+            android:enabled="true" >
+        </receiver>
     </application>
 
 </manifest>

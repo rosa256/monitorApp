@@ -47,6 +47,7 @@ import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.CustomCountDownTimer;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.Utils.ImageSaver;
+import com.example.damian.monitorapp.Utils.NetworkUtil;
 import com.example.damian.monitorapp.requester.RekognitionRequester;
 
 
@@ -89,6 +90,7 @@ public class CameraService extends Service {
     private ClientAWSFactory clientAWSFactory = new ClientAWSFactory();
     //private final IBinder binder = new LocalBinder();
     private BroadcastReceiver launchReceiver;
+    private BroadcastReceiver networkReceiver;
 
     private PowerManager.WakeLock wakeLock;
     private CustomCountDownTimer countDownTimer = null;
@@ -143,12 +145,18 @@ public class CameraService extends Service {
         readDelayPreference();
         pictureDelaySaved = pictureDelay;
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        filter.addAction(Intent.ACTION_SCREEN_ON);
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        IntentFilter launchFilter = new IntentFilter();
+        launchFilter.addAction(Intent.ACTION_USER_PRESENT);
+        launchFilter.addAction(Intent.ACTION_SCREEN_ON);
+        launchFilter.addAction(Intent.ACTION_SCREEN_OFF);
         launchReceiver = new LaunchBroadcastReceiver();
-        registerReceiver(launchReceiver, filter);
+        registerReceiver(launchReceiver, launchFilter);
+
+        IntentFilter networkFilter = new IntentFilter();
+        networkFilter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        networkFilter.addAction("android.net.wifi.WIFI_STATE_CHANGED");
+        networkReceiver = new NetworkChangeReceiver();
+        registerReceiver(networkReceiver, networkFilter);
 
         startForeground(ONGOING_NOTIFICATION_ID, getNotification(""));
 
@@ -174,6 +182,7 @@ public class CameraService extends Service {
         stopSelf();
         closeBackgroundThread();
         unregisterReceiver(launchReceiver);
+        unregisterReceiver(networkReceiver);
         Log.d(TAG, "stopService: Stopping service");
     }
 
@@ -326,6 +335,7 @@ public class CameraService extends Service {
 
             final Image image = reader.acquireNextImage();
             new ImageSaver(image);
+            Toast.makeText(context,"Taking Picture",Toast.LENGTH_SHORT).show();
             new RekognitionRequester().doAwsService(rekognitionClient, FileManager.getInstance().getCurrentTakenPhotoFile(), Constants.AWS_COMPARE_FACES, CameraService.this);
 
         }
@@ -384,7 +394,7 @@ public class CameraService extends Service {
         }
     }
 
-    public void isInternetConnection(){
+    public boolean isInternetConnection(){
 
         //(START) CHECK INTERNET CONNECTION
         ConnectivityManager connectivityManager =
@@ -393,14 +403,21 @@ public class CameraService extends Service {
                 connectivityManager.getActiveNetworkInfo().isConnected();
         if(!isInternetConnection){
             Log.i(TAG, "isInternetConnection(): No Internet Connection");
-            System.out.println("NO INTERNET CONNECTION!");
             Toast.makeText(context, "No internet connection!", Toast.LENGTH_LONG).show();
+            return false;
         }
+        return true;
     }
 
-    public void updateNotification(String timer) {
+    public void updateNotification(String timer, String extraInfo) {
+        Notification newNotification;
+        if (extraInfo.isEmpty()){
+            newNotification = getNotification(timer +" secounds.");
+        }else{
+            newNotification = getNotification(timer +" secounds. - "+ extraInfo);
 
-        Notification newNotification = getNotification(timer +" secounds.");
+        }
+
         NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(ONGOING_NOTIFICATION_ID, newNotification);
     }
@@ -430,18 +447,59 @@ public class CameraService extends Service {
     private class LaunchBroadcastReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.i(TAG, "onReceive(): Action: " + intent.getAction());
+
             String action = intent.getAction();
             if (Intent.ACTION_USER_PRESENT.equals(action)) {
                 Log.d(TAG, "PRESENT!");
-                resumeTimer();
+                if(isInternetConnection()) {
+                    if(countDownTimer == null)
+                    resumeTimer();
+                }
             } else if (Intent.ACTION_SCREEN_ON.equals(action)) {
                 Log.d(TAG, "SCREEN ON!");
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
                 Log.d(TAG, "SCREEN OFF!");
-                countDownTimer.pauseTimer();
+                if(countDownTimer != null) {
+                    countDownTimer.pauseTimer();
+                    countDownTimer = null;
+                }
             }
         }
     }
+
+    //TODO: PRZYPADEK: Włączam aplikacje(działa w tle). -> Wyłączam internet(Zatrzymuje sie apka) -> !! Włączam internet i w tym samym momencie wygaszam ekran !!
+    //TODO: PROBLEM: Aplikacja działa na wygaszonym erkanie. Sytuacja niepożądana.
+    private class NetworkChangeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(final Context context, final Intent intent) {
+
+            int status = NetworkUtil.getConnectivityStatusString(context);
+            Log.e(TAG, "Broadcast invoked network receiver - action: " + intent.getAction() + " - status: " + status);
+
+            if("android.net.conn.CONNECTIVITY_CHANGE".equals(intent.getAction())){
+                if(status == NetworkUtil.NETWORK_STATUS_NOT_CONNECTED){
+                    Log.i(TAG, "status: NETWORK_STATUS_NOT_CONNECTED");
+                    if(countDownTimer != null) {
+                        long timeInSecounds = countDownTimer.getTimeLeft() / 1000;
+                        updateNotification(String.valueOf(timeInSecounds), "No internet access.");
+                        countDownTimer.pauseTimer();
+                        countDownTimer = null;
+                        Log.i(TAG, "onReceive(): Pausing timer - No internet access.");
+                        Toast.makeText(CameraService.this, "Received - No internet access.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                else if(status == NetworkUtil.NETWORK_STATUS_MOBILE || status == NetworkUtil.NETWORK_STATUS_WIFI){
+                    Log.i(TAG, "status: NETWORK_STATUS_MOBILE or NETWORK_STATUS_WIFI");
+                    if(countDownTimer == null) {
+                        resumeTimer();
+                        Log.i(TAG, "onReceive():resumeTimer(): Internet access.");
+                    }
+                }
+            }
+        }
+    }
+
 
     private void resumeTimer() {
         Log.i(TAG, "resumeTimer(): Time Left:" + readLeftTimeSharedPref());

@@ -35,7 +35,7 @@ public class CustomCountDownTimer extends CountDownTimer {
             Toast.makeText(cameraService.getApplicationContext(),timeInSecounds + " sec remaining",Toast.LENGTH_SHORT).show();
         }
 
-        cameraService.updateNotification(String.valueOf(timeInSecounds));
+        cameraService.updateNotification(String.valueOf(timeInSecounds), "");
         sendDataToActivity(String.valueOf(timeInSecounds));
     }
 
@@ -68,5 +68,8 @@ public class CustomCountDownTimer extends CountDownTimer {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(SERVICE_PICTURE_DELAY_SAVED, pictureTimer);
         editor.commit();
+    }
+    public long getTimeLeft(){
+        return timeLeftMili;
     }
 }
