@@ -10,7 +10,6 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognition;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.example.damian.monitorapp.AWSChangable.UILApplication;
 
 public class ClientAWSFactory extends AppCompatActivity{
     private AWSCredentials AWSCredentials;
@@ -82,8 +81,8 @@ public class ClientAWSFactory extends AppCompatActivity{
 //                //performAction(action);
 //                }
 //        });
-
-        return new AmazonRekognitionClient(UILApplication.cognitoCachingCredentialsProvider);
+        return null;
+        //return new AmazonRekognitionClient(UILApplication.cognitoCachingCredentialsProvider);
     }
 
     public AmazonDynamoDBClient createDynamoDBClient(Context context) {
@@ -94,8 +93,8 @@ public class ClientAWSFactory extends AppCompatActivity{
         /*Identity pool credentials provider*/
         Log.i(TAG, "getting Identity Pool credentials provider");
         credentialsProvider = cognitoSettings.getCredentialsProvider();
-
-        return new AmazonDynamoDBClient(UILApplication.cognitoCachingCredentialsProvider);
+        return null;
+        //return new AmazonDynamoDBClient(UILApplication.cognitoCachingCredentialsProvider);
     }
 
 }

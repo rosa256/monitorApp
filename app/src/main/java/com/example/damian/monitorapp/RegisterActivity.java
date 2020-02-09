@@ -1,5 +1,6 @@
 package com.example.damian.monitorapp;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -14,6 +15,8 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.SignUpHandler;
+import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
+import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 
 import java.util.regex.Matcher;
@@ -75,42 +78,37 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     SignUpHandler signupCallback = new SignUpHandler() {
-//        @Override
-//        public void onSuccess(CognitoUser user, SignUpResult signUpResult) {
-//            Toast.makeText(RegisterActivity.this,"Pomyślna Rejestracja", Toast.LENGTH_SHORT).show();
-//            Log.i(TAG, "sing up success...is confirmed:" + signUpResult.getUserConfirmed());
-//
-//            // Check if this user (cognitoUser) needs to be confirmed
-//            if(!signUpResult.getUserConfirmed()){
-//                Log.i(TAG, "sing up success...not confirmed, verification code sent to:"
-//                        + signUpResult.getCodeDeliveryDetails().getDestination());
-//
-//                Intent intent = new Intent(RegisterActivity.this, RegisterConfirmation.class);
-//                intent.putExtra("username", usernameGiven.getText().toString());
-//                startActivity(intent);
-//
-//                // This user must be confirmed and awsconfiguration confirmation code was sent to the user
-//                // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
-//                // Get the confirmation code from user
-//            }
-//            else {
-//                Log.i(TAG, "sing up success...confirmed:" + signUpResult.getUserConfirmed());
-//                Toast.makeText(RegisterActivity.this,"Użytkownik jest już potwierdzony.", Toast.LENGTH_SHORT).show();
-//                // The user has already been confirmed
-//            }
-//            busyIndicator.unDimBackgorund();
-//        }
-
         @Override
-        public void onSuccess(CognitoUser user, boolean signUpConfirmationState, CognitoUserCodeDeliveryDetails cognitoUserCodeDeliveryDetails) {
+        public void onSuccess(CognitoUser user, SignUpResult signUpResult) {
+            Log.i(TAG, "Sing up success...is confirmed:" + signUpResult.getUserConfirmed());
 
+            if(!signUpResult.getUserConfirmed()){
+                Log.i(TAG, "Sing up success...not confirmed, verification code sent to:"
+                        + signUpResult.getCodeDeliveryDetails().getDestination());
+
+                Intent intent = new Intent(RegisterActivity.this, RegisterConfirmation.class);
+                intent.putExtra("username", usernameGiven.getText().toString());
+                intent.putExtra("destination", signUpResult.getCodeDeliveryDetails().getDestination());
+                intent.putExtra("deliveryMed", signUpResult.getCodeDeliveryDetails().getDeliveryMedium());
+                intent.putExtra("attribute", signUpResult.getCodeDeliveryDetails().getAttributeName());
+                startActivity(intent);
+
+                // This user must be confirmed and awsconfiguration confirmation code was sent to the user
+                // cognitoUserCodeDeliveryDetails will indicate where the confirmation code was sent
+                // Get the confirmation code from user
+            }
+            else {
+                Log.i(TAG, "sing up success...confirmed:" + signUpResult.getUserConfirmed());
+                Toast.makeText(RegisterActivity.this,"Użytkownik jest już potwierdzony.", Toast.LENGTH_SHORT).show();
+                // The user has already been confirmed
+            }
+            busyIndicator.unDimBackgorund();
         }
 
         @Override
         public void onFailure(Exception exception) {
-            Log.i(TAG, "sing up failure:" + exception.getLocalizedMessage());
-            Toast.makeText(RegisterActivity.this,"Nie pomyślna rejestracja. Byc może istnieje juz taki.", Toast.LENGTH_SHORT).show();
-            // Sign-up failed, check exception for the cause
+            Log.i(TAG, "Sing up failure:" + exception.getLocalizedMessage());
+            Toast.makeText(RegisterActivity.this,"Nie udana rejestracja..", Toast.LENGTH_SHORT).show();
             busyIndicator.unDimBackgorund();
         }
     };
@@ -124,7 +122,8 @@ public class RegisterActivity extends AppCompatActivity {
             userAttributes = new CognitoUserAttributes();
             userAttributes.addAttribute("email", emailGiven.getText().toString());
 
-            cognitoSettings.getUserPool().signUpInBackground(
+
+            AppHelper.getPool().signUpInBackground(
                     usernameGiven.getText().toString(),
                     passwordGiven.getText().toString(),
                     userAttributes,

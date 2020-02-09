@@ -16,24 +16,17 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.example.damian.monitorapp.AWSChangable.UILApplication;
-import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
+import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.models.nosql.USERDO;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 public class DatabaseAccess {
 
@@ -53,7 +46,7 @@ public class DatabaseAccess {
         this.context = context;
 
         cognitoSettings = CognitoSettings.getInstance();
-        credentialsProvider = UILApplication.cognitoCachingCredentialsProvider;
+        //credentialsProvider = UILApplication.cognitoCachingCredentialsProvider;
 
         // AWSMobileClient enables AWS user credentials to access your table
         AWSMobileClient.getInstance().initialize(context).execute();

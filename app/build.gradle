@@ -60,7 +60,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     implementation "com.amazonaws:aws-android-sdk-core:2.6.11"
-    implementation "com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.6.11"
+    implementation 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.16.+'
     implementation 'com.github.navasmdc:MaterialDesign:1.5@aar'
 
     //https://android-arsenal.com/details/1/2193

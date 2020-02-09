@@ -1,19 +1,33 @@
-package com.example.damian.monitorapp.AWSChangable.utils;
-
-/**
- * Created by neha on 20/12/17.
+/*
+ * Copyright 2013-2017 Amazon.com,
+ * Inc. or its affiliates. All Rights Reserved.
+ *
+ * Licensed under the Amazon Software License (the "License").
+ * You may not use this file except in compliance with the
+ * License. A copy of the License is located at
+ *
+ *      http://aws.amazon.com/asl/
+ *
+ * or in the "license" file accompanying this file. This file is
+ * distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, express or implied. See the License
+ * for the specific language governing permissions and
+ * limitations under the License.
  */
+
+package com.example.damian.monitorapp.Utils;
 
 import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserPool;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserSession;
 import com.amazonaws.regions.Regions;
-import com.example.damian.monitorapp.models.ItemToDisplay;
+import com.amazonaws.services.cognitoidentityprovider.model.AttributeType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,7 +37,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class AppHelper {
-    public static final String IDENTITY_POOL_ID = "eu-west-2:6c31e36c-774e-4130-bc73-db9117a699fa";
+    private static final String TAG = "AppHelper";
     // App settings
 
     private static List<String> attributeDisplaySeq;
@@ -34,6 +48,9 @@ public class AppHelper {
     private static CognitoUserPool userPool;
     private static String user;
     private static CognitoDevice newDevice;
+
+    private static CognitoUserAttributes attributesChanged;
+    private static List<AttributeType> attributesToDelete;
 
     private static List<ItemToDisplay> currDisplayedItems;
     private static  int itemCount;
@@ -51,6 +68,13 @@ public class AppHelper {
     private static Map<String, String> firstTimeLogInUpDatedAttributes;
     private static String firstTimeLoginNewPassword;
 
+    private static List<ItemToDisplay> mfaOptions;
+    private static List<String> mfaAllOptionsCode;
+
+    // The lines below allow app users to register in your Cognito User Pool. Use
+    // a Cognito Identity Pool to control the user's access to your account resources.
+    // https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html
+
     // Change the next three lines of code to run this demo on your user pool
 
     /**
@@ -62,6 +86,7 @@ public class AppHelper {
      * Add you app id
      */
     private static final String clientId = "mvta0p8a66pu2cj331gacpada";
+
 
     /**
      * App secret associated with your app id - if the App id does not have an associated App secret,
@@ -113,6 +138,7 @@ public class AppHelper {
             userPool = new CognitoUserPool(context, userPoolId, clientId, clientSecret, cipClient);
             */
 
+
         }
 
         phoneVerified = false;
@@ -129,6 +155,8 @@ public class AppHelper {
         newDevice = null;
         thisDevice = null;
         thisDeviceTrustState = false;
+
+        mfaOptions = new ArrayList<ItemToDisplay>();
     }
 
     public static CognitoUserPool getPool() {
@@ -139,7 +167,7 @@ public class AppHelper {
         return signUpFieldsC2O;
     }
 
-    public static Map<String, String> getSignUpFieldsO2C() {
+    public static  Map<String, String> getSignUpFieldsO2C() {
         return signUpFieldsO2C;
     }
 
@@ -148,8 +176,6 @@ public class AppHelper {
     }
 
     public static void setCurrSession(CognitoUserSession session) {
-        Map<String, String> logins = new HashMap<>();
-
         currSession = session;
     }
 
@@ -226,7 +252,7 @@ public class AppHelper {
 
     public static String formatException(Exception exception) {
         String formattedString = "Internal Error";
-        Log.e("App Error",exception.toString());
+        Log.e(TAG, " -- Error: "+exception.toString());
         Log.getStackTraceString(exception);
 
         String temp = exception.getMessage();
@@ -352,6 +378,47 @@ public class AppHelper {
         }
     }
 
+    public static void setMfaOptionsForDisplay(List<String> options, Map<String, String> parameters) {
+        mfaAllOptionsCode = options;
+        mfaOptions = new ArrayList<ItemToDisplay>();
+        String textToDisplay = "";
+        for (String option: options) {
+            if ("SMS_MFA".equals(option)) {
+                textToDisplay = "Send SMS";
+                if (parameters.containsKey("CODE_DELIVERY_DESTINATION")) {
+                    textToDisplay = textToDisplay + " to "+ parameters.get("CODE_DELIVERY_DESTINATION");
+                }
+            } else if ("SOFTWARE_TOKEN_MFA".equals(option)) {
+                textToDisplay = "Use TOTP";
+                if (parameters.containsKey("FRIENDLY_DEVICE_NAME")) {
+                    textToDisplay = textToDisplay + ": " + parameters.get("FRIENDLY_DEVICE_NAME");
+                }
+            }
+            ItemToDisplay item = new ItemToDisplay("", textToDisplay, "", Color.BLACK, Color.DKGRAY, Color.parseColor("#329AD6"), 0, null);
+            mfaOptions.add(item);
+            textToDisplay = "Unsupported MFA";
+        }
+    }
+
+    public static List<String> getAllMfaOptions() {
+        return mfaAllOptionsCode;
+    }
+
+    public static String getMfaOptionCode(int position) {
+        return mfaAllOptionsCode.get(position);
+    }
+
+    public static ItemToDisplay getMfaOptionForDisplay(int position) {
+        if (position >= mfaOptions.size()) {
+            return new ItemToDisplay(" ", " ", " ", Color.BLACK, Color.DKGRAY, Color.parseColor("#37A51C"), 0, null);
+        }
+        return mfaOptions.get(position);
+    }
+
+    public static int getMfaOptionsCount() {
+        return mfaOptions.size();
+    }
+
     //public static
 
     public static CognitoDevice getNewDevice() {
@@ -470,7 +537,7 @@ public class AppHelper {
                         item.setMessageColor(Color.parseColor("#E94700"));
                     }
                 }
-
+                
                 currDisplayedItems.add(item);
                 currUserAttributes.add(det);
                 itemCount++;
@@ -487,3 +554,4 @@ public class AppHelper {
 
     }
 }
+

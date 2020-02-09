@@ -15,9 +15,8 @@ import com.amazonaws.mobile.auth.core.StartupAuthResultHandler;
 import com.amazonaws.mobile.auth.core.signin.AuthException;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
-import com.example.damian.monitorapp.AWSChangable.UILApplication;
 import com.example.damian.monitorapp.AWSChangable.activity.SignInActivity;
-import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
+import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
 
 import java.lang.ref.WeakReference;
@@ -98,7 +97,7 @@ public class SplashActivity extends Activity implements StartupAuthResultHandler
             }
         });
 
-        SignInActivity.startSignInActivity(this, UILApplication.sAuthUIConfiguration);
+        //SignInActivity.startSignInActivity(this, UILApplication.sAuthUIConfiguration);
 
         CustomPrivileges.setUpPrivileges(this);
 

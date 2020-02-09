@@ -42,14 +42,13 @@ import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.example.damian.monitorapp.AWSChangable.utils.AppHelper;
+import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.ClientAWSFactory;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.FileManager;
 import com.example.damian.monitorapp.fragments.CameraPreviewFragment;
 import com.example.damian.monitorapp.requester.DatabaseAccess;
-import com.example.damian.monitorapp.requester.RekognitionRequester;
 import com.michaldrabik.tapbarmenulib.TapBarMenu;
 
 import net.steamcrafted.materialiconlib.MaterialDrawableBuilder;
@@ -88,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private TimeLevelReceiver timeLevelReceiver;
 
     private DatabaseAccess databaseAccess;
+    private String username;
 
     @Bind(R.id.tapBarMenu)
     TapBarMenu tapBarMenu;
@@ -344,22 +344,27 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 awsServiceOption = Constants.AWS_COMPARE_FACES;
                 return true;
             case R.id.logoutItem:
-                cognitoSettings.getUserPool().getCurrentUser().globalSignOutInBackground(new GenericHandler() {
-                    @Override
-                    public void onSuccess() {
-                        cognitoSettings.getUserPool().getCurrentUser().signOut();
-                        cognitoSettings.getCredentialsProvider().clear();
-                        cognitoSettings.getCredentialsProvider().clearCredentials();
-                        Toast.makeText(MainActivity.this, "Success Logout", Toast.LENGTH_SHORT).show();
-                        intent[0] = new Intent(MainActivity.this, LoginActivity.class);
-                        startActivity(intent[0]);
-                    }
 
-                    @Override
-                    public void onFailure(Exception exception) {
-                        Toast.makeText(MainActivity.this,"Cannot log out.", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                AppHelper.setCurrSession(null);
+                AppHelper.getPool().getCurrentUser().signOut();
+                exitToLogin();
+
+//                cognitoSettings.getUserPool().getCurrentUser().globalSignOutInBackground(new GenericHandler() {
+//                    @Override
+//                    public void onSuccess() {
+//                        cognitoSettings.getUserPool().getCurrentUser().signOut();
+//                        cognitoSettings.getCredentialsProvider().clear();
+//                        cognitoSettings.getCredentialsProvider().clearCredentials();
+//                        Toast.makeText(MainActivity.this, "Success Logout", Toast.LENGTH_SHORT).show();
+//                        intent[0] = new Intent(MainActivity.this, LoginActivity.class);
+//                        startActivity(intent[0]);
+//                    }
+//
+//                    @Override
+//                    public void onFailure(Exception exception) {
+//                        Toast.makeText(MainActivity.this,"Cannot log out.", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
 
                 return true;
             default:
@@ -367,6 +372,15 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 // Invoke the superclass to handle it.
                 return true;
         }
+    }
+
+    private void exitToLogin() {
+        Intent intent = new Intent();
+        if(username == null)
+            username = "";
+        intent.putExtra("name",username);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
     @Override

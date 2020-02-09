@@ -34,6 +34,7 @@ import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.Verificat
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.cognitoidentityprovider.model.InvalidParameterException;
 import com.amazonaws.services.cognitoidentityprovider.model.NotAuthorizedException;
+import com.amazonaws.services.cognitoidentityprovider.model.SignUpResult;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotConfirmedException;
 import com.amazonaws.services.cognitoidentityprovider.model.UserNotFoundException;
 import com.example.damian.monitorapp.AWSChangable.ui.UserPoolSignInView;
@@ -113,6 +114,11 @@ public class CustomCognitoUserPoolsSignInProvider extends CognitoUserPoolsSignIn
                 Log.w(CustomCognitoUserPoolsSignInProvider.LOG_TAG, "Additional confirmation for sign up.");
                 CustomCognitoUserPoolsSignInProvider.this.startVerificationActivity();
             }
+
+        }
+
+        @Override
+        public void onSuccess(CognitoUser user, SignUpResult signUpResult) {
 
         }
 
