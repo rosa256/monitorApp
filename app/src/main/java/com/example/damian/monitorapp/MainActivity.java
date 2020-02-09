@@ -39,7 +39,11 @@ import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
 import com.afollestad.materialdialogs.Theme;
 import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GenericHandler;
+import com.amazonaws.mobileconnectors.cognitoidentityprovider.handlers.GetDetailsHandler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
 import com.example.damian.monitorapp.Utils.AppHelper;
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     private TimeLevelReceiver timeLevelReceiver;
 
+    private CognitoUser user;
     private DatabaseAccess databaseAccess;
     private String username;
 
@@ -97,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     private CameraPreviewFragment cameraPreviewFragment;
     private BusyIndicator busyIndicator;
     private IntentFilter mIntentFilter;
+    private static final String USER_DO_LOGOUT = "user_do_logout";
 
     public MainActivity() { }
 
@@ -108,6 +114,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
         toolbar = findViewById(R.id.my_toolbar);
         setSupportActionBar(toolbar);
+
+        username = AppHelper.getCurrUser();
 
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(MainActivity.this);
@@ -121,7 +129,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         fileManager.initFileManager(this.getResources());
 
         usernameEditText = findViewById(R.id.usernameEditText);
-        usernameEditText.setText(AppHelper.getPool().getCurrentUser().getUserId());
+        usernameEditText.setText(username);
 
         appStatusIcon = (MaterialIconView) findViewById(R.id.appStatus);
 
@@ -141,6 +149,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         mIntentFilter.addAction("com.example.damian.monitorApp.GET_TIME");
         getApplicationContext().registerReceiver(timeLevelReceiver, mIntentFilter);
 
+
         //TODO: Ewentualnie sprawdzic czy istnieje zdjęcie źródłowe
         cameraPreviewFragment = (CameraPreviewFragment) getSupportFragmentManager().findFragmentById(R.id.cameraPreviewFragment);
 
@@ -149,6 +158,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         this.readDelayPreference();
         ButterKnife.bind(this);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
+
+        getDetails();
+
+        user = AppHelper.getPool().getUser();
 
         busyIndicator = new BusyIndicator(cameraPreviewFragment);
 
@@ -160,9 +173,41 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
             editor.putBoolean("firstTimeRun", true);
             editor.commit();
         }
-        
-
     }
+
+
+
+    private void getDetails() {
+        AppHelper.getPool().getUser(username).getDetailsInBackground(detailsHandler);
+    }
+
+    GetDetailsHandler detailsHandler = new GetDetailsHandler() {
+        @Override
+        public void onSuccess(CognitoUserDetails cognitoUserDetails) {
+            //closeWaitDialog();
+            // Store details in the AppHandler
+            AppHelper.setUserDetails(cognitoUserDetails);
+            //showAttributes();
+            // Trusted devices?
+            handleTrustedDevice();
+            user = AppHelper.getPool().getCurrentUser();
+        }
+
+        @Override
+        public void onFailure(Exception exception) {
+            //closeWaitDialog();
+            Log.e(TAG, "onFailure: Could not fetch user details!" + AppHelper.formatException(exception).toString());
+        }
+    };
+
+    private void handleTrustedDevice() {
+        CognitoDevice newDevice = AppHelper.getNewDevice();
+        if (newDevice != null) {
+            AppHelper.newDevice(null);
+            //trustedDeviceDialog(newDevice);
+        }
+    }
+
 
     private class TimeLevelReceiver extends BroadcastReceiver {
         @Override
@@ -345,27 +390,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 return true;
             case R.id.logoutItem:
 
-                AppHelper.setCurrSession(null);
-                AppHelper.getPool().getCurrentUser().signOut();
+                user.signOut();
                 exitToLogin();
-
-//                cognitoSettings.getUserPool().getCurrentUser().globalSignOutInBackground(new GenericHandler() {
-//                    @Override
-//                    public void onSuccess() {
-//                        cognitoSettings.getUserPool().getCurrentUser().signOut();
-//                        cognitoSettings.getCredentialsProvider().clear();
-//                        cognitoSettings.getCredentialsProvider().clearCredentials();
-//                        Toast.makeText(MainActivity.this, "Success Logout", Toast.LENGTH_SHORT).show();
-//                        intent[0] = new Intent(MainActivity.this, LoginActivity.class);
-//                        startActivity(intent[0]);
-//                    }
-//
-//                    @Override
-//                    public void onFailure(Exception exception) {
-//                        Toast.makeText(MainActivity.this,"Cannot log out.", Toast.LENGTH_SHORT).show();
-//                    }
-//                });
-
                 return true;
             default:
                 // If we got here, the user's action was not recognized.
@@ -375,12 +401,22 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
     }
 
     private void exitToLogin() {
-        Intent intent = new Intent();
-        if(username == null)
-            username = "";
-        intent.putExtra("name",username);
-        setResult(RESULT_OK, intent);
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        startActivity(intent);
         finish();
+        writeLogoutState(true);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+    }
+
+    private void writeLogoutState(boolean doLogout) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(USER_DO_LOGOUT, doLogout);
+        editor.commit();
     }
 
     @Override
@@ -437,6 +473,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                             "Else our services can't be accessed.")
                     .theme(Theme.LIGHT)
                     .positiveText("ALLOW")
+                    .positiveColor(Color.GRAY)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
@@ -474,6 +511,7 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                             "Else our services can't be accessed.")
                     .theme(Theme.LIGHT)
                     .positiveText("ALLOW")
+                    .positiveColor(Color.GRAY)
                     .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
                         public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {

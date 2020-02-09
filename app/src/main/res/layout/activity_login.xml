@@ -36,6 +36,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="@dimen/inputTextSize"
+            android:inputType="textPassword"
             android:layout_marginLeft="@dimen/inputLeftRightMargin"
             android:layout_marginRight="@dimen/inputLeftRightMargin"
             android:layout_marginTop="@dimen/inputTopMarginLogin"

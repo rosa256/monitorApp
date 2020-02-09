@@ -1,6 +1,7 @@
 package com.example.damian.monitorapp;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -11,6 +12,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUser;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserCodeDeliveryDetails;
@@ -55,13 +58,9 @@ public class RegisterActivity extends AppCompatActivity {
         ButterKnife.bind(this);
 
         usernameGiven = findViewById(R.id.usernameEditText);
-        usernameGiven.setText("Maniek256");
         passwordGiven = findViewById(R.id.passowrdTextView);
-        passwordGiven.setText("ABCabc!@#");
         confirmPasswordGiven= findViewById(R.id.passowrdConfirmTextView);
-        confirmPasswordGiven.setText("ABCabc!@#");
         emailGiven = findViewById(R.id.emailEditText);
-        emailGiven.setText("d.rosinski256@gmail.com");
         /* Creating awsconfiguration CognitoUserPool instance */
         cognitoSettings = CognitoSettings.getInstance();
         cognitoSettings.initContext(RegisterActivity.this);
@@ -91,6 +90,7 @@ public class RegisterActivity extends AppCompatActivity {
                 intent.putExtra("destination", signUpResult.getCodeDeliveryDetails().getDestination());
                 intent.putExtra("deliveryMed", signUpResult.getCodeDeliveryDetails().getDeliveryMedium());
                 intent.putExtra("attribute", signUpResult.getCodeDeliveryDetails().getAttributeName());
+                busyIndicator.unDimBackgorund();
                 startActivity(intent);
 
                 // This user must be confirmed and awsconfiguration confirmation code was sent to the user
@@ -108,7 +108,13 @@ public class RegisterActivity extends AppCompatActivity {
         @Override
         public void onFailure(Exception exception) {
             Log.i(TAG, "Sing up failure:" + exception.getLocalizedMessage());
-            Toast.makeText(RegisterActivity.this,"Nie udana rejestracja..", Toast.LENGTH_SHORT).show();
+            new MaterialDialog.Builder(RegisterActivity.this).title("Register Problem")
+                    .content("Cannot process registration.\n" +
+                            "Please try again later.")
+                    .theme(Theme.LIGHT)
+                    .positiveColor(Color.GRAY)
+                    .positiveText("ok")
+                    .show();
             busyIndicator.unDimBackgorund();
         }
     };
@@ -116,7 +122,6 @@ public class RegisterActivity extends AppCompatActivity {
     @OnClick(R.id.registerButton)
     public void OnRegisterClcik(){
         busyIndicator.dimBackground();
-        Toast.makeText(RegisterActivity.this,"Registration invoke",Toast.LENGTH_SHORT).show();
 
         if(usernameCorrect && emailCorrect && passwordCorrect && passwordConfirmCorrect) {
             userAttributes = new CognitoUserAttributes();

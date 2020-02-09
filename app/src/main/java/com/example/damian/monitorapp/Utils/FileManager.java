@@ -63,9 +63,10 @@ public class FileManager {
 
     public File createSourceImageFile() throws IOException{
         String imageFileName = "sourceImage";
+        String Id = AppHelper.getCurrUser();
         String sufix = ".jpg";
-        Log.i(TAG, "createdImageFile:" + gallerySourceFolder + "/" + imageFileName + sufix);
-        sourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+        Log.i(TAG, "createdImageFile:" + gallerySourceFolder + "/" + imageFileName + "_" + Id + sufix);
+        sourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName  + "_" + Id + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
         return sourcePhotoFile;
     }
 
@@ -95,8 +96,9 @@ public class FileManager {
 
     public boolean checkIfExistsSourcePhotoFile(){
         String imageFileName = "sourceImage";
+        String Id = AppHelper.getCurrUser();
         String sufix = ".jpg";
-        File testSourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+        File testSourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName + "_" + Id + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
             if(testSourcePhotoFile.exists())
                 return true;
             else
@@ -106,8 +108,9 @@ public class FileManager {
     private void loadSourceImage(){
         if(checkIfExistsSourcePhotoFile()){
             String imageFileName = "sourceImage";
+            String Id = AppHelper.getCurrUser();
             String sufix = ".jpg";
-            File fileSource = new File(gallerySourceFolder + "/" + imageFileName + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+            File fileSource = new File(gallerySourceFolder + "/" + imageFileName + "_" + Id + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
             setSourcePhotoFile(fileSource);
         }
     }

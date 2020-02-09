@@ -1,7 +1,12 @@
 package com.example.damian.monitorapp;
 
 import android.app.ProgressDialog;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -10,6 +15,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.afollestad.materialdialogs.Theme;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.mobile.auth.ui.AuthUIConfiguration;
 import com.amazonaws.mobile.auth.ui.SignInUI;
@@ -34,13 +42,6 @@ import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
 import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.Utils.CustomPrivileges;
-import com.example.damian.monitorapp.requester.RefreshAsyncTask;
-import com.google.gson.Gson;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -48,19 +49,16 @@ import butterknife.OnClick;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
-    private CognitoUser cognitoUser;
+    private static final String USER_DO_LOGOUT = "user_do_logout";
     @Bind(R.id.loginButton) Button loginButton;
     @Bind(R.id.goToRegistrationButton) Button registrationButton;
     private EditText passwordInput;
     private EditText usernameInput;
-    private CognitoSettings cognitoSettings;
     private BusyIndicator busyIndicator;
+    private Boolean shouldAllowBack;
 
     String username;
     String password;
-
-    private AWSCredentialsProvider credentialsProvider;
-    private AWSConfiguration configuration;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,26 +68,27 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         busyIndicator = new BusyIndicator(this);
 
-
-        //cognitoSettings = CognitoSettings.getInstance();
-        //cognitoSettings.initContext(LoginActivity.this);
-
         CustomPrivileges.setUpPrivileges(this);
         initInputs();
 
         AppHelper.init(getApplicationContext());
+        shouldAllowBack = true;
 
+        boolean doLogout = readLogoutState();
+        Log.i(TAG, "onCreate(): Read logout: " + doLogout);
+        if(doLogout){
+            shouldAllowBack = false;
+            Log.i(TAG, "onCreate(): Signing out");
+            writeLogoutState(false);
+        }
         findCurrent();
     }
-
     private void findCurrent() {
         Log.e(TAG, "findCurrent: Invoked" );
         CognitoUser user = AppHelper.getPool().getCurrentUser();
         username = user.getUserId();
-        Log.e(TAG, "findCurrent: A" );
-
+        Log.e(TAG, "findCurrent: username: "+ username );
         if(username != null) {
-        Log.e(TAG, "findCurrent: B" );
             AppHelper.setUser(username);
             usernameInput.setText(user.getUserId());
             user.getSessionInBackground(authenticationHandler);
@@ -97,10 +96,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void initInputs() {
-        passwordInput = findViewById(R.id.inputLoginPassword);
-        passwordInput.setText("");
         usernameInput = findViewById(R.id.inputLoginUsername);
-        usernameInput.setText("maniek256");
+        usernameInput.setText("Maniek255");
+        passwordInput = findViewById(R.id.inputLoginPassword);
     }
 
     @Override
@@ -108,7 +106,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onResume();
         Log.i(TAG, "invoke onResume()");
     }
-
 
     @OnClick(R.id.goToRegistrationButton)
     public void goToRegister(){
@@ -118,29 +115,24 @@ public class LoginActivity extends AppCompatActivity {
 
     @OnClick(R.id.loginButton)
     public void SignInUser(){
-        //busyIndicator.dimBackground();
         Log.e(TAG, "SignInUser: Invoked" );
         username = usernameInput.getText().toString();
         if(username == null || username.length() < 1) {
-            //TextView label = (TextView) findViewById(R.id.textViewUserIdMessage);
-            //label.setText(usernameInput.getHint()+" cannot be empty");
-            //return;
+            usernameInput.setError("Incorrect username!\n*Cannot be empty!");
+            return;
         }
 
         AppHelper.setUser(username);
 
         password = passwordInput.getText().toString();
         if(password == null || password.length() < 1) {
-            //TextView label = (TextView) findViewById(R.id.textViewUserPasswordMessage);
-            //label.setText(passwordInput.getHint()+" cannot be empty");
-            //passwordInput.setBackground(getDrawable(R.drawable.text_border_error));
-            //return;
+            passwordInput.setError("Incorrect password!\n*Cannot be empty!");
+            return;
         }
+        busyIndicator.dimBackground();
 
         showWaitDialog("Signing in...");
         AppHelper.getPool().getUser(username).getSessionInBackground(authenticationHandler);
-
-       // busyIndicator.unDimBackgorund();
     }
 
     private void showWaitDialog(String message) {
@@ -185,26 +177,25 @@ public class LoginActivity extends AppCompatActivity {
     AuthenticationHandler authenticationHandler = new AuthenticationHandler() {
         @Override
         public void onSuccess(CognitoUserSession cognitoUserSession, CognitoDevice device) {
-            Log.e(TAG, "onSuccess: 1" );
-            Log.d(TAG, " -- Auth Success");
+            shouldAllowBack = true;
+            Log.i(TAG, "onSuccess(): Invoked" );
             AppHelper.setCurrSession(cognitoUserSession);
             AppHelper.newDevice(device);
-            closeWaitDialog();
             goToMainActivity();
+            clearInput();
+            finish();
+            busyIndicator.unDimBackgorund();
         }
 
         @Override
         public void getAuthenticationDetails(AuthenticationContinuation authenticationContinuation, String username) {
-            Log.e(TAG, "onSuccess: 2" );
-            closeWaitDialog();
-            Locale.setDefault(Locale.US);
+            Log.i(TAG, "getAuthenticationDetails(): Invoked" );
             getUserAuthentication(authenticationContinuation, username);
         }
 
         @Override
         public void getMFACode(MultiFactorAuthenticationContinuation multiFactorAuthenticationContinuation) {
-            Log.e(TAG, "onSuccess: 3" );
-            closeWaitDialog();
+            Log.i(TAG, "getMFACode(): Invoked" );
             //mfaAuth(multiFactorAuthenticationContinuation);
         }
 
@@ -213,18 +204,16 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void onFailure(Exception e) {
-            Log.e(TAG, "onSuccess: 4" );
+            Log.i(TAG, "onFailure(): 4" );
             closeWaitDialog();
-            Toast.makeText(LoginActivity.this, "NIE UDALO SIE ZALOGOWAC", Toast.LENGTH_SHORT).show();
-            //TextView label = (TextView) findViewById(R.id.textViewUserIdMessage);
-            //label.setText("Sign-in failed");
-            //inPassword.setBackground(getDrawable(R.drawable.text_border_error));
+            busyIndicator.unDimBackgorund();
 
-            //label = (TextView) findViewById(R.id.textViewUserIdMessage);
-            //label.setText("Sign-in failed");
-            //usernameInput.setBackground(getDrawable(R.drawable.text_border_error));
-
-            //showDialogMessage("Sign-in failed", AppHelper.formatException(e));
+            new MaterialDialog.Builder(LoginActivity.this).title("Wrong Credentials")
+                    .content("User does not exist.")
+                    .theme(Theme.LIGHT)
+                    .positiveColor(Color.GRAY)
+                    .positiveText("ok")
+                    .show();
         }
     };
 
@@ -259,6 +248,34 @@ public class LoginActivity extends AppCompatActivity {
         Intent mainActivity = new Intent(this, MainActivity.class);
         mainActivity.putExtra("name", username);
         startActivityForResult(mainActivity, 4);
+    }
+
+    private void clearInput() {
+        if(usernameInput== null) {
+            usernameInput = findViewById(R.id.inputLoginUsername);
+        }
+
+        if(passwordInput== null) {
+            passwordInput = findViewById(R.id.inputLoginPassword);
+        }
+
+        usernameInput.setText("");
+        usernameInput.requestFocus();
+        passwordInput.setText("");
+    }
+
+    private void writeLogoutState(boolean doLogout) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(USER_DO_LOGOUT, doLogout);
+        editor.commit();
+    }
+
+    private boolean readLogoutState() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        boolean doLogout = prefs.getBoolean(USER_DO_LOGOUT, true);
+        Log.i(TAG, "readLogoutState(): Do Logout: " + doLogout);
+        return doLogout;
     }
 }
 
