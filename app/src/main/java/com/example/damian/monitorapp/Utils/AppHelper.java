@@ -21,6 +21,9 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
+import com.amazonaws.auth.CognitoCachingCredentialsProvider;
+import com.amazonaws.mobile.auth.core.IdentityManager;
+import com.amazonaws.mobile.config.AWSConfiguration;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoDevice;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserAttributes;
 import com.amazonaws.mobileconnectors.cognitoidentityprovider.CognitoUserDetails;
@@ -77,6 +80,8 @@ public class AppHelper {
 
     // Change the next three lines of code to run this demo on your user pool
 
+
+    public static final String IDENTITY_POOL_ID = "eu-west-2:6c31e36c-774e-4130-bc73-db9117a699fa";
     /**
      * Add your pool id here
      */
@@ -113,6 +118,8 @@ public class AppHelper {
     private static boolean emailAvailable;
 
     private static Set<String> currUserAttributes;
+    private static AWSConfiguration awsConfiguration;
+    private static CognitoCachingCredentialsProvider cognitoCachingCredentialsProvider;
 
     public static void init(Context context) {
         setData();
@@ -137,9 +144,20 @@ public class AppHelper {
             cipClient.setRegion(Region.getRegion(cognitoRegion));
             userPool = new CognitoUserPool(context, userPoolId, clientId, clientSecret, cipClient);
             */
-
-
         }
+
+        awsConfiguration = new AWSConfiguration(context);
+
+        if (IdentityManager.getDefaultIdentityManager() == null) {
+            Log.e(TAG, "init(): Invoked cachingCredentials" );
+            cognitoCachingCredentialsProvider = new CognitoCachingCredentialsProvider(
+                             context,
+                             AppHelper.IDENTITY_POOL_ID,
+                             AppHelper.cognitoRegion);
+         final IdentityManager identityManager = new IdentityManager(context, awsConfiguration);
+         IdentityManager.setDefaultIdentityManager(identityManager);
+         }
+
 
         phoneVerified = false;
         phoneAvailable = false;
@@ -238,6 +256,10 @@ public class AppHelper {
 
     public static void addCurrUserattribute(String attribute) {
         currUserAttributes.add(attribute);
+    }
+
+    public static CognitoCachingCredentialsProvider getCognitoCachingCredentialsProvider() {
+        return cognitoCachingCredentialsProvider;
     }
 
     public static List<String> getNewAvailableOptions() {

@@ -81,8 +81,7 @@ public class ClientAWSFactory extends AppCompatActivity{
 //                //performAction(action);
 //                }
 //        });
-        return null;
-        //return new AmazonRekognitionClient(UILApplication.cognitoCachingCredentialsProvider);
+        return new AmazonRekognitionClient(AppHelper.getCognitoCachingCredentialsProvider());
     }
 
     public AmazonDynamoDBClient createDynamoDBClient(Context context) {
@@ -93,8 +92,7 @@ public class ClientAWSFactory extends AppCompatActivity{
         /*Identity pool credentials provider*/
         Log.i(TAG, "getting Identity Pool credentials provider");
         credentialsProvider = cognitoSettings.getCredentialsProvider();
-        return null;
-        //return new AmazonDynamoDBClient(UILApplication.cognitoCachingCredentialsProvider);
+        return new AmazonDynamoDBClient(AppHelper.getCognitoCachingCredentialsProvider());
     }
 
 }

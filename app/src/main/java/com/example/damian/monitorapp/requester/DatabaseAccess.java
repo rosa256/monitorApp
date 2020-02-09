@@ -12,12 +12,14 @@ import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
 import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Primitive;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
+import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
 import com.example.damian.monitorapp.Utils.AppHelper;
 import com.example.damian.monitorapp.Utils.CognitoSettings;
+import com.example.damian.monitorapp.Utils.Constants;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
 import com.example.damian.monitorapp.models.nosql.USERDO;
 
@@ -46,7 +48,7 @@ public class DatabaseAccess {
         this.context = context;
 
         cognitoSettings = CognitoSettings.getInstance();
-        //credentialsProvider = UILApplication.cognitoCachingCredentialsProvider;
+        credentialsProvider = AppHelper.getCognitoCachingCredentialsProvider();
 
         // AWSMobileClient enables AWS user credentials to access your table
         AWSMobileClient.getInstance().initialize(context).execute();
@@ -63,8 +65,8 @@ public class DatabaseAccess {
                 .awsConfiguration(configuration)
                 .build();
 
-        //amazonDynamoDBClient = new AmazonDynamoDBClient(UILApplication.cognitoCachingCredentialsProvider);
-        //amazonDynamoDBClient.setRegion(Region.getRegion(Constants.COGNITO_REGION));
+        amazonDynamoDBClient = new AmazonDynamoDBClient(AppHelper.getCognitoCachingCredentialsProvider());
+        amazonDynamoDBClient.setRegion(Region.getRegion(Constants.COGNITO_REGION));
 
         //dbTable = Table.loadTable(amazonDynamoDBClient, TABLE_NAME);
     }
