@@ -184,7 +184,8 @@ public class LoginActivity extends AppCompatActivity {
             goToMainActivity();
             clearInput();
             finish();
-            busyIndicator.unDimBackgorund();
+            //busyIndicator.dimBackground();
+            //busyIndicator.unDimBackgorund();
         }
 
         @Override

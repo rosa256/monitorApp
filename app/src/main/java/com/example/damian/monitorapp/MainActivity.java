@@ -409,7 +409,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
 
     @Override
     public void onBackPressed() {
-
+        finishAffinity();
+        finish();
     }
 
     private void writeLogoutState(boolean doLogout) {
