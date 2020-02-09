@@ -54,17 +54,37 @@
             android:layout_gravity="center"
             android:padding="16dp"/>
 
-        <Button
-            android:id="@+id/goToRegistrationButton"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginLeft="@dimen/inputLeftRightMargin"
             android:layout_marginRight="@dimen/inputLeftRightMargin"
             android:textSize="@dimen/inputTextSize"
             android:layout_marginTop="@dimen/inputTopMargin"
-            android:text="@string/registerStr"
-            android:layout_gravity="center"
-            android:padding="16dp"/>
+            android:weightSum="2"
+            >
+
+            <Button
+                android:id="@+id/goToRegistrationButton"
+                android:layout_height="wrap_content"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="@string/createNewAccount"
+                android:layout_gravity="center" />
+
+            <Button
+                android:id="@+id/goToForgotPassword"
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:textSize="12sp"
+                android:text="@string/forgotPasswordStr"
+                android:layout_gravity="center"/>
+
+        </LinearLayout>
+
 
 
     </LinearLayout>

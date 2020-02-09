@@ -21,6 +21,7 @@ import com.afollestad.materialdialogs.Theme;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.mobile.auth.ui.AuthUIConfiguration;
 import com.amazonaws.mobile.auth.ui.SignInUI;
+import com.amazonaws.mobile.auth.userpools.ForgotPasswordActivity;
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobile.client.AWSStartupHandler;
 import com.amazonaws.mobile.client.AWSStartupResult;
@@ -57,6 +58,8 @@ public class LoginActivity extends AppCompatActivity {
     private BusyIndicator busyIndicator;
     private Boolean shouldAllowBack;
 
+    private ForgotPasswordContinuation forgotPasswordContinuation;
+
     String username;
     String password;
 
@@ -67,7 +70,6 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         busyIndicator = new BusyIndicator(this);
-
         CustomPrivileges.setUpPrivileges(this);
         initInputs();
 
@@ -154,22 +156,32 @@ public class LoginActivity extends AppCompatActivity {
     ForgotPasswordHandler forgotPasswordHandler = new ForgotPasswordHandler() {
         @Override
         public void onSuccess() {
-//            closeWaitDialog();
-//            showDialogMessage("Password successfully changed!","");
-//            inPassword.setText("");
-//            inPassword.requestFocus();
+            new MaterialDialog.Builder(LoginActivity.this).title("Password recover success")
+                    .content("Password successfully changed!")
+                    .theme(Theme.LIGHT)
+                    .positiveColor(Color.GRAY)
+                    .positiveText("ok")
+                    .show();
+            passwordInput.setText("");
+            passwordInput.requestFocus();
+            return;
         }
 
         @Override
         public void getResetCode(ForgotPasswordContinuation forgotPasswordContinuation) {
-//            closeWaitDialog();
-//            getForgotPasswordCode(forgotPasswordContinuation);
+            getForgotPasswordCode(forgotPasswordContinuation);
         }
 
         @Override
         public void onFailure(Exception e) {
-//            closeWaitDialog();
-//            showDialogMessage("Forgot password failed",AppHelper.formatException(e));
+            new MaterialDialog.Builder(LoginActivity.this).title("Password recover failed")
+                    .content("Username not found.")
+                    .theme(Theme.LIGHT)
+                    .positiveColor(Color.GRAY)
+                    .positiveText("ok")
+                    .show();
+            return;
+
         }
     };
 
@@ -278,5 +290,31 @@ public class LoginActivity extends AppCompatActivity {
         Log.i(TAG, "readLogoutState(): Do Logout: " + doLogout);
         return doLogout;
     }
+
+    @OnClick(R.id.goToForgotPassword)
+    public void forgotPassword(){
+        forgotpasswordUser();
+    }
+
+    private void forgotpasswordUser() {
+        username = usernameInput.getText().toString();
+        if(username == null || username.length() < 1) {
+            usernameInput.setError("Incorrect username!\n*Cannot be empty!");
+        }
+
+        AppHelper.getPool().getUser(username).forgotPasswordInBackground(forgotPasswordHandler);
+    }
+
+    private void getForgotPasswordCode(ForgotPasswordContinuation forgotPasswordContinuation) {
+        this.forgotPasswordContinuation = forgotPasswordContinuation;
+        Intent intent = new Intent(this, CustomForgotPasswordActivity.class);
+        intent.putExtra("destination",forgotPasswordContinuation.getParameters().getDestination());
+        intent.putExtra("deliveryMed", forgotPasswordContinuation.getParameters().getDeliveryMedium());
+        startActivityForResult(intent, 3);
+    }
+
+
+
+
 }
 

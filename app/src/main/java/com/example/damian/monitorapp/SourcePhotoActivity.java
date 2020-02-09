@@ -30,6 +30,9 @@ public class SourcePhotoActivity extends AppCompatActivity {
     private SourceStatePagerAdapter sourceStatePagerAdapter;
     private ViewPager viewPager;
 
+    private String username = "";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +44,7 @@ public class SourcePhotoActivity extends AppCompatActivity {
         sourceStatePagerAdapter = new SourceStatePagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.container);
         setupViewPager();
-
+        username = getIntent().getStringExtra("username");
         ButterKnife.bind(this);
 
     }
@@ -66,7 +69,11 @@ public class SourcePhotoActivity extends AppCompatActivity {
         FileOutputStream outputPhoto = null;
         try {
             //TODO: Do Poprawienia setCurrentTakenPhotoFile...
-            fileManager.setSourcePhotoFile(fileManager.createSourceImageFile());
+            if(username != null && !username.isEmpty())
+                fileManager.setSourcePhotoFile(fileManager.createSourceImageFile(username));
+            else
+                fileManager.setSourcePhotoFile(fileManager.createSourceImageFile());
+
             outputPhoto = new FileOutputStream(fileManager.getSourcePhotoFile());
             textureView.getBitmap()
                     .compress(Bitmap.CompressFormat.PNG, 100, outputPhoto);

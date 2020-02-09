@@ -60,6 +60,7 @@ public class RegisterConfirmation extends AppCompatActivity {
 
             Intent intent = new Intent(RegisterConfirmation.this, SourcePhotoActivity.class);
             //Intent intent = new Intent(RegisterConfirmation.this, LoginActivity.class);
+            intent.putExtra("username", username);
             startActivity(intent);
 
             // User was successfully confirmed

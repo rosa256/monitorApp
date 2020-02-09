@@ -25,19 +25,21 @@
             android:gravity="center_horizontal">
 
             <android.support.design.widget.FloatingActionButton
+                android:id="@+id/fab_discard_source_photo"
+
+                android:layout_width="56dp"
+                android:layout_height="56dp"
+                android:layout_gravity="center"
+                android:src="@android:drawable/ic_delete" />
+
+            <android.support.design.widget.FloatingActionButton
                 android:id="@+id/fab_accept_source_photo"
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_gravity="center"
+                android:layout_marginLeft="146dp"
                 android:src="@android:drawable/ic_input_add" />
 
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_discard_source_photo"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:layout_gravity="center"
-                android:layout_marginLeft="146dp"
-                android:src="@android:drawable/ic_delete" />
         </LinearLayout>
 
     </RelativeLayout>

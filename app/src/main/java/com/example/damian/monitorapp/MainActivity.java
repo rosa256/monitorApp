@@ -143,8 +143,6 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         DatabaseAccess.getInstance(this);
         timeLevelReceiver = new MainActivity.TimeLevelReceiver();
 
-        Toast.makeText(getApplicationContext(), "Service State: " + readServiceStatePreference(), Toast.LENGTH_SHORT ).show();
-
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction("com.example.damian.monitorApp.GET_TIME");
         getApplicationContext().registerReceiver(timeLevelReceiver, mIntentFilter);
@@ -368,29 +366,24 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
         final Intent[] intent = new Intent[1];
         switch (item.getItemId()) {
             case R.id.registerItem:
-                Toast.makeText(this, "Register", Toast.LENGTH_SHORT).show();
                 intent[0] = new Intent(this, RegisterActivity.class);
                 startActivity(intent[0]);
+                turnOfServiceWhenOn();
+                logout();
                 return true;
 
-            case R.id.loginItem:
-                Toast.makeText(this, "Login", Toast.LENGTH_SHORT).show();
-                intent[0] = new Intent(this, LoginActivity.class);
+            case R.id.changeSourceImage:
+                intent[0] = new Intent(this, SourcePhotoActivity.class);
                 startActivity(intent[0]);
                 return true;
 
-            case R.id.detectFaces:
-                Toast.makeText(this, "Detect Faces Set", Toast.LENGTH_SHORT).show();
-                awsServiceOption = Constants.AWS_DETECT_FACES;
+            case R.id.changePassword:
+
                 return true;
 
-            case R.id.compareFaces:
-                Toast.makeText(this, "Compare Faces Set", Toast.LENGTH_SHORT).show();
-                awsServiceOption = Constants.AWS_COMPARE_FACES;
-                return true;
             case R.id.logoutItem:
-
-                user.signOut();
+                logout();
+                turnOfServiceWhenOn();
                 exitToLogin();
                 return true;
             default:
@@ -398,6 +391,10 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 // Invoke the superclass to handle it.
                 return true;
         }
+    }
+
+    private void logout(){
+        user.signOut();
     }
 
     private void exitToLogin() {
@@ -610,6 +607,13 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                         }
                     })
                     .show();
+        }
+    }
+
+    public void turnOfServiceWhenOn(){
+        boolean serviceState = readServiceStatePreference();
+        if(serviceState){
+            stopMyService();
         }
     }
 }

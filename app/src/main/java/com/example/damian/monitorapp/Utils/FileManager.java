@@ -70,6 +70,15 @@ public class FileManager {
         return sourcePhotoFile;
     }
 
+    public File createSourceImageFile(String username) throws IOException{
+        String imageFileName = "sourceImage";
+        String Id = username;
+        String sufix = ".jpg";
+        Log.i(TAG, "createdImageFile:" + gallerySourceFolder + "/" + imageFileName + "_" + Id + sufix);
+        sourcePhotoFile = new File(gallerySourceFolder + "/" + imageFileName  + "_" + Id + sufix); //Tu może być problem, bo sourceFileImage jest pusty.
+        return sourcePhotoFile;
+    }
+
     public void createImageGallery() {
         File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if(resources == null){

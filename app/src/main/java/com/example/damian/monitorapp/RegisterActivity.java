@@ -293,6 +293,13 @@ public class RegisterActivity extends AppCompatActivity {
             passwordConfirmCorrect = true;
         }
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent loginIntent = new Intent(RegisterActivity.this, LoginActivity.class);
+        startActivity(loginIntent);
+        finish();
+    }
 }
 
 

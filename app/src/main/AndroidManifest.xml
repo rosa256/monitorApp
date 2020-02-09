@@ -25,10 +25,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".CustomForgotPasswordActivity"></activity>
         <activity
             android:name=".GraphTabActivity"
-            android:screenOrientation="portrait"
-            ></activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".GraphActivity" />
         <activity
             android:name=".AWSChangable.activity.SignInActivity"
@@ -44,19 +44,16 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".MainActivity"
-            android:screenOrientation="portrait"/>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"
-            android:screenOrientation="portrait" >
-
-        </activity>
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".AbouteMe"
             android:screenOrientation="portrait" />
         <activity
             android:name=".AuthenticatorActivity"
             android:screenOrientation="portrait" />
-
         <activity
             android:name=".SplashActivity"
             android:label="@string/app_name"
@@ -64,6 +61,7 @@
             android:theme="@style/AppTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -85,10 +83,10 @@
         </receiver>
         <receiver
             android:name=".CameraService$LaunchBroadcastReceiver"
-            android:enabled="true"></receiver>
+            android:enabled="true" />
         <receiver
             android:name=".CameraService$NetworkChangeReceiver"
-            android:enabled="true"></receiver>
+            android:enabled="true" />
     </application>
 
 </manifest>

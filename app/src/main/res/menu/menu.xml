@@ -8,18 +8,13 @@
             app:showAsAction="never">
         </item>
 
-        <item android:title="Login"
-            android:id="@+id/loginItem"
+        <item android:title="Change Source Image"
+            android:id="@+id/changeSourceImage"
             app:showAsAction="never">
         </item>
 
-        <item android:title="Detect Faces"
-            android:id="@+id/detectFaces"
-            app:showAsAction="never">
-        </item>
-
-        <item android:title="Compare Faces"
-            android:id="@+id/compareFaces"
+        <item android:title="Change Password"
+            android:id="@+id/changePassword"
             app:showAsAction="never">
         </item>
 

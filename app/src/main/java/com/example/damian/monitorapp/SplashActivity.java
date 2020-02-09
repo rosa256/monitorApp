@@ -55,6 +55,10 @@ public class SplashActivity extends Activity {
         if(username != null) {
             AppHelper.setUser(username);
             user.getSessionInBackground(authenticationHandler);
+        }else{
+            Intent loginIntent = new Intent(SplashActivity.this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish();
         }
     }
 

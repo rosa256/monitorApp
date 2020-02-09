@@ -11,7 +11,6 @@ import butterknife.OnClick;
 
 public class AbouteMe extends AppCompatActivity {
 
-    private Button doActionButton;
     public static final String TAG = "AbouteMe";
 
     //private CircleImageView circleImageView;  // imageview
@@ -20,14 +19,7 @@ public class AbouteMe extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.i(TAG, ":onCreate");
         setContentView(R.layout.activity_aboute_me);
-        doActionButton = (Button) findViewById(R.id.doActionButton);
         ButterKnife.bind(this);
-    }
-
-    @OnClick(R.id.doActionButton)
-    public void doActionButton(){
-        Intent intent = new Intent(this, SourcePhotoActivity.class);
-        startActivity(intent);
     }
 }
 
