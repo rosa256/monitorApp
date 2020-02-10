@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
+import com.example.damian.monitorapp.Utils.HourLinearXAxisValueFormatter;
 import com.example.damian.monitorapp.Utils.MarkerGraph;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
@@ -88,7 +89,7 @@ public class LinearGraphFragment extends Fragment {
         long unixTimeStamp = c.getTimeInMillis() / 1000;
 
 
-        HourAxisValueFormatter X_hourAxisValueFormatter = new HourAxisValueFormatter(referenceTimeStamp);
+        HourLinearXAxisValueFormatter X_hourAxisValueFormatter = new HourLinearXAxisValueFormatter(referenceTimeStamp);
         XAxis xAxis = lineChart.getXAxis();
         xAxis.setValueFormatter(X_hourAxisValueFormatter);
 
