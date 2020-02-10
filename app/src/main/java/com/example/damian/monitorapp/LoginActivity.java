@@ -217,12 +217,12 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         public void onFailure(Exception e) {
-            Log.i(TAG, "onFailure(): 4" );
+            Log.i(TAG, "onFailure(): Invoked" );
             closeWaitDialog();
             busyIndicator.unDimBackgorund();
 
             new MaterialDialog.Builder(LoginActivity.this).title("Wrong Credentials")
-                    .content("User does not exist.")
+                    .content("Incorrect Username or Password!")
                     .theme(Theme.LIGHT)
                     .positiveColor(Color.GRAY)
                     .positiveText("ok")

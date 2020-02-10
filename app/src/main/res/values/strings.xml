@@ -84,7 +84,9 @@
     <string name="forgotPasswordStr"><b>Forgot Password</b></string>
     <string name="usernameHint">Username</string>
     <string name="emailHint">E-mail</string>
+    <string name="currentPasswordHint">Current Password</string>
     <string name="passwordHint">Password</string>
+    <string name="passwordNewHint">New Password</string>
     <string name="passwordConfirmHint">Confirm password</string>
     <string name="loginStr"><b>Login</b></string>
 

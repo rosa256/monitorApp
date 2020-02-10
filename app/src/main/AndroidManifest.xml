@@ -25,7 +25,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".CustomForgotPasswordActivity"></activity>
+        <activity android:name=".ChangePasswordActivity"></activity>
+        <activity android:name=".CustomForgotPasswordActivity" />
         <activity
             android:name=".GraphTabActivity"
             android:screenOrientation="portrait" />
@@ -47,7 +48,7 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".LoginActivity"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
         <activity
             android:name=".AbouteMe"
             android:screenOrientation="portrait" />

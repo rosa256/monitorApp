@@ -378,6 +378,8 @@ public class MainActivity extends AppCompatActivity implements CameraPreviewFrag
                 return true;
 
             case R.id.changePassword:
+                intent[0] = new Intent(this, ChangePasswordActivity.class);
+                startActivity(intent[0]);
 
                 return true;
 
