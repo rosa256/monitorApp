@@ -135,11 +135,11 @@
 
                 <TextView
                     android:id="@+id/TimeTV"
-                    android:layout_width="58dp"
+                    android:layout_width="86dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/montserrat_regular"
-                    android:text="Użytkowanie"
+                    android:text="Useage"
 
                     android:textAlignment="center"
                     android:textColor="@android:color/background_light"
@@ -148,23 +148,23 @@
                 <TextView
 
                     android:id="@+id/deviceOffTimeTV"
-                    android:layout_width="50dp"
+                    android:layout_width="93dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:fontFamily="@font/montserrat_regular"
-                    android:text="Bezczynny"
-                    android:textAlignment="textEnd"
+                    android:text="Idle"
+                    android:textAlignment="center"
                     android:textColor="@android:color/background_light"
                     android:textSize="18sp" />
 
                 <TextView
 
                     android:id="@+id/summaryTimeTV"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_width="98dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:fontFamily="@font/montserrat_regular"
-                    android:text="Łącznie"
+                    android:text="Summary"
                     android:textAlignment="center"
                     android:textColor="@android:color/background_light"
                     android:textSize="18sp" />

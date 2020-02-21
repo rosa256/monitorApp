@@ -99,7 +99,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void initInputs() {
         usernameInput = findViewById(R.id.inputLoginUsername);
-        usernameInput.setText("Maniek255");
+        //usernameInput.setText("Maniek255");
         passwordInput = findViewById(R.id.inputLoginPassword);
     }
 
