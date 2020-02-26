@@ -8,7 +8,7 @@ android {
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -33,35 +33,22 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
 
 
-    implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.jakewharton:butterknife:7.0.1'
-//  implementation 'android.arch.lifecycle:extensions:1.1.1'
     annotationProcessor 'com.jakewharton:butterknife:7.0.1'
-    implementation 'com.github.michaldrabik:tapbarmenu:1.0.5'
+
+    implementation( "com.amazonaws:aws-android-sdk-core:2.6.11") { transitive = true }
     implementation group: 'com.amazonaws', name: 'aws-android-sdk-rekognition', version: '2.16.0'
     implementation group: 'com.amazonaws', name: 'aws-android-sdk-ddb', version: '2.16.3'
-    implementation group: 'com.amazonaws', name: 'aws-android-sdk-ddb-document', version: '2.16.3'
     implementation group: 'com.amazonaws', name: 'aws-android-sdk-ddb-mapper', version: '2.16.3'
 
 
-    implementation(
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.4.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.4.1'],
-            [group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.4.1']
-    )
-
-    //implementation 'com.amazonaws:aws-android-sdk-core:2.6.0'
     implementation('com.amazonaws:aws-android-sdk-mobile-client:2.7.+@aar') { transitive = true }
-
-    implementation 'com.amazonaws:aws-android-sdk-auth-core:2.6.11@aar'
-    implementation 'com.amazonaws:aws-android-sdk-pinpoint:2.6.0'
+    implementation( 'com.amazonaws:aws-android-sdk-auth-core:2.6.11@aar') { transitive = true }
     implementation('com.amazonaws:aws-android-sdk-auth-userpools:2.7.+@aar') { transitive = true }
     implementation('com.amazonaws:aws-android-sdk-auth-ui:2.7.+@aar') { transitive = true }
-    implementation 'com.android.support:multidex:1.0.3'
+    implementation 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.16.8'
 
-    implementation "com.amazonaws:aws-android-sdk-core:2.6.11"
-    implementation 'com.amazonaws:aws-android-sdk-cognitoidentityprovider:2.16.+'
-    implementation 'com.github.navasmdc:MaterialDesign:1.5@aar'
+    implementation 'com.github.michaldrabik:tapbarmenu:1.0.5'
 
     //https://android-arsenal.com/details/1/2193
     implementation 'net.steamcrafted:materialiconlib:1.1.5'
@@ -76,10 +63,16 @@ dependencies {
         transitive = true
     }
 
-
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'com.android.support.test:runner:1.0.2'
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
+    // Espresso
+    def androidx_test_espresso = "3.1.0"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidx_test_espresso"
+
+    // androidx.test
+    def androidx_test = "1.1.0"
+    androidTestImplementation "androidx.test:runner:$androidx_test"
+    androidTestImplementation "androidx.test:core:$androidx_test"
+    androidTestImplementation "androidx.test.ext:junit-ktx:$androidx_test"
 
 }

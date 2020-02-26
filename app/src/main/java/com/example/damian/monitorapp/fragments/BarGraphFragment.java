@@ -5,15 +5,13 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.damian.monitorapp.R;
-import com.example.damian.monitorapp.Utils.DayAxisValueFormatter;
-import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
+import com.example.damian.monitorapp.utils.DayAxisValueFormatter;
+import com.example.damian.monitorapp.utils.HourAxisValueFormatter;
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;

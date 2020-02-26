@@ -6,16 +6,12 @@ import android.util.Log;
 import android.widget.Toast;
 
 import com.amazonaws.services.rekognition.AmazonRekognitionClient;
-import com.amazonaws.services.rekognition.model.BoundingBox;
 import com.amazonaws.services.rekognition.model.CompareFacesMatch;
 import com.amazonaws.services.rekognition.model.CompareFacesRequest;
 import com.amazonaws.services.rekognition.model.CompareFacesResult;
-import com.amazonaws.services.rekognition.model.ComparedFace;
 import com.amazonaws.services.rekognition.model.Image;
 import com.amazonaws.services.rekognition.model.InvalidParameterException;
-import com.example.damian.monitorapp.Utils.Constants;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.example.damian.monitorapp.utils.Constants;
 
 import java.util.List;
 
@@ -23,71 +19,47 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     private static final String TAG = "CompareFacesAsync";
 
     private AmazonRekognitionClient amazonRekognitionClient;
-    private ObjectMapper objectMapper;
     private Context context;
-    private Image source;
-    private Image target;
-    private String confidence ="0";
-    boolean sendFalse;
+    private Image sourceImage;
+    private Image targetImage;
+    private String confidenceStr ="0";
+    private Float confidence = 0F;
+    private Float actuallSimilarity = 0F;
+    boolean comparisonFailed;
 
-    private Exception exception;
 
-    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image source, Image target, Context context) {
+    public CompareFacesAsync(AmazonRekognitionClient rekognitionClient, Image sourceImage, Image targetImage, Context context) {
         super();
         this.amazonRekognitionClient = rekognitionClient;
-        this.source = source;
-        this.target = target;
+        this.sourceImage = sourceImage;
+        this.targetImage = targetImage;
         this.context = context;
-
-        objectMapper = new ObjectMapper();
     }
-
 
     @Override
     protected Void doInBackground(String... strings) {
         Log.i(TAG,": Invoke do In background");
 
         CompareFacesRequest request = new CompareFacesRequest()
-                .withSourceImage(source)
-                .withTargetImage(target)
+                .withSourceImage(sourceImage)
+                .withTargetImage(targetImage)
                 .withSimilarityThreshold(Constants.SIMILARITY_THRESHOLD);
 
-        // Call operation
-        // When in target or source photo there is no faces, then its return InvalidparametersExcpetion.
-        CompareFacesResult compareFacesResult;
-        sendFalse = false;
         try{
-            compareFacesResult = amazonRekognitionClient.compareFaces(request);
-
-            List<CompareFacesMatch> faceDetails = compareFacesResult.getFaceMatches();
-            for (CompareFacesMatch match : faceDetails) {
-                ComparedFace face = match.getFace();
-                BoundingBox position = face.getBoundingBox();
-                System.out.println("Face at " + position.getLeft().toString()
-                        + " " + position.getTop()
-                        + " matches with " + match.getSimilarity().toString()
-                        + "% confidence.");
-                confidence = match.getSimilarity().toString();
-                try {
-                    Log.i(TAG, "Complete set of attributes:");
-                    Log.i(TAG, objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(face));
-                } catch (JsonProcessingException e) {
-                    e.printStackTrace();
-                    Log.e("monitorApp", "exception", e);
+            CompareFacesResult response = amazonRekognitionClient.compareFaces(request);
+            List<CompareFacesMatch> faceDetails = response.getFaceMatches();
+            for (CompareFacesMatch details : faceDetails) {
+                Log.d(TAG, "Face matches with " + details.getSimilarity().toString() + "% confidence.");
+                actuallSimilarity  = details.getSimilarity();
+                if (confidence < actuallSimilarity){
+                    confidence = actuallSimilarity;
                 }
             }
-
-            List<ComparedFace> uncompared = compareFacesResult.getUnmatchedFaces();
-
-            Log.i(TAG, "There was " + uncompared.size()
-                    + " face(s) that did not match");
-
+            confidenceStr = confidence.toString();
+            Log.d(TAG, "There was " + response.getUnmatchedFaces().size() + " faces which didn't match.");
         }catch (InvalidParameterException e){
-            sendFalse = true;
+            comparisonFailed = true;
         }
-
-
-        //Display results
         return null;
     }
 
@@ -95,14 +67,11 @@ public class CompareFacesAsync extends AsyncTask<String, Void, Void> {
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
         Toast.makeText(context.getApplicationContext(), "Comparison: " + confidence, Toast.LENGTH_SHORT).show();
-
         final DatabaseAccess databaseAccess = DatabaseAccess.getInstance(null);
-        Log.i(TAG, "onPostExecute: Start saving status to DB");
-        if(sendFalse){
+        if(comparisonFailed){
             databaseAccess.createStatus("0");
         }else{
-            databaseAccess.createStatus(confidence);
+            databaseAccess.createStatus(confidenceStr);
         }
-        Log.i(TAG, "onPostExecute: End saving status to DB");
     }
 }

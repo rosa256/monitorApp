@@ -10,9 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.damian.monitorapp.R;
-import com.example.damian.monitorapp.Utils.HourAxisValueFormatter;
-import com.example.damian.monitorapp.Utils.HourLinearXAxisValueFormatter;
-import com.example.damian.monitorapp.Utils.MarkerGraph;
+import com.example.damian.monitorapp.utils.HourAxisValueFormatter;
+import com.example.damian.monitorapp.utils.HourLinearXAxisValueFormatter;
+import com.example.damian.monitorapp.utils.MarkerGraph;
 import com.github.mikephil.charting.charts.LineChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;

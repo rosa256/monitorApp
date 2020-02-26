@@ -14,7 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.damian.monitorapp.R;
-import com.example.damian.monitorapp.Utils.FileManager;
+import com.example.damian.monitorapp.utils.FileManager;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -23,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -112,7 +111,7 @@ public class ActionMenu extends Fragment{
                 File tempFile = fileManager.createImageFile();
                 outputPhoto = new FileOutputStream(tempFile);
 
-                selectedImage.compress(Bitmap.CompressFormat.PNG, 60 , outputPhoto);
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 100 , outputPhoto);
 
                 fileManager.setCurrentTakenPhotoFile(tempFile);
 

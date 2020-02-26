@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    tools:context=".activities.RegisterActivity"
+    android:id="@+id/registerActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,6 +14,7 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/registerTitleId"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="37dp"
@@ -63,7 +65,7 @@
             android:layout_marginRight="@dimen/inputLeftRightMargin">
 
             <EditText
-                android:id="@+id/passowrdTextView"
+                android:id="@+id/passwordEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/passwordHint"
@@ -81,7 +83,7 @@
         android:layout_marginLeft="@dimen/inputLeftRightMargin"
         android:layout_marginRight="@dimen/inputLeftRightMargin">
             <EditText
-                android:id="@+id/passowrdConfirmTextView"
+                android:id="@+id/passwordConfirmEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/passwordConfirmHint"

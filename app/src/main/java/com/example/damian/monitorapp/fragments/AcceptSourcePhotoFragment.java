@@ -11,10 +11,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
-import com.example.damian.monitorapp.LoginActivity;
+import com.example.damian.monitorapp.activities.LoginActivity;
 import com.example.damian.monitorapp.R;
-import com.example.damian.monitorapp.SourcePhotoActivity;
-import com.example.damian.monitorapp.Utils.FileManager;
+import com.example.damian.monitorapp.activities.SourcePhotoActivity;
+import com.example.damian.monitorapp.utils.FileManager;
 
 import java.io.File;
 

@@ -4,24 +4,16 @@ import android.content.Context;
 import android.util.Log;
 
 import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.CognitoCachingCredentialsProvider;
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.mobile.config.AWSConfiguration;
-import com.amazonaws.mobileconnectors.dynamodbv2.document.Table;
-import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Document;
-import com.amazonaws.mobileconnectors.dynamodbv2.document.datatype.Primitive;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBMapper;
 import com.amazonaws.mobileconnectors.dynamodbv2.dynamodbmapper.DynamoDBQueryExpression;
-import com.amazonaws.regions.Region;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClient;
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ComparisonOperator;
 import com.amazonaws.services.dynamodbv2.model.Condition;
-import com.example.damian.monitorapp.Utils.AppHelper;
-import com.example.damian.monitorapp.Utils.CognitoSettings;
-import com.example.damian.monitorapp.Utils.Constants;
+import com.example.damian.monitorapp.utils.AppHelper;
 import com.example.damian.monitorapp.models.nosql.STATUSDO;
-import com.example.damian.monitorapp.models.nosql.USERDO;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -33,22 +25,11 @@ import java.util.List;
 public class DatabaseAccess {
 
     private static final String TAG = "DatabaseAccess";
-    private Context context;
-    private CognitoCachingCredentialsProvider credentialsProvider;
-    private CognitoSettings cognitoSettings;
-    private AmazonDynamoDBClient amazonDynamoDBClient;
-    private Table dbTable;
-    private static final String TABLE_NAME = "User_Check";
 
+    private DynamoDBMapper dynamoDBMapper;
+    private AmazonDynamoDBClient dynamoDBClient;
     private static DatabaseAccess instance;
-    // Declare a DynamoDBMapper object
-    DynamoDBMapper dynamoDBMapper;
-    AmazonDynamoDBClient dynamoDBClient;
     private DatabaseAccess(Context context) {
-        this.context = context;
-
-        cognitoSettings = CognitoSettings.getInstance();
-        credentialsProvider = AppHelper.getCognitoCachingCredentialsProvider();
 
         // AWSMobileClient enables AWS user credentials to access your table
         AWSMobileClient.getInstance().initialize(context).execute();
@@ -56,19 +37,13 @@ public class DatabaseAccess {
         AWSCredentialsProvider credentialsProvider = AWSMobileClient.getInstance().getCredentialsProvider();
         AWSConfiguration configuration = AWSMobileClient.getInstance().getConfiguration();
 
-
-        // Add code to instantiate a AmazonDynamoDBClient
         dynamoDBClient = new AmazonDynamoDBClient(credentialsProvider);
+        //dynamoDBClient = new AmazonDynamoDBClient(AppHelper.getCognitoCachingCredentialsProvider());
 
         this.dynamoDBMapper = DynamoDBMapper.builder()
                 .dynamoDBClient(dynamoDBClient)
                 .awsConfiguration(configuration)
                 .build();
-
-        amazonDynamoDBClient = new AmazonDynamoDBClient(AppHelper.getCognitoCachingCredentialsProvider());
-        amazonDynamoDBClient.setRegion(Region.getRegion(Constants.COGNITO_REGION));
-
-        //dbTable = Table.loadTable(amazonDynamoDBClient, TABLE_NAME);
     }
 
     public static synchronized DatabaseAccess getInstance(Context context){
@@ -76,28 +51,6 @@ public class DatabaseAccess {
             instance = new DatabaseAccess(context);
         }
         return instance;
-    }
-
-    public void createUser(final String userId, final String username, final String email){
-        Runnable runnable = new Runnable() {
-            public void run() {
-                final USERDO userItem = new USERDO();
-
-                userItem.setUserId(userId);
-                userItem.setUsername(username);
-                userItem.setEmail(email);
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        dynamoDBMapper.save(userItem);
-                    }
-                }).start();
-            }
-        };
-
-        Thread createUserThread = new Thread(runnable);
-        createUserThread.start();
     }
 
     public void createStatus(final String confidence){
@@ -151,7 +104,6 @@ public class DatabaseAccess {
 
         return statusItem;
     }
-
 
     public List<STATUSDO> getStatusFromToday(){
 
@@ -277,10 +229,10 @@ public class DatabaseAccess {
     public List<STATUSDO> getStatusFromCustomDate(Date customDateStart, Date customDateEnd){
 
         Log.i(TAG, "getStatusFromCustomDate(): Invoke method.");
-        // today
 
-        String startDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(customDateStart);
-        String endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(customDateEnd);
+        String dateFormat = "yyyy-MM-dd HH:mm:ss";
+        String startDate = new SimpleDateFormat(dateFormat).format(customDateStart);
+        String endDate = new SimpleDateFormat(dateFormat).format(customDateEnd);
 
         Log.i(TAG, "getStatusFromCustomDate(): customDateStart: "+ customDateStart);
         Log.i(TAG, "getStatusFromCustomDate(): customDateEnd: "+ customDateEnd);
@@ -289,43 +241,24 @@ public class DatabaseAccess {
         attributes.add(new AttributeValue().withS(startDate));
         attributes.add(new AttributeValue().withS(endDate));
 
-        STATUSDO hasKey = new STATUSDO();
-        hasKey.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
+        STATUSDO statusDO = new STATUSDO();
+        statusDO.setUserId(AppHelper.getPool().getCurrentUser().getUserId());
 
-        Condition lastWeekCondition = new Condition();
-        lastWeekCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
-        lastWeekCondition.setAttributeValueList(attributes);
+        Condition customDateCondition = new Condition();
+        customDateCondition.setComparisonOperator(ComparisonOperator.BETWEEN);
+        customDateCondition.setAttributeValueList(attributes);
 
         DynamoDBQueryExpression<STATUSDO> queryExpression = new DynamoDBQueryExpression<STATUSDO>()
-                .withHashKeyValues(hasKey)
-                .withRangeKeyCondition("full_date", lastWeekCondition);
+                .withHashKeyValues(statusDO)
+                .withRangeKeyCondition("full_date", customDateCondition);
 
         List<STATUSDO> allStatuses = dynamoDBMapper.query(STATUSDO.class, queryExpression);
+
+        String formatToDisplay = "Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n";
         for (STATUSDO status : allStatuses) {
-            System.out.format("Id=%s, FullDate=%s, UnixTime=%s , Verified=%s \n", status.getUserId(),
-                    status.getFullDate(), status.getUnixTime(), status.getVerified());
+            Log.d(TAG, String.format(formatToDisplay,
+                    status.getUserId(), status.getFullDate(), status.getUnixTime(), status.getVerified()));
         }
         return allStatuses;
     }
-
-
-
-    public void createUserCheck(Document userCheckDocument){
-        if(!userCheckDocument.containsKey("userId")){
-            userCheckDocument.put("userId", credentialsProvider.getCachedIdentityId());
-        }
-        if(!userCheckDocument.containsKey(""))
-        return;
-    }
-
-
-    public void readUserCheck() {
-
-        List<Document> returnedItem = dbTable.query(new Primitive(cognitoSettings.getUserPool().getCurrentUser().getUserId())).getAllResults();
-        System.out.println(returnedItem.get(1).toString());
-        System.out.println(returnedItem.size());
-
-    }
-
-    //*************************************************************************
 }

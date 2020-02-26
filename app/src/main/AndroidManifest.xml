@@ -25,38 +25,32 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ChangePasswordActivity"></activity>
-        <activity android:name=".CustomForgotPasswordActivity" />
+        <activity android:name=".activities.ChangePasswordActivity"></activity>
+        <activity android:name=".activities.CustomForgotPasswordActivity" />
         <activity
-            android:name=".GraphTabActivity"
+            android:name=".activities.GraphTabActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".GraphActivity" />
+        <activity android:name=".activities.GraphActivity" />
         <activity
-            android:name=".AWSChangable.activity.SignInActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".SourcePhotoActivity"
+            android:name=".activities.SourcePhotoActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".RegisterConfirmation"
+            android:name=".activities.RegisterConfirmation"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".activities.RegisterActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MainActivity"
+            android:name=".activities.MainActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".activities.LoginActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".AbouteMe"
+            android:name=".activities.AboutApp"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".AuthenticatorActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".SplashActivity"
+            android:name=".activities.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
@@ -67,7 +61,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".CameraService">
+        <service android:name=".services.CameraService">
             <intent-filter>
                 <action android:name="com.example.damian.monitorApp.START" />
                 <action android:name="com.example.damian.monitorApp.START_WITH_PREVIEW" />
@@ -83,10 +77,10 @@
             </intent-filter>
         </receiver>
         <receiver
-            android:name=".CameraService$LaunchBroadcastReceiver"
+            android:name=".services.CameraService$LaunchBroadcastReceiver"
             android:enabled="true" />
         <receiver
-            android:name=".CameraService$NetworkChangeReceiver"
+            android:name=".services.CameraService$NetworkChangeReceiver"
             android:enabled="true" />
     </application>
 

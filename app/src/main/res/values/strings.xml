@@ -120,5 +120,7 @@
         <item>Custom Date</item>
     </string-array>
     <string name="title_activity_graph_tab">GraphTabActivity</string>
+    <string name="user_not_found">Username not found.</string>
+    <string name="wrong_credentials">Wrong Credentials</string>
 
 </resources>
