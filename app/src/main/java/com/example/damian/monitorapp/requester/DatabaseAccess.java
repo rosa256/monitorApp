@@ -96,7 +96,7 @@ public class DatabaseAccess {
         statusItem.setFullDate(full_date);
         statusItem.setUnixTime(unixTime);
 
-        if(Double.parseDouble(confidence) > 75D ) {
+        if(Double.parseDouble(confidence) > 70D ) {
             statusItem.setVerified(true);
         }else{
             statusItem.setVerified(false);

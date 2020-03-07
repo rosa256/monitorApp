@@ -13,6 +13,7 @@ import com.example.damian.monitorapp.R;
 import com.example.damian.monitorapp.utils.DayAxisValueFormatter;
 import com.example.damian.monitorapp.utils.HourAxisValueFormatter;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
@@ -40,8 +41,12 @@ public class BarGraphFragment extends Fragment {
 
         barChart.setDrawBarShadow(false);
         barChart.setDrawValueAboveBar(true);
-
+//        Description description = new Description();
+//        description.setText("Y - Summary Time, X - Day");
+//        description.setTextSize(12f);
+//        barChart.setDescription(description);
         barChart.getDescription().setEnabled(false);
+
         barChart.setMaxVisibleValueCount(60);
 
         // scaling can now only be done on x- and y-axis separately

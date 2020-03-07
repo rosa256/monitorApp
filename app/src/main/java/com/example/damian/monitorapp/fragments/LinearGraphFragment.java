@@ -40,11 +40,14 @@ public class LinearGraphFragment extends Fragment {
         lineChart.setNoDataTextColor(R.color.colorGreyLight);
         lineChart.setNoDataText("Refresh to get data.");
         Description description = new Description();
-        description.setText("Wykres czasu");
+        description.setText("Activity");
+        //description.setTextSize(12f);
         lineChart.setDescription(description);
+
 
         Legend legend = lineChart.getLegend();
         legend.setEnabled(false);
+
         lineChart.setNoDataText("Refresh to get data.");
         lineChart.setNoDataTextColor(R.color.colorGreyLight);
         lineChart.setDrawBorders(true);
